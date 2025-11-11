@@ -5,7 +5,7 @@
 1. Sau khi đăng nhập, User click nút "Tài liệu" tại sidebar
 2. DocAgentSessionPage.js khởi tạo và gọi `DocAgentService.getSessions()` để lấy danh sách Session
 3. DocAgentService gửi request GET tới endpoint `/session/by-user/{userId}`
-4. Backend route `@router.get("/by-user/{user_id}")` trong session_routes.py nhận request
+4. Backend route trong session_routes.py nhận request
 5. SessionService được gọi hàm `get_sessions_by_user()`
 6. SessionService truy vấn cơ sở dữ liệu để lấy các Session mà User là MANAGER
 7. SessionService convert Session objects thành SessionResponse objects

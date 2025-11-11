@@ -4,7 +4,7 @@
 
 | Thành phần | Chi tiết |
 |-----------|----------|
-| Use Case | Tạo Question mới |
+| **Use Case** | Tạo Question mới |
 | **Actor** | User |
 | **Tiền điều kiện** | User đã đăng nhập thành công và đang ở giao diện Session chi tiết|
 | **Hậu điều kiện** | Question mới được tạo và thêm vào danh sách |
@@ -15,7 +15,7 @@
 
 | Thành phần | Chi tiết |
 |-----------|----------|
-| Use Case | Chỉnh sửa Question |
+| **Use Case** | Chỉnh sửa Question |
 | **Actor** | User |
 | **Tiền điều kiện** | User đã đăng nhập thành công và đang ở giao diện Session chi tiết |
 | **Hậu điều kiện** | Thông tin Question được cập nhật trong hệ thống |
@@ -28,7 +28,7 @@
 
 | Thành phần | Chi tiết |
 |-----------|----------|
-| Use Case | Xóa Question |
+| **Use Case** | Xóa Question |
 | **Actor** | User |
 | **Tiền điều kiện** | User đã đăng nhập thành công và đang ở giao diện Session chi tiết |
 | **Hậu điều kiện** | Question được xóa khỏi hệ thống và danh sách được cập nhật |
@@ -41,7 +41,7 @@
 
 | Thành phần | Chi tiết |
 |-----------|----------|
-| Use Case | Luyện tập với Question |
+| **Use Case** | Luyện tập với Question |
 | **Actor** | User |
 | **Tiền điều kiện** | User đã đăng nhập thành công và đang ở giao diện Session chi tiết, Session có ít nhất một Question |
 | **Hậu điều kiện** | User hoàn thành luyện tập và xem kết quả |

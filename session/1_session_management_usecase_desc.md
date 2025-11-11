@@ -16,7 +16,7 @@ Chức năng quản lý các Session (Session Management) có các giao diện t
 
 **Mô tả chi tiết các Use Case:**
 
-| Use Case | Mô tả |
+| **Use Case** | Mô tả |
 |----------|------|
 | **Đăng nhập** | UC này cho phép User xác thực danh tính để truy cập hệ thống. |
 | **Xem danh sách Session** | UC này cho phép User xem danh sách tất cả các Session đã tạo. |

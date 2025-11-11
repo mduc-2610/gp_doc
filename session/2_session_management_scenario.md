@@ -4,7 +4,7 @@
 
 | Thành phần | Chi tiết |
 |-----------|----------|
-| Use Case | Xem danh sách Session |
+| **Use Case** | Xem danh sách Session |
 | **Actor** | User |
 | **Tiền điều kiện** | User đã đăng nhập thành công |
 | **Hậu điều kiện** | Danh sách các Session của User được hiển thị trên giao diện |
@@ -17,7 +17,7 @@
 
 | Thành phần | Chi tiết |
 |-----------|----------|
-| Use Case | Tạo Session mới |
+| **Use Case** | Tạo Session mới |
 | **Actor** | User |
 | **Tiền điều kiện** | User đã đăng nhập thành công và đang ở giao diện danh sách Session |
 | **Hậu điều kiện** | Session mới được tạo và User được chuyển hướng đến chi tiết Session |
@@ -30,7 +30,7 @@
 
 | Thành phần | Chi tiết |
 |-----------|----------|
-| Use Case | Chỉnh sửa Session |
+| **Use Case** | Chỉnh sửa Session |
 | **Actor** | User |
 | **Tiền điều kiện** | User đã đăng nhập thành công và đang ở giao diện danh sách Session |
 | **Hậu điều kiện** | Thông tin Session được cập nhật trong hệ thống |
@@ -43,7 +43,7 @@
 
 | Thành phần | Chi tiết |
 |-----------|----------|
-| Use Case | Xóa Session |
+| **Use Case** | Xóa Session |
 | **Actor** | User |
 | **Tiền điều kiện** | User đã đăng nhập thành công và đang ở giao diện danh sách Session |
 | **Hậu điều kiện** | Session được xóa khỏi hệ thống và danh sách được cập nhật |

@@ -17,7 +17,7 @@ Truy cập chi tiết Session là bắt buộc để sử dụng các tab Questi
 
 **Mô tả chi tiết các Use Case:**
 
-| Use Case | Mô tả |
+| **Use Case** | Mô tả |
 |----------|------|
 | **Chỉnh sửa Question** | UC này cho phép User cập nhật thông tin của một Question hiện có. |
 | **Tạo Question mới** | UC này cho phép User tạo một Question mới cho Session. |
