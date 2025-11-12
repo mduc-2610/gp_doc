@@ -7,7 +7,26 @@ classDiagram
         - id: UUID
         - username: String
         - email: String
+        - phone: String
+        - firstName: String
+        - lastName: String
+        - userCode: String
+        - userPrefix: String
+        - isPremium: Boolean
         + getId(): UUID
+        + getRoles(): Set~Role~
+    }
+
+    class Role {
+        - name: RoleType
+        + getName(): RoleType
+    }
+
+    class RoleType {
+        <<enumeration>>
+        STUDENT
+        LECTURER
+        ADMIN
     }
 
     class Session {
@@ -206,6 +225,8 @@ classDiagram
     }
 
     %% Relationships
+    User "*" -- "*" Role : has
+    Role "*" -- "1" RoleType : has_type
     User "1" -- "*" Session : creates
     Session "1" -- "*" Question : contains
     Session "1" -- "*" Flashcard : contains
@@ -240,7 +261,9 @@ classDiagram
 ```
 
 **Mô tả quan hệ:**
-- **User**: Đại diện cho User của hệ thống.
+- **User**: Đại diện cho User của hệ thống, có thể có nhiều Role (STUDENT, LECTURER, ADMIN).
+- **Role**: Đại diện cho vai trò của User trong hệ thống, được định danh bởi RoleType enum.
+- **RoleType**: Enum định nghĩa các loại role: STUDENT, LECTURER, ADMIN.
 - **Session**: Đại diện cho một Session, chứa các Question và flashcard.
 - **Question & QuestionAnswer**: Đại diện Question với các tùy chọn trả lời.
 - **Flashcard**: Đại diện cho một Flashcard.

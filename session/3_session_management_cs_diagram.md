@@ -6,7 +6,26 @@ classDiagram
         - id: UUID
         - username: String
         - email: String
+        - phone: String
+        - firstName: String
+        - lastName: String
+        - userCode: String
+        - userPrefix: String
+        - isPremium: Boolean
         + getId(): UUID
+        + getRoles(): Set~Role~
+    }
+
+    class Role {
+        - name: RoleType
+        + getName(): RoleType
+    }
+
+    class RoleType {
+        <<enumeration>>
+        STUDENT
+        LECTURER
+        ADMIN
     }
 
     class Session {
@@ -96,6 +115,8 @@ classDiagram
     }
 
     %% Relationships
+    User "*" -- "*" Role : has
+    Role "*" -- "1" RoleType : has_type
     User "1" -- "*" Session : creates
     User "1" -- "*" SessionAccessGrant : has
     Session "1" -- "*" Document : contains
@@ -115,7 +136,9 @@ classDiagram
 ```
 
 **Mô tả quan hệ:**
-- **User**: Đại diện cho User của hệ thống, có thể tạo và quản lý các Session.
+- **User**: Đại diện cho User của hệ thống, có thể có nhiều Role (STUDENT, LECTURER, ADMIN). User có thể tạo và quản lý các Session.
+- **Role**: Đại diện cho vai trò của User trong hệ thống, được định danh bởi RoleType enum.
+- **RoleType**: Enum định nghĩa các loại role: STUDENT, LECTURER, ADMIN.
 - **Session**: Đại diện cho một Session, chứa thông tin cơ bản như tên, mô tả, ngày tạo. Được sử dụng để đóng gói dữ liệu từ cơ sở dữ liệu.
 - **Document**: Các tài liệu thuộc về một Session.
 - **SessionAccessGrant**: Quản lý quyền truy cập vào Session cho các User khác.

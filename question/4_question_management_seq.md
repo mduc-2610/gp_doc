@@ -24,6 +24,10 @@ sequenceDiagram
     activate DocAgentService
     DocAgentService->>QuestionRoutes: GET /question/questions/by-session/{sessionId}
     activate QuestionRoutes
+    QuestionRoutes->>QuestionService: get_questions_by_session()
+    activate QuestionService
+    QuestionService-->>QuestionRoutes: [QuestionResponse]
+    deactivate QuestionService
     QuestionRoutes-->>DocAgentService: [Question]
     deactivate QuestionRoutes
     DocAgentService-->>QuestionEditTab: ServiceResult~Question[]~
@@ -87,8 +91,22 @@ sequenceDiagram
     EditTab-->>User: Hiển thị giao diện Edit
     
     User->>EditTab: Click tab con "Question"
-    EditTab->>QuestionEditTab: Load questions
+    EditTab->>QuestionEditTab: Khởi tạo QuestionEditTab
     activate QuestionEditTab
+    
+    QuestionEditTab->>DocAgentService: getQuestionsBySession()
+    activate DocAgentService
+    DocAgentService->>QuestionRoutes: GET /question/questions/by-session/{sessionId}
+    activate QuestionRoutes
+    QuestionRoutes->>QuestionService: get_questions_by_session()
+    activate QuestionService
+    QuestionService-->>QuestionRoutes: [QuestionResponse]
+    deactivate QuestionService
+    QuestionRoutes-->>DocAgentService: [Question]
+    deactivate QuestionRoutes
+    DocAgentService-->>QuestionEditTab: ServiceResult~Question[]~
+    deactivate DocAgentService
+    
     QuestionEditTab-->>User: Hiển thị danh sách Question
     
     User->>QuestionEditTab: Click icon chỉnh sửa
@@ -146,8 +164,22 @@ sequenceDiagram
     EditTab-->>User: Hiển thị giao diện Edit
     
     User->>EditTab: Click tab con "Question"
-    EditTab->>QuestionEditTab: Load questions
+    EditTab->>QuestionEditTab: Khởi tạo QuestionEditTab
     activate QuestionEditTab
+    
+    QuestionEditTab->>DocAgentService: getQuestionsBySession()
+    activate DocAgentService
+    DocAgentService->>QuestionRoutes: GET /question/questions/by-session/{sessionId}
+    activate QuestionRoutes
+    QuestionRoutes->>QuestionService: get_questions_by_session()
+    activate QuestionService
+    QuestionService-->>QuestionRoutes: [QuestionResponse]
+    deactivate QuestionService
+    QuestionRoutes-->>DocAgentService: [Question]
+    deactivate QuestionRoutes
+    DocAgentService-->>QuestionEditTab: ServiceResult~Question[]~
+    deactivate DocAgentService
+    
     QuestionEditTab-->>User: Hiển thị danh sách Question
     
     User->>QuestionEditTab: Click icon xóa
@@ -256,6 +288,10 @@ sequenceDiagram
     activate DocAgentService
     DocAgentService->>FlashcardRoutes: GET /question/flashcards/by-session/{sessionId}
     activate FlashcardRoutes
+    FlashcardRoutes->>FlashcardService: get_flashcards_by_session()
+    activate FlashcardService
+    FlashcardService-->>FlashcardRoutes: [FlashcardResponse]
+    deactivate FlashcardService
     FlashcardRoutes-->>DocAgentService: [Flashcard]
     deactivate FlashcardRoutes
     DocAgentService-->>FlashcardEditTab: ServiceResult~Flashcard[]~
@@ -319,8 +355,22 @@ sequenceDiagram
     EditTab-->>User: Hiển thị giao diện Edit
     
     User->>EditTab: Click tab con "Flashcard"
-    EditTab->>FlashcardEditTab: Load flashcards
+    EditTab->>FlashcardEditTab: Khởi tạo FlashcardEditTab
     activate FlashcardEditTab
+    
+    FlashcardEditTab->>DocAgentService: getFlashcardsBySession()
+    activate DocAgentService
+    DocAgentService->>FlashcardRoutes: GET /question/flashcards/by-session/{sessionId}
+    activate FlashcardRoutes
+    FlashcardRoutes->>FlashcardService: get_flashcards_by_session()
+    activate FlashcardService
+    FlashcardService-->>FlashcardRoutes: [FlashcardResponse]
+    deactivate FlashcardService
+    FlashcardRoutes-->>DocAgentService: [Flashcard]
+    deactivate FlashcardRoutes
+    DocAgentService-->>FlashcardEditTab: ServiceResult~Flashcard[]~
+    deactivate DocAgentService
+    
     FlashcardEditTab-->>User: Hiển thị danh sách Flashcard
     
     User->>FlashcardEditTab: Click icon chỉnh sửa
@@ -378,8 +428,22 @@ sequenceDiagram
     EditTab-->>User: Hiển thị giao diện Edit
     
     User->>EditTab: Click tab con "Flashcard"
-    EditTab->>FlashcardEditTab: Load flashcards
+    EditTab->>FlashcardEditTab: Khởi tạo FlashcardEditTab
     activate FlashcardEditTab
+    
+    FlashcardEditTab->>DocAgentService: getFlashcardsBySession()
+    activate DocAgentService
+    DocAgentService->>FlashcardRoutes: GET /question/flashcards/by-session/{sessionId}
+    activate FlashcardRoutes
+    FlashcardRoutes->>FlashcardService: get_flashcards_by_session()
+    activate FlashcardService
+    FlashcardService-->>FlashcardRoutes: [FlashcardResponse]
+    deactivate FlashcardService
+    FlashcardRoutes-->>DocAgentService: [Flashcard]
+    deactivate FlashcardRoutes
+    DocAgentService-->>FlashcardEditTab: ServiceResult~Flashcard[]~
+    deactivate DocAgentService
+    
     FlashcardEditTab-->>User: Hiển thị danh sách Flashcard
     
     User->>FlashcardEditTab: Click icon xóa

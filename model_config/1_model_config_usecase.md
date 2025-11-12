@@ -1,65 +1,73 @@
-# Use Case Diagram - Cấu hình Model
+# Use Case Diagram - Quản lý Model Config và Model Wrapper
 
 ```mermaid
 graph TB
-    UserActor["👤 User"]
-    AdminActor["🔐 Admin (User + ADMIN role)"]
+    Actor["👤 User"]
+    AdminActor["👤 Admin"]
     
-    ListModels["Xem danh sách Model"]
-    CreateModel["Tạo Model mới"]
-    EditModel["Chỉnh sửa Model"]
-    DeleteModel["Xóa Model"]
+    AccessModelConfigPage["Truy cập trang cấu hình Model"]
+    ViewModelConfigList["Xem danh sách Model Config"]
+    ViewWrapperList["Xem danh sách Model Wrapper"]
+    EditModelConfig["Chỉnh sửa Model Config"]
+    CreateModelConfig["Tạo Model Config mới"]
+    DeleteModelConfig["Xóa Model Config"]
+    ToggleModelConfig["Toggle trạng thái Model Config"]
     
-    ListWrappers["Xem danh sách Model Wrapper"]
-    CreateWrapper["Tạo Model Wrapper mới"]
     EditWrapper["Chỉnh sửa Model Wrapper"]
+    CreateWrapper["Tạo Model Wrapper mới"]
     DeleteWrapper["Xóa Model Wrapper"]
+    PreloadModelConfig["Preload Model Config"]
     
-    %% User có thể xem và quản lý Model của mình
-    UserActor -->|Truy cập| ListModels
-    ListModels -->|Thực hiện| UserActor
+    Actor -->|Truy cập| AccessModelConfigPage
+    AdminActor -->|Truy cập| AccessModelConfigPage
     
-    ListModels -->|include| CreateModel
-    CreateModel -->|Thực hiện| UserActor
+    AccessModelConfigPage -->|include| ViewModelConfigList
+    ViewModelConfigList -->|Thực hiện| Actor
     
-    ListModels -->|include| EditModel
-    EditModel -->|Thực hiện| UserActor
+    AccessModelConfigPage -->|include| ViewWrapperList
+    ViewWrapperList -->|Thực hiện| Actor
+    ViewWrapperList -->|Thực hiện| AdminActor
     
-    ListModels -->|include| DeleteModel
-    DeleteModel -->|Thực hiện| UserActor
+    ViewModelConfigList -->|include| EditModelConfig
+    EditModelConfig -->|Thực hiện| Actor
     
-    %% User có thể xem danh sách Model Wrapper
-    UserActor -->|Truy cập| ListWrappers
-    ListWrappers -->|Thực hiện| UserActor
+    ViewModelConfigList -->|include| CreateModelConfig
+    CreateModelConfig -->|Thực hiện| Actor
     
-    %% Admin có thể tạo, sửa, xóa Wrapper (Admin inherits User permissions)
-    AdminActor -->|Truy cập| ListWrappers
+    ViewModelConfigList -->|include| DeleteModelConfig
+    DeleteModelConfig -->|Thực hiện| Actor
     
-    ListWrappers -->|include| CreateWrapper
-    CreateWrapper -->|Thực hiện| AdminActor
+    ViewModelConfigList -->|include| ToggleModelConfig
+    ToggleModelConfig -->|Thực hiện| Actor
     
-    ListWrappers -->|include| EditWrapper
+    ViewModelConfigList -->|include| PreloadModelConfig
+    PreloadModelConfig -->|Thực hiện| Actor
+    
+    ViewWrapperList -->|include| EditWrapper
     EditWrapper -->|Thực hiện| AdminActor
     
-    ListWrappers -->|include| DeleteWrapper
+    ViewWrapperList -->|include| CreateWrapper
+    CreateWrapper -->|Thực hiện| AdminActor
+    
+    ViewWrapperList -->|include| DeleteWrapper
     DeleteWrapper -->|Thực hiện| AdminActor
     
-    style UserActor fill:#e1f5ff
-    style AdminActor fill:#fff3e0
-    style ListModels fill:#f3e5f5
-    style CreateModel fill:#e8f5e9
-    style EditModel fill:#e0f2f1
-    style DeleteModel fill:#ffebee
-    style ListWrappers fill:#f3e5f5
+    style Actor fill:#e1f5ff
+    style AdminActor fill:#ffe1f5
+    style AccessModelConfigPage fill:#fff3e0
+    style ViewModelConfigList fill:#e0f2f1
+    style ViewWrapperList fill:#e0f2f1
+    style EditModelConfig fill:#e8f5e9
+    style CreateModelConfig fill:#e8f5e9
+    style DeleteModelConfig fill:#ffebee
+    style ToggleModelConfig fill:#e3f2fd
+    style EditWrapper fill:#e8f5e9
     style CreateWrapper fill:#e8f5e9
-    style EditWrapper fill:#e0f2f1
     style DeleteWrapper fill:#ffebee
+    style PreloadModelConfig fill:#e0f2f1
 ```
 
 **Ghi chú:**
-- **User** có thể thực hiện các thao tác:
-  - Xem, Tạo, Chỉnh sửa, Xóa Model của mình
-  - Xem danh sách Model Wrapper
-- **Admin** (User có role ADMIN) có thể thực hiện:
-  - Tất cả quyền của User
-  - Tạo, Chỉnh sửa, Xóa Model Wrapper
+- Truy cập trang cấu hình Model là điều kiện tiên quyết để sử dụng các chức năng Model Config và Wrapper.
+- Xem danh sách là bước đầu tiên trước khi thực hiện các thao tác quản lý.
+- Các thao tác với Wrapper (tạo, chỉnh sửa, xóa) chỉ dành cho Admin.

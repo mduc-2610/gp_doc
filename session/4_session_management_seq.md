@@ -52,8 +52,26 @@ sequenceDiagram
     participant SessionService as SessionService
     participant SessionModel as Session Model
 
-    User->>DocAgentSessionPage: Click nút "Tạo Session mới"
+    User->>DocAgentSessionPage: Click "Tài liệu" tại sidebar
     activate DocAgentSessionPage
+    
+    DocAgentSessionPage->>DocAgentService: getSessions()
+    activate DocAgentService
+    DocAgentService->>SessionRoutes: GET /session/by-user/{userId}
+    activate SessionRoutes
+    SessionRoutes->>SessionService: get_sessions_by_user()
+    activate SessionService
+    SessionService->>SessionService: Query sessions where<br/>actor_id=userId and is_active=true<br/>Order by updated_at DESC
+    SessionService-->>SessionRoutes: [SessionResponse]
+    deactivate SessionService
+    SessionRoutes-->>DocAgentService: [Session]
+    deactivate SessionRoutes
+    DocAgentService-->>DocAgentSessionPage: ServiceResult~Session[]~
+    deactivate DocAgentService
+    
+    DocAgentSessionPage-->>User: Hiển thị danh sách Session
+    
+    User->>DocAgentSessionPage: Click nút "Tạo Session mới"
     
     DocAgentSessionPage->>SessionCreateDialog: Mở dialog
     activate SessionCreateDialog
@@ -105,8 +123,26 @@ sequenceDiagram
     participant SessionRoutes as session_routes
     participant SessionService as SessionService
 
-    User->>DocAgentSessionPage: Click nút "Chỉnh sửa" trên một Session
+    User->>DocAgentSessionPage: Click "Tài liệu" tại sidebar
     activate DocAgentSessionPage
+    
+    DocAgentSessionPage->>DocAgentService: getSessions()
+    activate DocAgentService
+    DocAgentService->>SessionRoutes: GET /session/by-user/{userId}
+    activate SessionRoutes
+    SessionRoutes->>SessionService: get_sessions_by_user()
+    activate SessionService
+    SessionService->>SessionService: Query sessions where<br/>actor_id=userId and is_active=true<br/>Order by updated_at DESC
+    SessionService-->>SessionRoutes: [SessionResponse]
+    deactivate SessionService
+    SessionRoutes-->>DocAgentService: [Session]
+    deactivate SessionRoutes
+    DocAgentService-->>DocAgentSessionPage: ServiceResult~Session[]~
+    deactivate DocAgentService
+    
+    DocAgentSessionPage-->>User: Hiển thị danh sách Session
+    
+    User->>DocAgentSessionPage: Click nút "Chỉnh sửa" trên một Session
     
     DocAgentSessionPage->>SessionUpdateDialog: Mở dialog với dữ liệu Session
     activate SessionUpdateDialog
@@ -155,8 +191,26 @@ sequenceDiagram
     participant SessionRoutes as session_routes
     participant SessionService as SessionService
 
-    User->>DocAgentSessionPage: Click nút "Xóa" trên Session
+    User->>DocAgentSessionPage: Click "Tài liệu" tại sidebar
     activate DocAgentSessionPage
+    
+    DocAgentSessionPage->>DocAgentService: getSessions()
+    activate DocAgentService
+    DocAgentService->>SessionRoutes: GET /session/by-user/{userId}
+    activate SessionRoutes
+    SessionRoutes->>SessionService: get_sessions_by_user()
+    activate SessionService
+    SessionService->>SessionService: Query sessions where<br/>actor_id=userId and is_active=true<br/>Order by updated_at DESC
+    SessionService-->>SessionRoutes: [SessionResponse]
+    deactivate SessionService
+    SessionRoutes-->>DocAgentService: [Session]
+    deactivate SessionRoutes
+    DocAgentService-->>DocAgentSessionPage: ServiceResult~Session[]~
+    deactivate DocAgentService
+    
+    DocAgentSessionPage-->>User: Hiển thị danh sách Session
+    
+    User->>DocAgentSessionPage: Click nút "Xóa" trên Session
     
     DocAgentSessionPage->>SessionDeleteDialog: Mở dialog xác nhận xóa
     activate SessionDeleteDialog

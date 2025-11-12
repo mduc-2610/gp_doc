@@ -1,4 +1,4 @@
-# Class Diagram - Cấu hình Model
+# Class Diagram - Quản lý Model Config và Model Wrapper
 
 ```mermaid
 classDiagram
@@ -6,24 +6,19 @@ classDiagram
         - id: UUID
         - username: String
         - email: String
-        - phone: String
-        - birthDay: LocalDate
-        - firstName: String
-        - lastName: String
-        - avatar: String
+        - password: String
+        - fullName: String
         - roles: Set~Role~
-        - userCode: String
-        - userPrefix: String
-        - isPremium: Boolean
-        - providers: List~UserIdentity~
+        - isActive: Boolean
+        - createdAt: DateTime
+        - updatedAt: DateTime
         + getId(): UUID
-        + isAdmin(): Boolean
-        + hasRole(roleName): Boolean
+        + getRoles(): Set~Role~
+        + hasRole(roleType): Boolean
     }
 
     class Role {
         - name: RoleType
-        - users: List~User~
         + getName(): RoleType
     }
 
@@ -34,94 +29,37 @@ classDiagram
         ADMIN
     }
 
-    class ModelConfig {
-        - id: UUID
-        - user_id: UUID
-        - name: String
-        - wrapper_id: UUID
-        - model_type: ModelType
-        - api_key: String | null (encrypted)
-        - extra_config: Dict~String, Any~
-        - is_used: Boolean
-        - lang: Lang
-        - created_at: DateTime
-        - updated_at: DateTime
-        + getId(): UUID
-        + getName(): String
-        + getWrapper(): ModelWrapper
-        + getApiKey(): String | null (masked)
-    }
-
     class ModelWrapper {
         - id: UUID
         - name: String
+        - instruction: String
         - task_type: TaskType
-        - instruction: String | null
         - is_active: Boolean
         - created_at: DateTime
         - updated_at: DateTime
         + getId(): UUID
         + getName(): String
         + getTaskType(): TaskType
-        + getInstruction(): String | null
     }
 
-    class ModelUsage {
+    class ModelConfig {
         - id: UUID
-        - model_id: UUID
-        - entity_type: EntityType
-        - entity_id: UUID
+        - user_id: UUID
+        - name: String
+        - wrapper_id: UUID
+        - model_type: ModelType
+        - is_used: Boolean
+        - api_key: String
+        - extra_config: JSON
+        - lang: Lang
         - created_at: DateTime
-        + getModelId(): UUID
-    }
-
-    class ModelConfigService {
-        + getModels(): ServiceResult~ModelConfig[]~
-        + createModel(): ServiceResult~ModelConfig~
-        + updateModel(): ServiceResult~ModelConfig~
-        + deleteModel(): ServiceResult~void~
-        + preloadModels(): ServiceResult~ModelConfig[]~
-        - parseErrorResponse(): MessageResponse
-        - getAuthHeaders(): Record~String, String~
-    }
-
-    class ModelConfigBackendService {
-        - db_session: Session
-        + get_models_by_user(): ModelConfig[]
-        + create_model(): ModelConfig
-        + update_model(): ModelConfig
-        + delete_model(): void
-        + get_wrappers(): ModelWrapper[]
-        + create_wrapper(): ModelWrapper
-        + update_wrapper(): ModelWrapper
-        + delete_wrapper(): void
-        + preload_models_for_user(): ModelConfig[]
-    }
-
-    class MessageResponse {
-        - translation_key: String
-        - message: String
-        - details: Dict~String, Any~ | null
-        + create(translation_key, message, details): MessageResponse
-    }
-
-    class ServiceResult~T~ {
-        - type: ResponseStatus
-        - data: T | null
-        - error: MessageResponse | null
-    }
-
-    class ResponseStatus {
-        SUCCESS
-        ERROR
-    }
-
-    class ModelType {
-        LOCAL
-        REMOTE
+        - updated_at: DateTime
+        + getId(): UUID
+        + getMaskedApiKey(): String
     }
 
     class TaskType {
+        <<enumeration>>
         GENERATION
         EMBEDDING
         PARSE_DOC
@@ -129,61 +67,157 @@ classDiagram
         PARSE_IMAGE
     }
 
+    class ModelType {
+        <<enumeration>>
+        REMOTE
+        LOCAL
+    }
+
     class Lang {
+        <<enumeration>>
         EN
         VI
     }
 
-    class EntityType {
-        SESSION
-        QUESTION
-        OTHER
+    class ModelConfigTab {
+        - models: ModelConfig[]
+        - wrappers: ModelWrapper[]
+        - loading: Boolean
+        - selectedTask: TaskType
+        - selectedModel: ModelConfig
+        - dialogMode: String
+        - selectedWrapperId: String
+        + loadModels()
+        + loadWrappers()
+        + handleEdit(model)
+        + handleCreate()
+        + handleSave(id, data)
+        + handleToggleActive(taskType, id, isUsed)
+        + handleDelete(id)
+        + handleShowInstruction(wrapper)
     }
 
-    %% Relationships
-    User "*" -- "*" Role : has
-    Role "*" -- "1" RoleType : defines
-    
-    User "1" -- "*" ModelConfig : creates
-    User "1" -- "*" ModelConfigService : uses
-    User "1" -- "*" ModelWrapper : manages (if ADMIN role)
-    
+    class ModelConfigBaseDialog {
+        - open: Boolean
+        - loading: Boolean
+        - formData: Partial~ModelConfig~
+        - rawExtraConfig: String
+        - jsonError: String
+        + handleSave()
+        + isFormValid(): Boolean
+        + handleExtraConfigChange(value)
+    }
+
+    class ModelWrapperTab {
+        - wrappers: ModelWrapper[]
+        - loading: Boolean
+        - selectedWrapper: ModelWrapper
+        - dialogMode: String
+        + loadWrappers()
+        + handleEdit(wrapper)
+        + handleCreate()
+        + handleSave(id, data)
+        + handleDelete(id)
+        + handleShowInstruction(wrapper)
+    }
+
+    class ModelWrapperBaseDialog {
+        - open: Boolean
+        - loading: Boolean
+        - formData: Partial~ModelWrapper~
+        + handleSave()
+        + isFormValid(): Boolean
+    }
+
+    class ModelConfigService {
+        + getModels(db, request): List~ModelConfig~
+        + createModel(db, createData): ModelConfig
+        + updateModel(db, modelId, updateData): ModelConfig
+        + deleteModel(db, modelId)
+        + preloadModelsForUser(db, userId, deleteExisting): List~ModelConfig~
+        + getWrappers(db, taskType): List~ModelWrapper~
+        + createWrapper(db, createData): ModelWrapper
+        + updateWrapper(db, wrapperId, updateData): ModelWrapper
+        + deleteWrapper(db, wrapperId)
+        + preloadWrappers(db): List~ModelWrapper~
+    }
+
+    class ModelConfigRoutes {
+        + getModels(request, db): List~ModelConfigResponse~
+        + createModel(createData, db): ModelConfigResponse
+        + updateModel(modelId, updateData, db): ModelConfigResponse
+        + deleteModel(modelId, db): MessageResponse
+        + preloadModels(userId, db): List~ModelConfigResponse~
+        + getWrappers(taskType, db): List~ModelWrapperResponse~
+        + createWrapper(createData, db): ModelWrapperResponse
+        + updateWrapper(wrapperId, updateData, db): ModelWrapperResponse
+        + deleteWrapper(wrapperId, db): MessageResponse
+        + preloadWrappers(db): List~ModelWrapperResponse~
+    }
+
+    class ModelConfigResponse {
+        - id: UUID
+        - user_id: UUID
+        - name: String
+        - wrapper_id: UUID
+        - model_type: ModelType
+        - is_used: Boolean
+        - api_key: String
+        - extra_config: Dict
+        - lang: Lang
+        - created_at: DateTime
+        - updated_at: DateTime
+        - wrapper: ModelWrapperResponse
+    }
+
+    class ModelWrapperResponse {
+        - id: UUID
+        - name: String
+        - instruction: String
+        - task_type: TaskType
+        - created_at: DateTime
+        - updated_at: DateTime
+    }
+
+    class MessageResponse {
+        - message: String
+        - detail: String
+    }
+
+    User "1" -- "*" Role : has
+    Role "*" -- "1" RoleType : has_type
+    User "1" -- "*" ModelConfig : owns
     ModelConfig "*" -- "1" ModelWrapper : uses
-    ModelConfig "*" -- "*" ModelUsage : tracked_by
+    ModelConfig "*" -- "1" ModelType : has_type
+    ModelConfig "*" -- "1" Lang : has_lang
+    ModelWrapper "*" -- "1" TaskType : has_type
     
-    ModelWrapper "1" -- "*" ModelConfig : has
-    ModelWrapper "*" -- "1" TaskType : defines
+    ModelConfigTab ..> ModelConfigBaseDialog : uses
+    ModelConfigTab ..> ModelConfigService : calls
+    ModelWrapperTab ..> ModelWrapperBaseDialog : uses
+    ModelWrapperTab ..> ModelConfigService : calls
     
-    ModelUsage "*" -- "1" ModelConfig : references
-    ModelUsage "*" -- "1" EntityType : tracks
-
-    ModelConfigService --> ModelConfig : manages
-    ModelConfigService --> ModelWrapper : manages
-    ModelConfigService --> ServiceResult : returns
-    ModelConfigService --> MessageResponse : uses
-
-    ModelConfigBackendService --> ModelConfig : manages_db
-    ModelConfigBackendService --> ModelWrapper : manages_db
-    ModelConfigBackendService --> MessageResponse : uses
-
-    ServiceResult --> ResponseStatus : has_status
-    ServiceResult --> MessageResponse : has_error
+    ModelConfigRoutes ..> ModelConfigService : uses
+    ModelConfigRoutes ..> ModelConfigResponse : returns
+    ModelConfigRoutes ..> ModelWrapperResponse : returns
+    ModelConfigRoutes ..> MessageResponse : returns
     
-    ModelConfig "*" -- "1" ModelType : has
-    ModelConfig "*" -- "1" Lang : has
+    ModelConfigService ..> ModelConfig : manages
+    ModelConfigService ..> ModelWrapper : manages
 ```
 
 **Mô tả quan hệ:**
-- **User**: Đại diện cho User của hệ thống. Mọi User đều có thể tạo và quản lý các Model Config của mình, xem danh sách Model Wrapper. User có nhiều Role (STUDENT, LECTURER, ADMIN).
-- **Role**: Đại diện cho vai trò của User trong hệ thống, được định nghĩa bởi enum RoleType.
-- **RoleType**: Enum định nghĩa các loại vai trò: STUDENT, LECTURER, ADMIN. User có role ADMIN sẽ có quyền quản lý (tạo, sửa, xóa) Model Wrapper.
-- **ModelConfig**: Đại diện cho một cấu hình Model của User, chứa thông tin như tên, wrapper, model type, API key (mã hóa), extra config. Được sử dụng để đóng gói dữ liệu từ cơ sở dữ liệu.
-- **ModelWrapper**: Đại diện cho một định nghĩa cách tương tác với một mô hình AI cụ thể, chứa tên, task type, và hướng dẫn sử dụng.
-- **ModelUsage**: Theo dõi việc sử dụng Model cho các entity khác nhau trong hệ thống.
-- **ModelConfigService** (Frontend): Lớp service Frontend xử lý các API call liên quan đến Model Config.
-- **ModelConfigBackendService** (Backend): Lớp service Backend xử lý logic nghiệp vụ của Model Config, truy vấn cơ sở dữ liệu và đóng gói dữ liệu thành Model.
-- **MessageResponse** & **ServiceResult**: Các lớp dùng để trả về kết quả API.
-- **ModelType**: Enum định nghĩa kiểu Model (LOCAL hoặc REMOTE).
-- **TaskType**: Enum định nghĩa loại tác vụ mà Wrapper hỗ trợ.
-- **Lang**: Enum định nghĩa ngôn ngữ của Model.
-- **EntityType**: Enum định nghĩa loại entity sử dụng Model.
+- **User**: Đại diện cho User của hệ thống, có thể có nhiều Role (STUDENT, LECTURER, ADMIN).
+- **Role**: Đại diện cho vai trò của User trong hệ thống, được định danh bởi RoleType enum.
+- **RoleType**: Enum định nghĩa các loại role: STUDENT, LECTURER, ADMIN.
+- **ModelWrapper**: Đại diện cho một Model Wrapper, chứa thông tin về wrapper và instruction.
+- **ModelConfig**: Đại diện cho cấu hình model của User, liên kết với ModelWrapper.
+- **TaskType**: Enum định nghĩa các loại task: GENERATION, EMBEDDING, PARSE_DOC, PARSE_AUDIO, PARSE_IMAGE.
+- **ModelType**: Enum định nghĩa loại model: REMOTE, LOCAL.
+- **Lang**: Enum định nghĩa ngôn ngữ: EN, VI.
+- **ModelConfigTab & ModelConfigBaseDialog**: Component Frontend để quản lý Model Config.
+- **ModelWrapperTab & ModelWrapperBaseDialog**: Component Frontend để quản lý Model Wrapper.
+- **ModelConfigService** (Backend): Service xử lý logic nghiệp vụ, truy vấn DB.
+- **ModelConfigRoutes** (Backend): Route handlers xử lý HTTP requests.
+- **ModelConfigResponse & ModelWrapperResponse**: DTO để trả về dữ liệu từ API.
+- **MessageResponse**: Lớp dùng để trả về kết quả API.
