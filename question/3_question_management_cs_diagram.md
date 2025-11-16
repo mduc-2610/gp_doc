@@ -1,4 +1,3 @@
-
 # Class Diagram - Quản lý Question và Flashcard
 
 ```mermaid
@@ -8,17 +7,21 @@ classDiagram
         - username: String
         - email: String
         - phone: String
+        - birthDay: LocalDate
         - firstName: String
         - lastName: String
+        - avatar: String
         - userCode: String
         - userPrefix: String
         - isPremium: Boolean
+        - providers: List~UserIdentity~
         + getId(): UUID
         + getRoles(): Set~Role~
     }
 
     class Role {
         - name: RoleType
+        - users: List~User~
         + getName(): RoleType
     }
 

@@ -6,19 +6,22 @@ classDiagram
         - id: UUID
         - username: String
         - email: String
-        - password: String
-        - fullName: String
-        - roles: Set~Role~
-        - isActive: Boolean
-        - createdAt: DateTime
-        - updatedAt: DateTime
+        - phone: String
+        - birthDay: LocalDate
+        - firstName: String
+        - lastName: String
+        - avatar: String
+        - userCode: String
+        - userPrefix: String
+        - isPremium: Boolean
+        - providers: List~UserIdentity~
         + getId(): UUID
         + getRoles(): Set~Role~
-        + hasRole(roleType): Boolean
     }
 
     class Role {
         - name: RoleType
+        - users: List~User~
         + getName(): RoleType
     }
 
