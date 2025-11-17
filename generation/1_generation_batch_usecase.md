@@ -4,7 +4,7 @@
 graph TB
     Actor["👤 User"]
     
-    AccessSessionDetail["Truy cập chi tiết Session"]
+    ViewSessionDetail["Xem chi tiết Session"]
     CreateGenRequest["Tạo yêu cầu generation"]
     TrackProgress["Theo dõi tiến trình generation"]
     CancelProcess["Hủy tiến trình generation"]
@@ -13,27 +13,27 @@ graph TB
     RejectBatch["Từ chối kết quả batch"]
     RegenerateRequest["Tạo yêu cầu regenerate"]
     
-    Actor -->|Truy cập| AccessSessionDetail
+    Actor -->|Xem| ViewSessionDetail
     
-    AccessSessionDetail -->|include| CreateGenRequest
+    ViewSessionDetail -->|include| CreateGenRequest
     CreateGenRequest -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| TrackProgress
+    ViewSessionDetail -->|include| TrackProgress
     TrackProgress -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| CancelProcess
+    ViewSessionDetail -->|include| CancelProcess
     CancelProcess -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| ViewBatchResult
+    ViewSessionDetail -->|include| ViewBatchResult
     ViewBatchResult -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| ApproveBatch
+    ViewSessionDetail -->|include| ApproveBatch
     ApproveBatch -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| RejectBatch
+    ViewSessionDetail -->|include| RejectBatch
     RejectBatch -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| RegenerateRequest
+    ViewSessionDetail -->|include| RegenerateRequest
     RegenerateRequest -->|Thực hiện| Actor
     
     CreateGenRequest -.->|trigger| TrackProgress
@@ -44,7 +44,7 @@ graph TB
     RegenerateRequest -.->|trigger| TrackProgress
     
     style Actor fill:#e1f5ff
-    style AccessSessionDetail fill:#fff3e0
+    style ViewSessionDetail fill:#fff3e0
     style CreateGenRequest fill:#e8f5e9
     style TrackProgress fill:#e3f2fd
     style CancelProcess fill:#ffebee
@@ -55,6 +55,6 @@ graph TB
 ```
 
 **Ghi chú:**
-- Truy cập chi tiết Session là điều kiện tiên quyết để sử dụng các chức năng generation.
+- Xem chi tiết Session là điều kiện tiên quyết để sử dụng các chức năng generation.
 - Các thao tác quản lý generation được thực hiện trong giao diện Generation.
 - User có thể reject và regenerate để cải thiện kết quả.

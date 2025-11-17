@@ -1,4 +1,3 @@
-```markdown
 # Use Case Description - Quản lý Session Access
 
 Chức năng quản lý Session Access (Session Access Management) có các giao diện tương tác với User:
@@ -12,8 +11,8 @@ Chức năng quản lý Session Access (Session Access Management) có các giao
 - **Nhận thông báo thời gian thực về thay đổi quyền** → đề xuất UC nhận cập nhật quyền
 
 **Quan hệ giữa các Use Case:**
-Truy cập chi tiết Session là bắt buộc để sử dụng các chức năng quản lý truy cập. Do đó:
-- UC "Chia sẻ Session", "Cập nhật quyền", "Thu hồi quyền", "Xử lý yêu cầu", "Quản lý liên kết chia sẻ" include UC "Truy cập chi tiết Session"
+Xem chi tiết Session là bắt buộc để sử dụng các chức năng quản lý truy cập. Do đó:
+- UC "Chia sẻ Session", "Cập nhật quyền", "Thu hồi quyền", "Xử lý yêu cầu", "Quản lý liên kết chia sẻ" include UC "Xem chi tiết Session"
 - UC "Yêu cầu truy cập", "Hủy yêu cầu" có thể thực hiện khi **chưa có quyền truy cập** hoặc quyền bị hạn chế
 - UC "Nhận cập nhật quyền" hoạt động thông qua WebSocket connection tự động khi User vào Session
 
@@ -29,6 +28,3 @@ Truy cập chi tiết Session là bắt buộc để sử dụng các chức nă
 | **Hủy yêu cầu truy cập** | UC này cho phép User hủy yêu cầu truy cập đang chờ xử lý. |
 | **Quản lý liên kết chia sẻ** | UC này cho phép User bật/tắt liên kết chia sẻ công khai và cấu hình mức quyền mặc định. |
 | **Nhận cập nhật quyền** | UC này tự động thông báo cho User khi quyền truy cập của họ thay đổi qua WebSocket. |
-
-
-```

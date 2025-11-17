@@ -10,9 +10,9 @@ Chức năng Generation với Batch (Generation & Batch Management) có các gia
 - **Tạo yêu cầu regenerate** → đề xuất UC tạo yêu cầu regenerate
 
 **Quan hệ giữa các Use Case:**
-Truy cập chi tiết Session là bắt buộc để sử dụng các chức năng generation. Do đó:
-- UC "Tạo yêu cầu generation", "Theo dõi tiến trình generation", "Hủy tiến trình generation" include UC "Truy cập chi tiết Session"
-- UC "Xem kết quả batch", "Duyệt kết quả batch", "Từ chối kết quả batch", "Tạo yêu cầu regenerate" include UC "Truy cập chi tiết Session"
+Xem chi tiết Session là bắt buộc để sử dụng các chức năng generation. Do đó:
+- UC "Tạo yêu cầu generation", "Theo dõi tiến trình generation", "Hủy tiến trình generation" include UC "Xem chi tiết Session"
+- UC "Xem kết quả batch", "Duyệt kết quả batch", "Từ chối kết quả batch", "Tạo yêu cầu regenerate" include UC "Xem chi tiết Session"
 
 **Mô tả chi tiết các Use Case:**
 

@@ -8,8 +8,8 @@ Chức năng quản lý Document (Document Management) có các giao diện tư�
 - **Xóa Document** → đề xuất UC xóa Document
 
 **Quan hệ giữa các Use Case:**
-Truy cập chi tiết Session là bắt buộc để sử dụng các chức năng quản lý Document. Do đó:
-- UC "Upload Document", "Xem danh sách Document", "Xem thông tin Document", "Cập nhật Document", "Xóa Document" include UC "Truy cập chi tiết Session"
+Xem chi tiết Session là bắt buộc để sử dụng các chức năng quản lý Document. Do đó:
+- UC "Upload Document", "Xem danh sách Document", "Xem thông tin Document", "Cập nhật Document", "Xóa Document" include UC "Xem chi tiết Session"
 
 **Mô tả chi tiết các Use Case:**
 

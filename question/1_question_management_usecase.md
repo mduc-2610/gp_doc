@@ -5,7 +5,7 @@
 graph TB
     Actor["👤 User"]
     
-    AccessSessionDetail["Truy cập chi tiết Session"]
+    ViewSessionDetail["Xem chi tiết Session"]
     EditQuestion["Chỉnh sửa Question"]
     CreateQuestion["Tạo Question mới"]
     DeleteQuestion["Xóa Question"]
@@ -16,34 +16,34 @@ graph TB
     DeleteFlashcard["Xóa Flashcard"]
     PracticeFlashcard["Luyện tập với Flashcard"]
     
-    Actor -->|Truy cập| AccessSessionDetail
+    Actor -->|Xem| ViewSessionDetail
     
-    AccessSessionDetail -->|include| EditQuestion
+    ViewSessionDetail -->|include| EditQuestion
     EditQuestion -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| CreateQuestion
+    ViewSessionDetail -->|include| CreateQuestion
     CreateQuestion -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| DeleteQuestion
+    ViewSessionDetail -->|include| DeleteQuestion
     DeleteQuestion -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| PracticeQuestion
+    ViewSessionDetail -->|include| PracticeQuestion
     PracticeQuestion -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| EditFlashcard
+    ViewSessionDetail -->|include| EditFlashcard
     EditFlashcard -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| CreateFlashcard
+    ViewSessionDetail -->|include| CreateFlashcard
     CreateFlashcard -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| DeleteFlashcard
+    ViewSessionDetail -->|include| DeleteFlashcard
     DeleteFlashcard -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| PracticeFlashcard
+    ViewSessionDetail -->|include| PracticeFlashcard
     PracticeFlashcard -->|Thực hiện| Actor
     
     style Actor fill:#e1f5ff
-    style AccessSessionDetail fill:#fff3e0
+    style ViewSessionDetail fill:#fff3e0
     style EditQuestion fill:#e8f5e9
     style CreateQuestion fill:#e8f5e9
     style DeleteQuestion fill:#ffebee
@@ -55,7 +55,7 @@ graph TB
 ```
 
 **Ghi chú:**
-- Truy cập chi tiết Session là điều kiện tiên quyết để sử dụng các chức năng Question và Flashcard.
+- Xem chi tiết Session là điều kiện tiên quyết để sử dụng các chức năng Question và Flashcard.
 - Các thao tác chỉnh sửa, tạo mới, xóa được thực hiện trong giao diện Edit.
 - Các thao tác Luyện tập được thực hiện trong giao diện xem danh sách tương ứng.
 

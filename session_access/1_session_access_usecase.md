@@ -4,7 +4,7 @@
 graph TB
     User["👤 User"]
     
-    AccessSessionDetail["Truy cập chi tiết Session"]
+    ViewSessionDetail["Xem chi tiết Session"]
     
     ShareSession["Chia sẻ Session với User"]
     UpdatePermission["Cập nhật quyền truy cập"]
@@ -17,32 +17,32 @@ graph TB
     
     ReceiveUpdate["Nhận cập nhật quyền realtime"]
     
-    User -->|Truy cập| AccessSessionDetail
+    User -->|Xem| ViewSessionDetail
     
-    AccessSessionDetail -->|include| ShareSession
+    ViewSessionDetail -->|include| ShareSession
     ShareSession -->|Thực hiện| User
     
-    AccessSessionDetail -->|include| UpdatePermission
+    ViewSessionDetail -->|include| UpdatePermission
     UpdatePermission -->|Thực hiện| User
     
-    AccessSessionDetail -->|include| RevokePermission
+    ViewSessionDetail -->|include| RevokePermission
     RevokePermission -->|Thực hiện| User
     
-    AccessSessionDetail -->|include| HandleRequest
+    ViewSessionDetail -->|include| HandleRequest
     HandleRequest -->|Thực hiện| User
     
-    AccessSessionDetail -->|include| ManageLink
+    ViewSessionDetail -->|include| ManageLink
     ManageLink -->|Thực hiện| User
     
     RequestAccess -->|Thực hiện| User
     
     CancelRequest -->|Thực hiện| User
     
-    AccessSessionDetail -->|extend| ReceiveUpdate
+    ViewSessionDetail -->|extend| ReceiveUpdate
     ReceiveUpdate -->|Nhận| User
     
     style User fill:#e1f5ff
-    style AccessSessionDetail fill:#fff3e0
+    style ViewSessionDetail fill:#fff3e0
     style ShareSession fill:#e8f5e9
     style UpdatePermission fill:#e8f5e9
     style RevokePermission fill:#ffebee
@@ -58,4 +58,4 @@ graph TB
 - Phân quyền cụ thể được xử lý bởi hệ thống quản lý quyền truy cập.
 - User có thể yêu cầu và hủy yêu cầu truy cập khi chưa có quyền.
 - User nhận thông báo realtime khi quyền thay đổi.
-- Truy cập chi tiết Session là điều kiện tiên quyết cho các thao tác quản lý.
+- Xem chi tiết Session là điều kiện tiên quyết cho các thao tác quản lý.
