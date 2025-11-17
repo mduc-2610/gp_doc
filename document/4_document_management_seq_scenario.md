@@ -15,25 +15,25 @@
 11. User click nút "Upload" trên SideBarLeft
 12. SideBarLeft.tsx gọi `onUploadClick()`
 13. DocAgentPage cập nhật state `isUploadDialogOpen = true`
-14. DocumentUploadDialog component được render với 2 tabs: "File" và "URL"
+14. DocumentUploadDialog component được render với 2 tabs: "Tệp" và "Liên kết"
 
 **Nếu upload File:**
-15a. User chọn tab "File"
+15a. User chọn tab "Tệp"
 16a. User chọn một hoặc nhiều file từ máy tính
 17a. DocumentUploadDialog gọi `addFileItems()` để thêm file vào uploadItems
 18a. DocumentUploadDialog validate kích thước file bằng `validateBatchSize()`
 
 **Nếu upload URL:**
-15b. User chọn tab "URL"
+15b. User chọn tab "Liên kết"
 16b. User nhập URL vào input field
-17b. User click nút "Add URL"
+17b. User click nút "Thêm"
 18b. DocumentUploadDialog gọi `addUrlItem()`
 19b. DocumentUploadDialog validate số lượng URL bằng `validateUrlCount()`
 20b. DocumentUploadDialog thêm URL vào uploadItems
 
 **Tiếp tục cho cả File và URL:**
 21. DocumentUploadDialog hiển thị danh sách items trong upload queue
-22. User click nút "Upload All"
+22. User click nút tải lên (hiển thị số lượng mục)
 23. DocumentUploadDialog gọi `handleUploadAll()`
 24. DocumentUploadDialog lặp qua từng uploadItem và gọi `uploadSingleItem()`
 

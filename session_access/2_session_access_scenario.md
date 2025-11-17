@@ -8,8 +8,8 @@
 | **Actor** | User |
 | **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang ở giao diện Session chi tiết |
 | **Hậu điều kiện** | - User được chỉ định nhận quyền truy cập vào Session<br>- Thông báo được gửi đến User được chia sẻ |
-| **Kịch bản chính** | 1. Tại giao diện Session chi tiết, User click nút chia sẻ<br>2. Hệ thống hiển thị dialog chia sẻ với danh sách User đã được chia sẻ<br>3. User click nút thêm người dùng<br>4. Hệ thống hiển thị dialog tìm kiếm User<br>5. User nhập từ khóa tìm kiếm<br>6. Hệ thống hiển thị kết quả tìm kiếm (loại bỏ User đã được chia sẻ)<br>7. User chọn User cần chia sẻ, chọn mức quyền (Reader/Contributor/Manager) và click "Add"<br>8. Hệ thống gửi yêu cầu chia sẻ đến backend<br>9. Backend tạo quyền truy cập cho User<br>10. Hệ thống cập nhật danh sách, hiển thị thông báo thành công và User được chia sẻ nhận thông báo realtime |
-| **Ngoại lệ** | - User không tồn tại: hiển thị thông báo lỗi<br>- Dữ liệu không hợp lệ: hiển thị lỗi validation<br>- User đã được chia sẻ trước đó: hiển thị thông báo<br>- Lỗi chia sẻ: hiển thị thông báo lỗi từ server |
+| **Kịch bản chính** | 1. Tại giao diện Session chi tiết, User click nút chia sẻ<br>2. Hệ thống hiển thị dialog chia sẻ với danh sách User đã được chia sẻ<br>3. User click nút thêm người dùng<br>4. Hệ thống hiển thị dialog tìm kiếm User<br>5. User nhập từ khóa tìm kiếm<br>6. Hệ thống hiển thị kết quả tìm kiếm (loại bỏ User đã được chia sẻ)<br>7. User chọn User cần chia sẻ, chọn mức quyền (Reader/Contributor/Manager) và click "Thêm"<br>8. Hệ thống gửi yêu cầu chia sẻ đến backend<br>9. Backend tạo quyền truy cập cho User<br>10. Hệ thống cập nhật danh sách, hiển thị thông báo "Đã gửi lời mời thành công" và User được chia sẻ nhận thông báo realtime "Bạn đã được cấp quyền {{level}}" |
+| **Ngoại lệ** | - User không tồn tại: hiển thị thông báo "Không tìm thấy người dùng"<br>- Dữ liệu không hợp lệ: hiển thị lỗi validation<br>- User đã được chia sẻ trước đó: hiển thị thông báo "Lời mời đã tồn tại"<br>- Lỗi chia sẻ: hiển thị thông báo "Không thể tạo lời mời" |
 
 ---
 

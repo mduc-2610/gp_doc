@@ -13,7 +13,7 @@ sequenceDiagram
     User->>ModelConfigPage: Click nút "Mô hình" tại sidebar
     activate ModelConfigPage
     
-    ModelConfigPage-->>User: Hiển thị giao diện với tab "Model Configurations"
+    ModelConfigPage-->>User: Hiển thị giao diện với tab "Cấu Hình Mô Hình"
     
     ModelConfigPage->>ModelConfigTab: Khởi tạo ModelConfigTab
     activate ModelConfigTab

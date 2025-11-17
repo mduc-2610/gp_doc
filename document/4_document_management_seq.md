@@ -36,24 +36,24 @@ sequenceDiagram
     activate SideBarLeft
     SideBarLeft-->>User: Hiển thị danh sách Document
     
-    User->>SideBarLeft: Click nút "Upload"
+    User->>SideBarLeft: Click nút "Tải lên"
     SideBarLeft->>DocAgentPage: onUploadClick()
     DocAgentPage->>DocumentUploadDialog: Open dialog
     activate DocumentUploadDialog
-    DocumentUploadDialog-->>User: Hiển thị upload dialog với tab "File" và "URL"
+    DocumentUploadDialog-->>User: Hiển thị upload dialog với tab "Tệp" và "Liên kết"
     
     alt Upload File
-        User->>DocumentUploadDialog: Chọn tab "File" và chọn file
+        User->>DocumentUploadDialog: Chọn tab "Tệp" và chọn file
         DocumentUploadDialog->>DocumentUploadDialog: addFileItems()<br/>validateBatchSize()
     else Upload URL
-        User->>DocumentUploadDialog: Chọn tab "URL" và nhập URL
-        User->>DocumentUploadDialog: Click "Add URL"
+        User->>DocumentUploadDialog: Chọn tab "Liên kết" và nhập URL
+        User->>DocumentUploadDialog: Click "Thêm"
         DocumentUploadDialog->>DocumentUploadDialog: addUrlItem()<br/>validateUrlCount()
     end
     
     DocumentUploadDialog-->>User: Hiển thị items trong danh sách
     
-    User->>DocumentUploadDialog: Click "Upload All"
+    User->>DocumentUploadDialog: Click "Tải lên tất cả"
     DocumentUploadDialog->>DocumentUploadDialog: handleUploadAll()
     
     loop Cho từng item (File hoặc URL)

@@ -67,8 +67,8 @@
 4. DocAgentService gửi GET request tới `/session-access/request/by-user-session/{sessionId}/{userId}`
 5. Backend route nhận request, SessionAccessService được gọi `get_session_access_request_by_user_session()`, truy vấn request với status=PENDING và trả SessionAccessRequest nếu có, hoặc null
 6. session_access_routes.py trả về SessionAccessRequestResponse hoặc null
-7. DocAgentService nhận response, đóng gói với ServiceResult và RequestAccessState set state existingRequest, hiển thị nút "Request Access" (nếu chưa có request)
-8. User click "Request Access"
+7. DocAgentService nhận response, đóng gói với ServiceResult và RequestAccessState set state existingRequest, hiển thị nút "Yêu cầu truy cập" (nếu chưa có request)
+8. User click "Yêu cầu truy cập"
 9. RequestAccessState gọi `DocAgentService.createRequest()` với session_id và requested_by
 10. DocAgentService gửi POST request tới `/session-access/request`
 11. Backend route nhận request, SessionAccessService được gọi `create_session_access_request()`, kiểm tra request/grant hiện tại, tạo SessionAccessRequest mới với status=PENDING và commit transaction
@@ -77,7 +77,7 @@
 14. SessionAccessService trả SessionAccessRequest
 15. session_access_routes.py trả về SessionAccessRequestResponse JSON
 16. DocAgentService nhận response, đóng gói với ServiceResult<SessionAccessRequest> và RequestAccessState update existingRequest
-17. Component re-render, hiển thị trạng thái "Pending", Toast success notification hiển thị "Yêu cầu đã được gửi" và UI hiển thị nút "Cancel Request"
+17. Component re-render, hiển thị trạng thái "Đang chờ", Toast success notification hiển thị "Yêu cầu đã được gửi" và UI hiển thị nút "Hủy yêu cầu"
 18. User có quyền Manager (có WebSocket connection) nhận event REQUEST_CREATED, DocAgentPage xử lý event trong handler `onRequestCreated`, hiển thị Toast "Có yêu cầu truy cập mới", increment requestTabReloadKey và SessionShareModal (nếu đang mở) tự động reload request list
 
 ---
@@ -85,7 +85,7 @@
 ## Kịch bản 5: Chấp nhận yêu cầu truy cập
 
 1. User mở SessionShareModal
-2. User click tab "Request"
+2. User click tab "Yêu cầu"
 3. useEffect hook trigger khi activeTab thay đổi và Component gọi `DocAgentService.getSessionRequests()`
 4. DocAgentService gửi GET request tới `/session-access/request/by-session/{sessionId}`
 5. Backend route nhận request, SessionAccessService được gọi `get_session_access_requests_by_session()`, truy vấn requests với status=PENDING và trả danh sách SessionAccessRequest
@@ -124,8 +124,8 @@
 
 ## Kịch bản 7: Hủy yêu cầu truy cập
 
-1. User đang xem RequestAccessState với trạng thái "Pending"
-2. User click nút "Cancel Request"
+1. User đang xem RequestAccessState với trạng thái "Đang chờ"
+2. User click nút "Hủy yêu cầu"
 3. RequestAccessState gọi `DocAgentService.deleteRequest()`
 4. DocAgentService gửi DELETE request tới `/session-access/request/{requestId}`
 5. Backend route nhận request, SessionAccessService được gọi `delete_session_access_request()`, lấy request từ cơ sở dữ liệu, xóa request và commit transaction
@@ -134,7 +134,7 @@
 8. SessionAccessService trả MessageResponse
 9. session_access_routes.py trả về MessageResponse JSON
 10. DocAgentService nhận response, đóng gói với ServiceResult và RequestAccessState set existingRequest = null
-11. Component re-render, hiển thị nút "Request Access" và Toast success notification hiển thị "Đã hủy yêu cầu"
+11. Component re-render, hiển thị nút "Yêu cầu truy cập" và Toast success notification hiển thị "Đã hủy yêu cầu"
 12. User có quyền Manager (có WebSocket connection) nhận event REQUEST_DELETED, DocAgentPage xử lý event trong handler `onRequestDeleted`, increment requestTabReloadKey và SessionShareModal (nếu đang mở) tự động reload request list, xóa request khỏi danh sách
 
 ---

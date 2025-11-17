@@ -15,7 +15,7 @@ sequenceDiagram
     participant WebSocket as WebSocket
     actor User2 as User
 
-    User1->>Header: Click nút "Share"
+    User1->>Header: Click nút "Chia sẻ"
     activate Header
     Header->>ShareModal: Mở modal
     activate ShareModal
@@ -56,7 +56,7 @@ sequenceDiagram
     SearchDialog->>SearchDialog: Filter excludeIds<br/>(loại bỏ User đã được chia sẻ)
     SearchDialog-->>User1: Hiển thị kết quả tìm kiếm
     
-    User1->>SearchDialog: Chọn User và click "Add"
+    User1->>SearchDialog: Chọn User và click "Thêm"
     
     SearchDialog->>ShareModal: onAddUser(user, AccessLevel.READER)
     deactivate SearchDialog

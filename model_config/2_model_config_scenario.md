@@ -8,8 +8,8 @@
 | **Actor** | User |
 | **Tiền điều kiện** | - User đã đăng nhập thành công |
 | **Hậu điều kiện** | - Danh sách các Model Config của User được hiển thị trên giao diện |
-| **Kịch bản chính** | 1. Tại giao diện chính, User click vào nút "Mô hình" tại sidebar <br>2. Hệ thống hiển thị giao diện cấu hình Model với tab "Model Configurations" <br>3. Hệ thống load và hiển thị danh sách tất cả các Model Config của User |
-| **Ngoại lệ** | - User không có Model Config nào: hiển thị thông báo "Không có Model Config nào" với nút "Tải mô hình mẫu"<br>- Lỗi load Model Config: hiển thị thông báo lỗi từ server |
+| **Kịch bản chính** | 1. Tại giao diện chính, User click vào nút "Mô hình" tại sidebar <br>2. Hệ thống hiển thị giao diện cấu hình Model với tab "Cấu Hình Mô Hình" <br>3. Hệ thống load và hiển thị danh sách tất cả các Model Config của User |
+| **Ngoại lệ** | - User không có Model Config nào: hiển thị thông báo "Chưa Có Mô Hình Nào Được Cấu Hình" với nút "Tải Mô Hình Mẫu"<br>- Lỗi load Model Config: hiển thị thông báo "Lỗi tải mô hình" |
 
 ---
 
@@ -21,8 +21,8 @@
 | **Actor** | User |
 | **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang ở giao diện cấu hình Model |
 | **Hậu điều kiện** | - Model Config mới được tạo trong hệ thống<br>- Model Config được thêm vào danh sách |
-| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, User click vào tab "Model Configurations"<br>2. Hệ thống hiển thị giao diện của tab "Model Configurations" với danh sách Model Config theo task type<br>3. User chọn task type cần tạo model<br>4. Hệ thống hiển thị danh sách Model Config cho task type đó<br>5. User click nút "Add Model"<br>6. Hệ thống mở dialog tạo Model Config mới và gọi API để lấy danh sách Wrapper<br>7. Backend trả về danh sách Wrapper theo task type<br>8. Hệ thống hiển thị bảng Wrapper trong dialog<br>9. User chọn một Wrapper từ bảng<br>10. User nhập các thông tin và click nút "Save":<br>&nbsp;&nbsp;&nbsp;&nbsp;- Tên Model Config<br>&nbsp;&nbsp;&nbsp;&nbsp;- Wrapper (đã chọn)<br>&nbsp;&nbsp;&nbsp;&nbsp;- Model Type (Remote/Local)<br>&nbsp;&nbsp;&nbsp;&nbsp;- Language<br>&nbsp;&nbsp;&nbsp;&nbsp;- Extra Config (JSON, optional)<br>11. Hệ thống gửi yêu cầu tạo Model Config đến backend<br>12. Backend tạo Model Config và trả về Model Config mới<br>13. Hệ thống cập nhật danh sách và hiển thị thông báo "Model created successfully" |
-| **Ngoại lệ** | - Không chọn Wrapper: hiển thị lỗi validation<br>- Dữ liệu không hợp lệ: hiển thị lỗi validation<br>- Lỗi tạo Model Config: hiển thị thông báo lỗi từ server |
+| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, User click vào tab "Cấu Hình Mô Hình"<br>2. Hệ thống hiển thị giao diện của tab "Cấu Hình Mô Hình" với danh sách Model Config theo task type<br>3. User chọn task type cần tạo model<br>4. Hệ thống hiển thị danh sách Model Config cho task type đó<br>5. User click nút "Tạo Mô Hình"<br>6. Hệ thống mở dialog tạo Model Config mới và gọi API để lấy danh sách Wrapper<br>7. Backend trả về danh sách Wrapper theo task type<br>8. Hệ thống hiển thị bảng Wrapper trong dialog<br>9. User chọn một Wrapper từ bảng<br>10. User nhập các thông tin và click nút "Lưu Thay Đổi":<br>&nbsp;&nbsp;&nbsp;&nbsp;- Tên Model Config<br>&nbsp;&nbsp;&nbsp;&nbsp;- Wrapper (đã chọn)<br>&nbsp;&nbsp;&nbsp;&nbsp;- Model Type (Remote/Local)<br>&nbsp;&nbsp;&nbsp;&nbsp;- Language<br>&nbsp;&nbsp;&nbsp;&nbsp;- Extra Config (JSON, optional)<br>11. Hệ thống gửi yêu cầu tạo Model Config đến backend<br>12. Backend tạo Model Config và trả về Model Config mới<br>13. Hệ thống cập nhật danh sách và hiển thị thông báo "Mô hình đã được tạo thành công" |
+| **Ngoại lệ** | - Không chọn Wrapper: hiển thị lỗi validation<br>- Dữ liệu không hợp lệ: hiển thị lỗi validation<br>- Lỗi tạo Model Config: hiển thị thông báo "Tạo mô hình thất bại" |
 
 ## Use Case: Chỉnh sửa Model Config
 
@@ -32,8 +32,8 @@
 | **Actor** | User |
 | **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang ở giao diện cấu hình Model |
 | **Hậu điều kiện** | - Thông tin Model Config được cập nhật trong hệ thống |
-| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, User click vào tab "Model Configurations"<br>2. Hệ thống hiển thị giao diện của tab "Model Configurations"<br>3. User chọn task type<br>4. Hệ thống hiển thị danh sách Model Config cho task type đó<br>5. User click nút "Edit" trên Model Config muốn chỉnh sửa<br>6. Hệ thống mở dialog chỉnh sửa với thông tin hiện tại và gọi API để lấy danh sách Wrapper<br>7. Backend trả về danh sách Wrapper theo task type<br>8. Hệ thống hiển thị bảng Wrapper với Wrapper hiện tại được chọn<br>9. User có thể thay đổi Wrapper từ bảng<br>10. User cập nhật thông tin và click nút "Save"<br>11. Hệ thống gửi yêu cầu cập nhật đến backend<br>12. Backend cập nhật Model Config và trả về Model Config đã cập nhật<br>13. Hệ thống cập nhật danh sách và hiển thị thông báo "Model updated successfully" |
-| **Ngoại lệ** | - Model Config không tồn tại: hiển thị lỗi<br>- Dữ liệu không hợp lệ: hiển thị lỗi validation<br>- Lỗi cập nhật: hiển thị thông báo lỗi từ server |
+| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, User click vào tab "Cấu Hình Mô Hình"<br>2. Hệ thống hiển thị giao diện của tab "Cấu Hình Mô Hình"<br>3. User chọn task type<br>4. Hệ thống hiển thị danh sách Model Config cho task type đó<br>5. User click nút "Chỉnh Sửa" trên Model Config muốn chỉnh sửa<br>6. Hệ thống mở dialog chỉnh sửa với thông tin hiện tại và gọi API để lấy danh sách Wrapper<br>7. Backend trả về danh sách Wrapper theo task type<br>8. Hệ thống hiển thị bảng Wrapper với Wrapper hiện tại được chọn<br>9. User có thể thay đổi Wrapper từ bảng<br>10. User cập nhật thông tin và click nút "Lưu Thay Đổi"<br>11. Hệ thống gửi yêu cầu cập nhật đến backend<br>12. Backend cập nhật Model Config và trả về Model Config đã cập nhật<br>13. Hệ thống cập nhật danh sách và hiển thị thông báo "Mô hình đã được cập nhật thành công" |
+| **Ngoại lệ** | - Model Config không tồn tại: hiển thị lỗi "Không tìm thấy mô hình"<br>- Dữ liệu không hợp lệ: hiển thị lỗi validation<br>- Lỗi cập nhật: hiển thị thông báo "Cập nhật mô hình thất bại" |
 
 ## Use Case: Xóa Model Config
 
@@ -43,8 +43,8 @@
 | **Actor** | User |
 | **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang ở giao diện cấu hình Model |
 | **Hậu điều kiện** | - Model Config được xóa khỏi hệ thống |
-| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, User click vào tab "Model Configurations"<br>2. Hệ thống hiển thị giao diện của tab "Model Configurations"<br>3. User chọn task type<br>4. Hệ thống hiển thị danh sách Model Config<br>5. User click nút "Delete" trên Model Config muốn xóa<br>6. Hệ thống hiển thị dialog xác nhận xóa<br>7. User xác nhận xóa<br>8. Hệ thống gửi yêu cầu xóa đến backend<br>9. Backend xóa Model Config khỏi database và trả về trạng thái thành công<br>10. Hệ thống cập nhật danh sách và hiển thị thông báo "Model deleted successfully" |
-| **Ngoại lệ** | - Model Config không tồn tại: hiển thị lỗi<br>- Model Config đang được sử dụng: hiển thị lỗi không thể xóa<br>- Lỗi xóa: hiển thị thông báo lỗi từ server |
+| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, User click vào tab "Cấu Hình Mô Hình"<br>2. Hệ thống hiển thị giao diện của tab "Cấu Hình Mô Hình"<br>3. User chọn task type<br>4. Hệ thống hiển thị danh sách Model Config<br>5. User click nút "Xóa" trên Model Config muốn xóa<br>6. Hệ thống hiển thị dialog xác nhận xóa<br>7. User xác nhận xóa<br>8. Hệ thống gửi yêu cầu xóa đến backend<br>9. Backend xóa Model Config khỏi database và trả về trạng thái thành công<br>10. Hệ thống cập nhật danh sách và hiển thị thông báo "Mô hình đã được xóa thành công" |
+| **Ngoại lệ** | - Model Config không tồn tại: hiển thị lỗi "Không tìm thấy mô hình"<br>- Model Config đang được sử dụng: hiển thị lỗi "Mô hình đang được sử dụng"<br>- Lỗi xóa: hiển thị thông báo "Xóa mô hình thất bại" |
 
 ## Use Case: Toggle trạng thái sử dụng Model Config
 
@@ -54,8 +54,8 @@
 | **Actor** | User |
 | **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang ở giao diện cấu hình Model |
 | **Hậu điều kiện** | - Trạng thái sử dụng của Model Config được cập nhật trong hệ thống |
-| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, User click vào tab "Model Configurations"<br>2. Hệ thống hiển thị giao diện của tab "Model Configurations"<br>3. User chọn task type<br>4. Hệ thống hiển thị danh sách Model Config<br>5. User toggle switch trạng thái "Is Used" của Model Config<br>6. Hệ thống gửi yêu cầu cập nhật trạng thái đến backend<br>7. Backend cập nhật trạng thái is_used của Model Config và tự động set is_used=false cho các Model Config khác cùng task type<br>8. Hệ thống cập nhật danh sách và hiển thị thông báo "Model status updated successfully" |
-| **Ngoại lệ** | - Model Config không tồn tại: hiển thị lỗi<br>- Lỗi cập nhật: hiển thị thông báo lỗi từ server |
+| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, User click vào tab "Cấu Hình Mô Hình"<br>2. Hệ thống hiển thị giao diện của tab "Cấu Hình Mô Hình"<br>3. User chọn task type<br>4. Hệ thống hiển thị danh sách Model Config<br>5. User toggle switch trạng thái "Is Used" của Model Config<br>6. Hệ thống gửi yêu cầu cập nhật trạng thái đến backend<br>7. Backend cập nhật trạng thái is_used của Model Config và tự động set is_used=false cho các Model Config khác cùng task type<br>8. Hệ thống cập nhật danh sách và hiển thị thông báo cập nhật thành công |
+| **Ngoại lệ** | - Model Config không tồn tại: hiển thị lỗi "Không tìm thấy mô hình"<br>- Lỗi cập nhật: hiển thị thông báo "Cập nhật mô hình thất bại" |
 
 ## Use Case: Preload Model Config
 

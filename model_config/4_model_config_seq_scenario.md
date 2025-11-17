@@ -46,7 +46,7 @@
 28. model_config_routes.py trả về ModelConfigResponse JSON
 29. ModelConfigTab.tsx cập nhật danh sách với model mới
 30. Component re-render và hiển thị danh sách Model Config được cập nhật
-31. Toast success notification được hiển thị: "Model created successfully"
+31. Toast success notification được hiển thị: "Tạo mô hình thành công"
 
 ---
 
@@ -81,7 +81,7 @@
 27. model_config_routes.py trả về ModelConfigResponse JSON
 28. ModelConfigTab.tsx cập nhật item trong danh sách
 29. Component re-render và hiển thị danh sách Model Config được cập nhật
-30. Toast success notification được hiển thị: "Model updated successfully"
+30. Toast success notification được hiển thị: "Cập nhật mô hình thành công"
 
 ---
 
@@ -89,7 +89,7 @@
 
 1. Sau khi đăng nhập, User click nút "Mô hình" tại sidebar
 2. ModelConfigPage.tsx khởi tạo và hiển thị giao diện
-3. User click vào tab "Model Configurations"
+3. User click vào tab "Cấu Hình Mô Hình"
 4. ModelConfigTab.tsx khởi tạo và gọi `loadModels()` để lấy danh sách Model Config
 5. ModelConfigTab.tsx gửi request GET tới endpoint `/model-config`
 6. Backend route `get_models()` nhận request và gọi `get_models_by_user()`
@@ -109,7 +109,7 @@
 20. model_config_routes.py trả về MessageResponse JSON
 21. ModelConfigTab.tsx xóa item khỏi danh sách
 22. Component re-render, danh sách Model Config được cập nhật
-23. Toast success notification được hiển thị: "Model deleted successfully"
+23. Toast success notification được hiển thị: "Đã xóa mô hình thành công"
 
 ---
 
@@ -117,7 +117,7 @@
 
 1. Sau khi đăng nhập, User click nút "Mô hình" tại sidebar
 2. ModelConfigPage.tsx khởi tạo và hiển thị giao diện
-3. User click vào tab "Model Configurations"
+3. User click vào tab "Cấu Hình Mô Hình"
 4. ModelConfigTab.tsx khởi tạo và gọi `loadModels()` để lấy danh sách Model Config
 5. ModelConfigTab.tsx gửi request GET tới endpoint `/model-config`
 6. Backend route `get_models()` nhận request và gọi `get_models_by_user()`
