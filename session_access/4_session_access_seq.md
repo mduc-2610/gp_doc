@@ -4,22 +4,23 @@
 
 ```mermaid
 sequenceDiagram
-    actor Manager
+    actor User1 as User
     participant Header as Header.tsx
     participant ShareModal as SessionShareModal.tsx
+    participant SearchDialog as SearchDialog.tsx
     participant DocAgentService as DocAgentService
     participant SessionAccessRoutes as session_access_routes
     participant SessionAccessService as SessionAccessService
     participant WSManager as WSSessionAccessManager
     participant WebSocket as WebSocket
-    actor User
+    actor User2 as User
 
-    Manager->>Header: Click nút "Share"
+    User1->>Header: Click nút "Share"
     activate Header
-    Header->>ShareModal: Open modal (open=true)
+    Header->>ShareModal: Mở modal
     activate ShareModal
     
-    ShareModal->>DocAgentService: getSessionGrants(sessionId)
+    ShareModal->>DocAgentService: getSessionGrants()
     activate DocAgentService
     DocAgentService->>SessionAccessRoutes: GET /session-access/grant/by-session/{sessionId}
     activate SessionAccessRoutes
@@ -32,16 +33,35 @@ sequenceDiagram
     DocAgentService-->>ShareModal: ServiceResult~SessionAccessGrant[]~
     deactivate DocAgentService
     
-    ShareModal-->>Manager: Hiển thị danh sách User đã được chia sẻ
+    ShareModal-->>User1: Hiển thị danh sách User đã được chia sẻ
     
-    Manager->>ShareModal: Click "Add people"
-    ShareModal->>ShareModal: Open UserSearchDialog
-    ShareModal-->>Manager: Hiển thị dialog tìm kiếm User
+    User1->>ShareModal: Click "Add people"
     
-    Manager->>ShareModal: Chọn User và access level
-    Manager->>ShareModal: Click "Add"
+    ShareModal->>SearchDialog: Mở dialog
+    activate SearchDialog
     
-    ShareModal->>DocAgentService: createInvite({invited_to, invited_level})
+    SearchDialog-->>User1: Hiển thị search input
+    
+    User1->>SearchDialog: Nhập từ khóa tìm kiếm
+    SearchDialog->>SearchDialog: Debounce 300ms
+    SearchDialog->>DocAgentService: searchUsersByName()
+    activate DocAgentService
+    DocAgentService->>SessionAccessRoutes: GET /api/users/search?name={searchTerm}
+    activate SessionAccessRoutes
+    SessionAccessRoutes-->>DocAgentService: [UserProfile]
+    deactivate SessionAccessRoutes
+    DocAgentService-->>SearchDialog: ServiceResult~UserProfile[]~
+    deactivate DocAgentService
+    
+    SearchDialog->>SearchDialog: Filter excludeIds<br/>(loại bỏ User đã được chia sẻ)
+    SearchDialog-->>User1: Hiển thị kết quả tìm kiếm
+    
+    User1->>SearchDialog: Chọn User và click "Add"
+    
+    SearchDialog->>ShareModal: onAddUser(user, AccessLevel.READER)
+    deactivate SearchDialog
+    
+    ShareModal->>DocAgentService: createInvite()
     activate DocAgentService
     DocAgentService->>SessionAccessRoutes: POST /session-access/invite
     activate SessionAccessRoutes
@@ -67,15 +87,15 @@ sequenceDiagram
     deactivate DocAgentService
     
     ShareModal->>ShareModal: Reload grant list
-    ShareModal-->>Manager: Hiển thị danh sách cập nhật + Toast "Chia sẻ thành công"
+    ShareModal-->>User1: Hiển thị danh sách cập nhật + Toast "Chia sẻ thành công"
     deactivate ShareModal
     deactivate Header
     
-    WebSocket-->>User: Receive PERMISSION_GRANTED event
-    activate User
-    User->>User: Toast "Bạn đã được cấp quyền"
-    User->>User: Reload permission & Session data
-    deactivate User
+    WebSocket-->>User2: Receive PERMISSION_GRANTED event
+    activate User2
+    User2->>User2: Toast "Bạn đã được cấp quyền"
+    User2->>User2: Reload permission & Session data
+    deactivate User2
 ```
 
 ---
@@ -84,16 +104,16 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor Manager
+    actor User1 as User
     participant ShareModal as SessionShareModal.tsx
     participant DocAgentService as DocAgentService
     participant SessionAccessRoutes as session_access_routes
     participant SessionAccessService as SessionAccessService
     participant WSManager as WSSessionAccessManager
     participant WebSocket as WebSocket
-    actor User
+    actor User2 as User
 
-    Manager->>ShareModal: Trong modal, chọn quyền mới từ dropdown
+    User1->>ShareModal: Trong modal, chọn quyền mới từ dropdown
     activate ShareModal
     
     ShareModal->>DocAgentService: updateGrant(grantId, {access_level})
@@ -120,14 +140,14 @@ sequenceDiagram
     deactivate DocAgentService
     
     ShareModal->>ShareModal: Update grant in list
-    ShareModal-->>Manager: Toast "Cập nhật quyền thành công"
+    ShareModal-->>User1: Toast "Cập nhật quyền thành công"
     deactivate ShareModal
     
-    WebSocket-->>User: Receive PERMISSION_CHANGED event
-    activate User
-    User->>User: Toast "Quyền của bạn đã được cập nhật"
-    User->>User: Reload permission
-    deactivate User
+    WebSocket-->>User2: Receive PERMISSION_CHANGED event
+    activate User2
+    User2->>User2: Toast "Quyền của bạn đã được cập nhật"
+    User2->>User2: Reload permission
+    deactivate User2
 ```
 
 ---
@@ -136,17 +156,17 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor Manager
+    actor User1 as User
     participant ShareModal as SessionShareModal.tsx
     participant DocAgentService as DocAgentService
     participant SessionAccessRoutes as session_access_routes
     participant SessionAccessService as SessionAccessService
     participant WSManager as WSSessionAccessManager
     participant WebSocket as WebSocket
-    actor User
+    actor User2 as User
     participant RequestAccessState as RequestAccessState.tsx
 
-    Manager->>ShareModal: Click icon "X" để xóa User
+    User1->>ShareModal: Click icon "X" để xóa User
     activate ShareModal
     
     ShareModal->>DocAgentService: revokeGrant(grantId)
@@ -173,18 +193,18 @@ sequenceDiagram
     deactivate DocAgentService
     
     ShareModal->>ShareModal: Remove grant from list
-    ShareModal-->>Manager: Toast "Thu hồi quyền thành công"
+    ShareModal-->>User1: Toast "Thu hồi quyền thành công"
     deactivate ShareModal
     
-    WebSocket-->>User: Receive PERMISSION_REVOKED event
-    activate User
-    User->>User: Toast "Quyền truy cập của bạn đã bị thu hồi"
-    User->>User: Reload permission
-    User->>RequestAccessState: Chuyển sang RequestAccessState
+    WebSocket-->>User2: Receive PERMISSION_REVOKED event
+    activate User2
+    User2->>User2: Toast "Quyền truy cập của bạn đã bị thu hồi"
+    User2->>User2: Reload permission
+    User2->>RequestAccessState: Chuyển sang RequestAccessState
     activate RequestAccessState
-    RequestAccessState-->>User: Hiển thị UI yêu cầu truy cập
+    RequestAccessState-->>User2: Hiển thị UI yêu cầu truy cập
     deactivate RequestAccessState
-    deactivate User
+    deactivate User2
 ```
 
 ---
@@ -193,7 +213,7 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor User
+    actor User1 as User
     participant DocAgentPage as DocAgentPage.tsx
     participant RequestAccessState as RequestAccessState.tsx
     participant DocAgentService as DocAgentService
@@ -201,10 +221,10 @@ sequenceDiagram
     participant SessionAccessService as SessionAccessService
     participant WSManager as WSSessionAccessManager
     participant WebSocket as WebSocket
-    actor Manager
+    actor User2 as User
     participant ShareModal as SessionShareModal.tsx
 
-    User->>DocAgentPage: Truy cập Session URL
+    User1->>DocAgentPage: Truy cập Session URL
     activate DocAgentPage
     DocAgentPage->>DocAgentPage: Check permission
     DocAgentPage->>RequestAccessState: Hiển thị RequestAccessState (no access)
@@ -223,9 +243,9 @@ sequenceDiagram
     DocAgentService-->>RequestAccessState: ServiceResult~SessionAccessRequest | null~
     deactivate DocAgentService
     
-    RequestAccessState-->>User: Hiển thị nút "Request Access"
+    RequestAccessState-->>User1: Hiển thị nút "Request Access"
     
-    User->>RequestAccessState: Click "Request Access"
+    User1->>RequestAccessState: Click "Request Access"
     RequestAccessState->>DocAgentService: createRequest({session_id, requested_by})
     activate DocAgentService
     DocAgentService->>SessionAccessRoutes: POST /session-access/request
@@ -250,18 +270,18 @@ sequenceDiagram
     deactivate DocAgentService
     
     RequestAccessState->>RequestAccessState: Update existingRequest
-    RequestAccessState-->>User: Hiển thị trạng thái "Pending" + Toast "Yêu cầu đã được gửi"
+    RequestAccessState-->>User1: Hiển thị trạng thái "Pending" + Toast "Yêu cầu đã được gửi"
     deactivate RequestAccessState
     deactivate DocAgentPage
     
-    WebSocket-->>Manager: Receive REQUEST_CREATED event
-    activate Manager
-    Manager->>Manager: Toast "Có yêu cầu truy cập mới"
-    Manager->>ShareModal: Increment requestTabReloadKey
+    WebSocket-->>User2: Receive REQUEST_CREATED event
+    activate User2
+    User2->>User2: Toast "Có yêu cầu truy cập mới"
+    User2->>ShareModal: Increment requestTabReloadKey
     activate ShareModal
     ShareModal->>ShareModal: Reload request list
     deactivate ShareModal
-    deactivate Manager
+    deactivate User2
 ```
 
 ---
@@ -270,17 +290,17 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor Manager
+    actor ManagerUser as User (Manager)
     participant ShareModal as SessionShareModal.tsx
     participant DocAgentService as DocAgentService
     participant SessionAccessRoutes as session_access_routes
     participant SessionAccessService as SessionAccessService
     participant WSManager as WSSessionAccessManager
     participant WebSocket as WebSocket
-    actor User
+    actor RequestUser as User
     participant DocAgentPage as DocAgentPage.tsx
 
-    Manager->>ShareModal: Open modal và click tab "Request"
+    ManagerUser->>ShareModal: Open modal và click tab "Request"
     activate ShareModal
     
     ShareModal->>DocAgentService: getSessionRequests(sessionId)
@@ -296,9 +316,9 @@ sequenceDiagram
     DocAgentService-->>ShareModal: ServiceResult~SessionAccessRequest[]~
     deactivate DocAgentService
     
-    ShareModal-->>Manager: Hiển thị danh sách yêu cầu
+    ShareModal-->>ManagerUser: Hiển thị danh sách yêu cầu
     
-    Manager->>ShareModal: Chọn access level và click "Approve"
+    ManagerUser->>ShareModal: Chọn access level và click "Approve"
     
     ShareModal->>DocAgentService: acceptRequest(requestId, {requested_level})
     activate DocAgentService
@@ -326,19 +346,19 @@ sequenceDiagram
     deactivate DocAgentService
     
     ShareModal->>ShareModal: Remove request from list
-    ShareModal-->>Manager: Toast "Đã chấp nhận yêu cầu"
+    ShareModal-->>ManagerUser: Toast "Đã chấp nhận yêu cầu"
     deactivate ShareModal
     
-    WebSocket-->>User: Receive PERMISSION_GRANTED event
-    activate User
-    User->>DocAgentPage: Handle onPermissionGranted
+    WebSocket-->>RequestUser: Receive PERMISSION_GRANTED event
+    activate RequestUser
+    RequestUser->>DocAgentPage: Handle onPermissionGranted
     activate DocAgentPage
     DocAgentPage->>DocAgentPage: Toast "Bạn đã được cấp quyền truy cập"
     DocAgentPage->>DocAgentPage: setPermissionLoading(true)
     DocAgentPage->>DocAgentPage: Reload permission & Session data
-    DocAgentPage-->>User: Hiển thị Session với quyền mới
+    DocAgentPage-->>RequestUser: Hiển thị Session với quyền mới
     deactivate DocAgentPage
-    deactivate User
+    deactivate RequestUser
 ```
 
 ---
@@ -347,17 +367,17 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor Manager
+    actor User1 as User
     participant ShareModal as SessionShareModal.tsx
     participant DocAgentService as DocAgentService
     participant SessionAccessRoutes as session_access_routes
     participant SessionAccessService as SessionAccessService
     participant WSManager as WSSessionAccessManager
     participant WebSocket as WebSocket
-    actor User
+    actor User2 as User
     participant RequestAccessState as RequestAccessState.tsx
 
-    Manager->>ShareModal: Trong tab "Request", click "Deny"
+    User1->>ShareModal: Trong tab "Request", click "Deny"
     activate ShareModal
     
     ShareModal->>DocAgentService: rejectRequest(requestId)
@@ -384,17 +404,17 @@ sequenceDiagram
     deactivate DocAgentService
     
     ShareModal->>ShareModal: Remove request from list
-    ShareModal-->>Manager: Toast "Đã từ chối yêu cầu"
+    ShareModal-->>User1: Toast "Đã từ chối yêu cầu"
     deactivate ShareModal
     
-    WebSocket-->>User: Receive REQUEST_DELETED event
-    activate User
-    User->>RequestAccessState: Handle event
+    WebSocket-->>User2: Receive REQUEST_DELETED event
+    activate User2
+    User2->>RequestAccessState: Handle event
     activate RequestAccessState
     RequestAccessState->>RequestAccessState: Clear existingRequest
-    RequestAccessState-->>User: Hiển thị lại nút "Request Access"
+    RequestAccessState-->>User2: Hiển thị lại nút "Request Access"
     deactivate RequestAccessState
-    deactivate User
+    deactivate User2
 ```
 
 ---
@@ -403,17 +423,17 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor User
+    actor User1 as User
     participant RequestAccessState as RequestAccessState.tsx
     participant DocAgentService as DocAgentService
     participant SessionAccessRoutes as session_access_routes
     participant SessionAccessService as SessionAccessService
     participant WSManager as WSSessionAccessManager
     participant WebSocket as WebSocket
-    actor Manager
+    actor User2 as User
     participant ShareModal as SessionShareModal.tsx
 
-    User->>RequestAccessState: Trong trạng thái "Pending", click "Cancel Request"
+    User1->>RequestAccessState: Trong trạng thái "Pending", click "Cancel Request"
     activate RequestAccessState
     
     RequestAccessState->>DocAgentService: deleteRequest(requestId, sessionId)
@@ -440,17 +460,17 @@ sequenceDiagram
     deactivate DocAgentService
     
     RequestAccessState->>RequestAccessState: Clear existingRequest
-    RequestAccessState-->>User: Hiển thị nút "Request Access" + Toast "Đã hủy yêu cầu"
+    RequestAccessState-->>User1: Hiển thị nút "Request Access" + Toast "Đã hủy yêu cầu"
     deactivate RequestAccessState
     
-    WebSocket-->>Manager: Receive REQUEST_DELETED event
-    activate Manager
-    Manager->>ShareModal: Increment requestTabReloadKey
+    WebSocket-->>User2: Receive REQUEST_DELETED event
+    activate User2
+    User2->>ShareModal: Increment requestTabReloadKey
     activate ShareModal
     ShareModal->>ShareModal: Reload request list
-    ShareModal-->>Manager: Cập nhật danh sách yêu cầu
+    ShareModal-->>User2: Cập nhật danh sách yêu cầu
     deactivate ShareModal
-    deactivate Manager
+    deactivate User2
 ```
 
 ---
@@ -459,7 +479,7 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor Manager
+    actor User1 as User
     participant ShareModal as SessionShareModal.tsx
     participant DocAgentService as DocAgentService
     participant SessionAccessRoutes as session_access_routes
@@ -467,7 +487,7 @@ sequenceDiagram
     participant WSManager as WSSessionAccessManager
     participant WebSocket as WebSocket
 
-    Manager->>ShareModal: Open modal
+    User1->>ShareModal: Open modal
     activate ShareModal
     
     ShareModal->>DocAgentService: getSessionLink(sessionId)
@@ -483,10 +503,10 @@ sequenceDiagram
     DocAgentService-->>ShareModal: ServiceResult~SessionAccessLink~
     deactivate DocAgentService
     
-    ShareModal-->>Manager: Hiển thị toggle và dropdown quyền
+    ShareModal-->>User1: Hiển thị toggle và dropdown quyền
     
     alt Bật/tắt link
-        Manager->>ShareModal: Toggle switch on/off
+        User1->>ShareModal: Toggle switch on/off
         ShareModal->>DocAgentService: updateSessionLink(linkId, {is_active})
         activate DocAgentService
         DocAgentService->>SessionAccessRoutes: PUT /session-access/link/{linkId}
@@ -509,9 +529,9 @@ sequenceDiagram
         DocAgentService-->>ShareModal: ServiceResult~SessionAccessLink~
         deactivate DocAgentService
         
-        ShareModal-->>Manager: Toast "Link đã được bật/tắt"
+        ShareModal-->>User1: Toast "Link đã được bật/tắt"
     else Thay đổi quyền mặc định
-        Manager->>ShareModal: Chọn quyền mới từ dropdown
+        User1->>ShareModal: Chọn quyền mới từ dropdown
         ShareModal->>DocAgentService: updateSessionLink(linkId, {access_level})
         activate DocAgentService
         DocAgentService->>SessionAccessRoutes: PUT /session-access/link/{linkId}
@@ -534,12 +554,12 @@ sequenceDiagram
         DocAgentService-->>ShareModal: ServiceResult~SessionAccessLink~
         deactivate DocAgentService
         
-        ShareModal-->>Manager: Toast "Quyền mặc định đã được cập nhật"
+        ShareModal-->>User1: Toast "Quyền mặc định đã được cập nhật"
     end
     
-    Manager->>ShareModal: Click "Copy link"
+    User1->>ShareModal: Click "Copy link"
     ShareModal->>ShareModal: Copy Session URL to clipboard
-    ShareModal-->>Manager: Toast "Đã copy link"
+    ShareModal-->>User1: Toast "Đã copy link"
     deactivate ShareModal
 ```
 

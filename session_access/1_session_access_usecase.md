@@ -1,10 +1,7 @@
-````markdown
-
 # Use Case Diagram - Quản lý Session Access
 
 ```mermaid
 graph TB
-    Manager["👤 Manager"]
     User["👤 User"]
     
     AccessSessionDetail["Truy cập chi tiết Session"]
@@ -20,23 +17,22 @@ graph TB
     
     ReceiveUpdate["Nhận cập nhật quyền realtime"]
     
-    Manager -->|Truy cập| AccessSessionDetail
     User -->|Truy cập| AccessSessionDetail
     
     AccessSessionDetail -->|include| ShareSession
-    ShareSession -->|Thực hiện| Manager
+    ShareSession -->|Thực hiện| User
     
     AccessSessionDetail -->|include| UpdatePermission
-    UpdatePermission -->|Thực hiện| Manager
+    UpdatePermission -->|Thực hiện| User
     
     AccessSessionDetail -->|include| RevokePermission
-    RevokePermission -->|Thực hiện| Manager
+    RevokePermission -->|Thực hiện| User
     
     AccessSessionDetail -->|include| HandleRequest
-    HandleRequest -->|Thực hiện| Manager
+    HandleRequest -->|Thực hiện| User
     
     AccessSessionDetail -->|include| ManageLink
-    ManageLink -->|Thực hiện| Manager
+    ManageLink -->|Thực hiện| User
     
     RequestAccess -->|Thực hiện| User
     
@@ -44,9 +40,7 @@ graph TB
     
     AccessSessionDetail -->|extend| ReceiveUpdate
     ReceiveUpdate -->|Nhận| User
-    ReceiveUpdate -->|Nhận| Manager
     
-    style Manager fill:#e1f5ff
     style User fill:#e1f5ff
     style AccessSessionDetail fill:#fff3e0
     style ShareSession fill:#e8f5e9
@@ -60,10 +54,8 @@ graph TB
 ```
 
 **Ghi chú:**
-- Manager có toàn quyền quản lý chia sẻ Session.
-- User có thể yêu cầu và hủy yêu cầu truy cập.
-- Cả Manager và User đều nhận thông báo realtime khi quyền thay đổi.
+- User có thể thực hiện các chức năng quản lý Session Access.
+- Phân quyền cụ thể được xử lý bởi hệ thống quản lý quyền truy cập.
+- User có thể yêu cầu và hủy yêu cầu truy cập khi chưa có quyền.
+- User nhận thông báo realtime khi quyền thay đổi.
 - Truy cập chi tiết Session là điều kiện tiên quyết cho các thao tác quản lý.
-
-
-````

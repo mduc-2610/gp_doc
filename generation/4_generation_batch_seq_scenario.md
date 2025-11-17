@@ -35,37 +35,39 @@
 
 ## Kịch bản 2: Theo dõi tiến trình generation qua WebSocket
 
-1. WebSocket connection đã được thiết lập với backend
-2. Frontend gửi message "start" với userId
-3. Backend gen_routes.websocket_question_generation() nhận WebSocket connection
-4. Backend gọi ws_generation_manager.connect() để register WebSocket
-5. Backend kiểm tra nếu pipeline chưa chạy, gọi QuestionGenerationService.generate()
-6. QuestionGenerationService bắt đầu execute_pipeline()
-7. Backend gọi ws_generation_manager.send_snapshot() với process và steps
-8. WSGenerationManager tạo WsEnvelope với event="snapshot" và WsSnapshotPayload
-9. WSGenerationManager broadcast message tới tất cả WebSocket connections của process
-10. DocSocketService nhận message với event="snapshot"
-11. DocSocketService parse message và gọi onSnapshot handler
-12. DocAgentPage nhận snapshot và cập nhật generationState với questionSteps và questionProcess
-13. LiveProgress component render với danh sách steps
-14. QuestionGenerationService thực hiện step đầu tiên: _step_retrieve_context()
-15. Backend cập nhật step status thành RUNNING và gọi ws_generation_manager.send_state()
-16. WSGenerationManager tạo WsEnvelope với event="state" và WsStatePayload
-17. WSGenerationManager broadcast message
-18. DocSocketService nhận message và gọi onState handler
-19. DocAgentPage cập nhật step trong questionSteps
-20. LiveProgress re-render và hiển thị step đang RUNNING
-21. QuestionGenerationService hoàn thành step và cập nhật status thành COMPLETED
-22. Backend gọi ws_generation_manager.send_state() với step COMPLETED
-23. Lặp lại bước 16-20 để cập nhật UI
-24. Lặp lại bước 14-23 cho các steps tiếp theo: generate_content, validate_results, save_batch
-25. Sau khi tất cả steps hoàn thành, backend gọi ws_generation_manager.send_notify() với code="finished"
-26. WSGenerationManager tạo WsEnvelope với event="notify" và WsNotifyPayload
-27. WSGenerationManager broadcast message
-28. DocSocketService nhận message và gọi onFinished handler
-29. DocAgentPage gọi handleQuestionSocketFinished()
-30. DocAgentPage cập nhật generationState, remove questionSocket và questionSteps
-31. LiveProgress hiển thị trạng thái completed và nút "View Results"
+1. Sau khi tạo yêu cầu generation thành công, frontend nhận được process_id
+2. Frontend gọi DocSocketService để thiết lập WebSocket connection
+3. DocSocketService tạo WebSocket URL và kết nối tới backend endpoint
+4. Backend nhận WebSocket connection request
+5. Backend kiểm tra model config cho generation và embedding
+6. Backend validate API keys nếu là remote model
+7. Backend tạo service instance (QuestionGenerationService hoặc FlashcardGenerationService)
+8. Backend register WebSocket vào manager
+9. Frontend gửi message "start" kèm user_id qua WebSocket
+10. Backend nhận message "start"
+11. Backend kiểm tra nếu pipeline chưa chạy, khởi động pipeline
+12. Backend gọi service.generate() để bắt đầu pipeline execution
+13. Backend gửi snapshot ban đầu với thông tin process và danh sách steps
+14. Frontend nhận snapshot message
+15. Frontend parse snapshot data và cập nhật state với danh sách steps và process info
+16. Frontend render LiveProgress component với danh sách steps
+17. Backend bắt đầu thực hiện step đầu tiên của pipeline
+18. Backend cập nhật step status thành RUNNING
+19. Backend gửi state update message với thông tin step đang chạy
+20. Frontend nhận state update message
+21. Frontend cập nhật step tương ứng trong danh sách steps
+22. Frontend re-render LiveProgress với step status mới
+23. Backend hoàn thành step và cập nhật status thành COMPLETED
+24. Backend gửi state update message với step COMPLETED
+25. Frontend nhận message và cập nhật UI
+26. Backend lặp lại bước 17-25 cho các steps tiếp theo (retrieve_context → generate_content → validate_results → save_batch)
+27. Sau khi tất cả steps hoàn thành, backend gửi notify message với code "finished"
+28. Frontend nhận finished message
+29. Frontend gọi callback xử lý khi generation hoàn thành
+30. Frontend đóng WebSocket connection
+31. Frontend cập nhật state, xóa process và socket info
+32. Frontend gọi API kiểm tra batch pending
+33. Nếu có batch pending, hiển thị tab approval để User xem kết quả
 
 ---
 
@@ -220,37 +222,3 @@
 22. Sau khi hoàn thành, hiển thị approval tab mới với batch mới
 23. User xem kết quả regeneration và approve/reject lại
 
----
-
-## Kịch bản 8: Kết nối lại với tiến trình đang chạy
-
-1. User truy cập lại Session detail page (reload hoặc navigate)
-2. DocAgentPage.useEffect() chạy với dependency sessionId, userId
-3. DocAgentPage gọi fetchSessionInfo()
-4. DocAgentService.getSessionDetail() trả về session info
-5. DocAgentPage set sessionConfirmed = true
-6. DocAgentPage.useEffect() với dependency sessionConfirmed, userId chạy
-7. DocAgentPage gọi checkAndConnectRunningProcesses()
-8. DocAgentPage gọi DocAgentService.getUserGenerationProcess() với userId và resultType="question"
-9. DocAgentService gửi GET request tới `/gen/user-process`
-10. Backend GenerationProcessService query database tìm active process
-11. Nếu tìm thấy process với status RUNNING hoặc PENDING, trả về GenerationProcessResponse
-12. DocAgentService nhận response
-13. DocAgentService trả về ServiceResult với GenerationProcess
-14. DocAgentPage nhận process data
-15. DocAgentPage gọi DocSocketService.connectQuestionSocket() với mode="resume"
-16. DocSocketService tạo WebSocket connection tới `/gen/ws/question/{processId}`
-17. WebSocket connection established
-18. DocSocketService gửi message "resume" với userId
-19. Backend gen_routes nhận WebSocket connection và message "resume"
-20. Backend gọi ws_generation_manager.connect() để register WebSocket
-21. Backend check nếu pipeline đang chạy, chỉ gửi snapshot
-22. Backend gọi ws_generation_manager.send_snapshot() với process hiện tại
-23. WSGenerationManager broadcast snapshot message
-24. DocSocketService nhận snapshot và gọi onSnapshot handler
-25. DocAgentPage cập nhật generationState với questionSteps và questionProcess
-26. LiveProgress render với trạng thái hiện tại của steps
-27. Nếu pipeline vẫn đang chạy, tiếp tục nhận state updates
-28. Lặp lại bước 8-27 cho resultType="flashcard"
-29. DocAgentPage set generationState.isGenerating = true
-30. User tiếp tục theo dõi tiến trình như bình thường

@@ -38,20 +38,20 @@
 24. DocumentUploadDialog lặp qua từng uploadItem và gọi `uploadSingleItem()`
 
 **Đối với mỗi item:**
-25. Nếu là file: DocumentUploadDialog gọi `DocAgentService.uploadFile(file, sessionId, userId)`
-26. Nếu là URL: DocumentUploadDialog gọi `DocAgentService.uploadUrl(url, sessionId, userId)`
+25. Nếu là file: DocumentUploadDialog gọi `DocAgentService.uploadFile()` để thêm file vào uploadItems
+26. Nếu là URL: DocumentUploadDialog gọi `DocAgentService.uploadUrl()`
 27. DocAgentService tạo FormData với dữ liệu tương ứng (file/url, session_id, user_id)
 28. DocAgentService gửi POST request tới `/document/file` hoặc `/document/url` endpoint
 29. Backend route nhận request và DocumentProcessService được gọi `process_file()` hoặc `process_url()`
 
 **Backend Processing - Step 1: Lấy Parse Model Config**
-30. DocumentProcessService gọi `get_parse_task_type(file_category, source_type)` để xác định task type
-31. DocumentProcessService gọi `ModelConfigService.get_model_by_type_and_task(user_id, ModelType.PARSE, task_type)`
+30. DocumentProcessService gọi `get_parse_task_type()` để xác định task type
+31. DocumentProcessService gọi `ModelConfigService.get_model_by_type_and_task()`
 32. ModelConfigService truy vấn database để lấy ModelConfig với wrapper.task_type tương ứng
 33. ModelConfigService trả về parse_model_config (chứa thông tin model và wrapper)
 
 **Backend Processing - Step 2: Tạo Parser từ Factory**
-34. DocumentProcessService gọi `ParserFactory.create_from_source_type(source_type, file_category, model_config)`
+34. DocumentProcessService gọi `ParserFactory.create_from_source_type()`
 35. ParserFactory mapping source_type và file_category để xác định ParserType:
     - UPLOAD + IMAGE → ImageParser
     - UPLOAD + AUDIO/VIDEO → AudioParser
@@ -63,7 +63,7 @@
 
 **Backend Processing - Step 3: Lưu file và tạo Document**
 38. Nếu là upload file: DocumentProcessService lưu file vào storage provider (Local/S3)
-39. DocumentProcessService gọi `DocumentService.create_document(document_data)` với thông tin:
+39. DocumentProcessService gọi `DocumentService.create_document()` với thông tin:
     - filename, source_name, file_type, source_type, file_size
     - storage_provider, storage_bucket
     - processing_status = PROCESSING
@@ -71,7 +71,7 @@
 41. DocumentService trả về document object
 
 **Backend Processing - Step 4: Parse Document**
-42. DocumentProcessService gọi `parser.parse(source_data)` với source_data là file path hoặc URL
+42. DocumentProcessService gọi `parser.parse()` với source_data là file path hoặc URL
 43. Parser xử lý theo loại:
     - DocParser: Extract text từ PDF/DOCX/PPTX
     - AudioParser: Transcribe audio/video thành text bằng model
@@ -79,16 +79,16 @@
     - WebParser: Scrape nội dung web
     - ImageParser: OCR để extract text từ image
 44. Parser trả về raw_text (text đã được extract)
-45. DocumentProcessService gọi `DocumentService.update_document(document.id, {processing_status: COMPLETED})`
+45. DocumentProcessService gọi `DocumentService.update_document()`
 46. DocumentService UPDATE Document trong database với processing_status mới
 
 **Backend Processing - Step 5: Lấy Embedding Model Config**
-47. DocumentProcessService gọi `ModelConfigService.get_model_by_type_and_task(user_id, ModelType.EMBEDDING, TaskType.EMBEDDING)`
+47. DocumentProcessService gọi `ModelConfigService.get_model_by_type_and_task()`
 48. ModelConfigService truy vấn database để lấy ModelConfig cho embedding
 49. ModelConfigService trả về embedding_model_config (chứa wrapper info như "fastembed", "openai")
 
 **Backend Processing - Step 6: Tạo Embedding Model từ Factory**
-50. DocumentProcessService gọi `EmbeddingFactory.create(embedding_model_config)`
+50. DocumentProcessService gọi `EmbeddingFactory.create()`
 51. EmbeddingFactory lấy wrapper_name từ model_config.wrapper.name
 52. EmbeddingFactory mapping wrapper_name để chọn embedding class:
     - "fastembed" → FastEmbedModel
@@ -98,13 +98,13 @@
 
 **Backend Processing - Step 7: Tạo Splitter và split text**
 55. DocumentProcessService xác định splitter_type (RECURSIVE hoặc SEMANTIC)
-56. DocumentProcessService gọi `TextSplitterFactory.create_splitter(splitter_type, **kwargs)`
+56. DocumentProcessService gọi `TextSplitterFactory.create_splitter()`
 57. TextSplitterFactory lấy splitter_class từ registry theo splitter_type:
     - RECURSIVE → RecursiveSplitter
     - SEMANTIC → SemanticSplitter
 58. TextSplitterFactory khởi tạo Splitter với kwargs (nếu có)
 59. TextSplitterFactory trả về splitter instance
-60. DocumentProcessService gọi `splitter.split_text(raw_text)`
+60. DocumentProcessService gọi `splitter.split_text()`
 61. Splitter phân tách raw_text thành các chunks:
     - RecursiveSplitter: Tự động điều chỉnh chunk_size/overlap dựa trên độ dài document
     - SemanticSplitter: Phân tách dựa trên semantic similarity với embedding
@@ -112,7 +112,7 @@
 
 **Backend Processing - Step 8: Tạo embeddings và lưu chunks**
 63. DocumentProcessService lặp qua từng chunk trong text_chunks[]
-64. Với mỗi chunk, gọi `embedding_model.embed(chunk_text)`
+64. Với mỗi chunk, gọi `embedding_model.embed()`
 65. EmbeddingModel generate embedding vector cho chunk_text
 66. EmbeddingModel trả về embedding_vector (mảng số float)
 67. DocumentProcessService gọi `DocumentService.create_document_chunk()` với:
@@ -130,7 +130,7 @@
 73. DocumentUploadDialog nhận ServiceResult<Document>
 74. DocumentUploadDialog cập nhật uploadItem status = 'completed'
 75. Lặp lại bước 25-74 cho tất cả các items trong upload queue
-76. DocumentUploadDialog gọi callback `onDocumentsUploaded(documents)` với danh sách Document đã upload
+76. DocumentUploadDialog gọi callback `onDocumentsUploaded()` với danh sách Document đã upload
 77. DocAgentPage cập nhật state documents với Document mới
 78. SideBarLeft.tsx re-render và hiển thị danh sách Document được cập nhật
 79. Toast success notification được hiển thị: "Upload thành công"
@@ -141,7 +141,7 @@
 
 1. Tại giao diện Session chi tiết, hệ thống hiển thị DocAgentPage
 2. DocAgentPage trong useEffect gọi `fetchSessionInfo()`
-3. DocAgentPage gọi `DocAgentService.getSessionDetail(sessionId)`
+3. DocAgentPage gọi `DocAgentService.getSessionDetail()`
 4. DocAgentService gửi request GET tới endpoint `/session/sessions/{sessionId}`
 5. Backend route nhận request và session_service được gọi `get_session_detail()`
 6. session_service truy vấn database và trả về Session với danh sách Document
@@ -161,8 +161,8 @@
 
 1. Tại giao diện Session chi tiết, SideBarLeft hiển thị danh sách Document
 2. User click vào một Document trong danh sách
-3. SideBarLeft.tsx gọi `handleDocumentClick(doc, event)`
-4. SideBarLeft.tsx gọi callback `onDocumentSelect(doc.id)`
+3. SideBarLeft.tsx gọi `handleDocumentClick()`
+4. SideBarLeft.tsx gọi callback `onDocumentSelect()`
 5. DocAgentPage cập nhật state `selectedDocumentId = doc.id`
 6. SideBarLeft.tsx nhận props selectedDocumentId và highlight Document được chọn
 7. User click vào icon info hoặc double click vào Document
@@ -177,10 +177,10 @@
     - Trạng thái xử lý (processing_status)
     - Ngày tạo (created_at)
 11. User có thể click "View Source" để xem file gốc
-12. DocumentInfoDialog gọi `onSourceFileClick(document.source_file_path, document.source_type)`
+12. DocumentInfoDialog gọi `onSourceFileClick()`
 13. Hệ thống mở file trong tab mới hoặc download file
 14. User có thể click "View Content" để xem nội dung đã xử lý
-15. DocumentInfoDialog gọi `onContentFileClick(document.content_file_path)`
+15. DocumentInfoDialog gọi `onContentFileClick()`
 16. Hệ thống mở file content trong tab mới hoặc download file
 
 ---
@@ -191,7 +191,7 @@
 2. User hover vào một Document
 3. SideBarLeft.tsx hiển thị icon menu (3 chấm)
 4. User click vào icon menu
-5. SideBarLeft.tsx gọi `handleActionsClick(doc, event, docIndex)`
+5. SideBarLeft.tsx gọi `handleActionsClick()`
 6. SideBarLeft.tsx cập nhật state:
    - dropdownOpen = true
    - selectedDocumentForActions = doc
@@ -207,14 +207,14 @@
 14. User click nút "Rename"
 15. DocumentUpdateDialog gọi `handleRename()`
 16. DocumentUpdateDialog validate tên không rỗng
-17. DocumentUpdateDialog gọi `DocAgentService.updateDocument(document.id, { source_name: newName })`
+17. DocumentUpdateDialog gọi `DocAgentService.updateDocument()`
 18. DocAgentService gửi PUT request tới `/document/documents/{documentId}`
 19. Backend route nhận request và DocumentService được gọi `update_document()`
 20. DocumentService lấy document từ database, cập nhật source_name và commit
 21. document_routes.py trả về DocumentResponse JSON
 22. DocAgentService nhận response và đóng gói với ServiceResult<Document>
 23. DocumentUpdateDialog nhận ServiceResult<Document>
-24. DocumentUpdateDialog gọi callback `onDocumentRenamed(updatedDocument)`
+24. DocumentUpdateDialog gọi callback `onDocumentRenamed()`
 25. SideBarLeft.tsx cập nhật document trong danh sách
 26. DocAgentPage cũng cập nhật documents state
 27. Component re-render và hiển thị tên Document mới
@@ -229,7 +229,7 @@
 2. User hover vào một Document
 3. SideBarLeft.tsx hiển thị icon menu (3 chấm)
 4. User click vào icon menu
-5. SideBarLeft.tsx gọi `handleActionsClick(doc, event, docIndex)`
+5. SideBarLeft.tsx gọi `handleActionsClick()`
 6. SideBarLeft.tsx cập nhật state:
    - dropdownOpen = true
    - selectedDocumentForActions = doc
@@ -243,7 +243,7 @@
 12. DocumentDeleteDialog hiển thị confirm message với tên Document
 13. User click nút "Delete" để xác nhận xóa
 14. DocumentDeleteDialog gọi `handleDelete()`
-15. DocumentDeleteDialog gọi `DocAgentService.deleteDocument(document.id, document.session_id)`
+15. DocumentDeleteDialog gọi `DocAgentService.deleteDocument()`
 16. DocAgentService gửi DELETE request tới `/document/documents/{documentId}`
 17. Backend route nhận request và DocumentService được gọi `delete_document()`
 18. DocumentService thực hiện soft delete: set is_active = false cho Document
@@ -251,7 +251,7 @@
 20. document_routes.py trả về MessageResponse JSON
 21. DocAgentService nhận response và đóng gói với ServiceResult<MessageResponse>
 22. DocumentDeleteDialog nhận ServiceResult<MessageResponse>
-23. DocumentDeleteDialog gọi callback `onDocumentDeleted(document.id)`
+23. DocumentDeleteDialog gọi callback `onDocumentDeleted()`
 24. SideBarLeft.tsx loại bỏ document khỏi danh sách
 25. DocAgentPage cũng cập nhật documents state (loại bỏ document)
 26. Nếu Document bị xóa đang được chọn, DocAgentPage reset selectedDocumentId = null

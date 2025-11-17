@@ -13,7 +13,6 @@ graph TB
     ApproveBatch["Duyệt kết quả batch"]
     RejectBatch["Từ chối kết quả batch"]
     RegenerateRequest["Tạo yêu cầu regenerate"]
-    ReconnectProcess["Kết nối lại với tiến trình đang chạy"]
     
     Actor -->|Truy cập| AccessSessionDetail
     
@@ -38,9 +37,6 @@ graph TB
     AccessSessionDetail -->|include| RegenerateRequest
     RegenerateRequest -->|Thực hiện| Actor
     
-    AccessSessionDetail -->|include| ReconnectProcess
-    ReconnectProcess -->|Thực hiện| Actor
-    
     CreateGenRequest -.->|trigger| TrackProgress
     TrackProgress -.->|lead to| ViewBatchResult
     ViewBatchResult -.->|enable| ApproveBatch
@@ -57,7 +53,6 @@ graph TB
     style ApproveBatch fill:#e8f5e9
     style RejectBatch fill:#ffebee
     style RegenerateRequest fill:#fff9c4
-    style ReconnectProcess fill:#e3f2fd
 ```
 
 **Ghi chú:**

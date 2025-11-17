@@ -13,7 +13,7 @@ Chức năng quản lý Session Access (Session Access Management) có các giao
 
 **Quan hệ giữa các Use Case:**
 Truy cập chi tiết Session là bắt buộc để sử dụng các chức năng quản lý truy cập. Do đó:
-- UC "Chia sẻ Session", "Cập nhật quyền", "Thu hồi quyền", "Xử lý yêu cầu", "Quản lý liên kết chia sẻ" include UC "Truy cập chi tiết Session" với quyền **Manager**
+- UC "Chia sẻ Session", "Cập nhật quyền", "Thu hồi quyền", "Xử lý yêu cầu", "Quản lý liên kết chia sẻ" include UC "Truy cập chi tiết Session"
 - UC "Yêu cầu truy cập", "Hủy yêu cầu" có thể thực hiện khi **chưa có quyền truy cập** hoặc quyền bị hạn chế
 - UC "Nhận cập nhật quyền" hoạt động thông qua WebSocket connection tự động khi User vào Session
 
@@ -21,13 +21,13 @@ Truy cập chi tiết Session là bắt buộc để sử dụng các chức nă
 
 | **Use Case** | Mô tả |
 |----------|------|
-| **Chia sẻ Session** | UC này cho phép Manager thêm User cụ thể vào Session với mức quyền Reader, Contributor hoặc Manager. |
-| **Cập nhật quyền truy cập** | UC này cho phép Manager thay đổi mức quyền của User đã được chia sẻ. |
-| **Thu hồi quyền truy cập** | UC này cho phép Manager xóa quyền truy cập của User khỏi Session. |
+| **Chia sẻ Session** | UC này cho phép User thêm User cụ thể vào Session với mức quyền Reader, Contributor hoặc Manager. |
+| **Cập nhật quyền truy cập** | UC này cho phép User thay đổi mức quyền của User đã được chia sẻ. |
+| **Thu hồi quyền truy cập** | UC này cho phép User xóa quyền truy cập của User khỏi Session. |
 | **Yêu cầu truy cập** | UC này cho phép User gửi yêu cầu để được cấp quyền truy cập vào Session. |
-| **Xử lý yêu cầu truy cập** | UC này cho phép Manager chấp nhận hoặc từ chối yêu cầu truy cập từ User. |
+| **Xử lý yêu cầu truy cập** | UC này cho phép User chấp nhận hoặc từ chối yêu cầu truy cập từ User. |
 | **Hủy yêu cầu truy cập** | UC này cho phép User hủy yêu cầu truy cập đang chờ xử lý. |
-| **Quản lý liên kết chia sẻ** | UC này cho phép Manager bật/tắt liên kết chia sẻ công khai và cấu hình mức quyền mặc định. |
+| **Quản lý liên kết chia sẻ** | UC này cho phép User bật/tắt liên kết chia sẻ công khai và cấu hình mức quyền mặc định. |
 | **Nhận cập nhật quyền** | UC này tự động thông báo cho User khi quyền truy cập của họ thay đổi qua WebSocket. |
 
 
