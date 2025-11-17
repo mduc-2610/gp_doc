@@ -198,14 +198,14 @@
    - dropdownPosition = { x, y }
    - isLastDocument = (docIndex === filteredDocuments.length - 1)
 7. DocumentActionDialog component được render tại vị trí dropdownPosition
-8. User click vào option "Rename"
-9. DocumentActionDialog gọi `handleRenameClick()`
+8. User click vào option "Update"
+9. DocumentActionDialog gọi `handleUpdateClick()`
 10. DocumentActionDialog cập nhật state `showUpdateDialog = true` và đóng dropdown
 11. DocumentUpdateDialog component được render với props document
 12. DocumentUpdateDialog auto-focus vào input và điền sẵn tên hiện tại
-13. User nhập tên mới vào input field
-14. User click nút "Rename"
-15. DocumentUpdateDialog gọi `handleRename()`
+13. User nhập tên hiển thị mới vào input field
+14. User click nút "Update"
+15. DocumentUpdateDialog gọi `handleUpdate()`
 16. DocumentUpdateDialog validate tên không rỗng
 17. DocumentUpdateDialog gọi `DocAgentService.updateDocument()`
 18. DocAgentService gửi PUT request tới `/document/documents/{documentId}`
@@ -214,7 +214,7 @@
 21. document_routes.py trả về DocumentResponse JSON
 22. DocAgentService nhận response và đóng gói với ServiceResult<Document>
 23. DocumentUpdateDialog nhận ServiceResult<Document>
-24. DocumentUpdateDialog gọi callback `onDocumentRenamed()`
+24. DocumentUpdateDialog gọi callback `onDocumentUpdated()`
 25. SideBarLeft.tsx cập nhật document trong danh sách
 26. DocAgentPage cũng cập nhật documents state
 27. Component re-render và hiển thị tên Document mới

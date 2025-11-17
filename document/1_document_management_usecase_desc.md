@@ -18,5 +18,5 @@ Truy cập chi tiết Session là bắt buộc để sử dụng các chức nă
 | **Upload Document** | UC này cho phép User tải lên Document mới vào Session. User có thể upload file hoặc cung cấp URL. |
 | **Xem danh sách Document** | UC này cho phép User xem danh sách tất cả các Document trong Session. |
 | **Xem thông tin Document** | UC này cho phép User xem chi tiết thông tin của một Document cụ thể. |
-| **Cập nhật Document** | UC này cho phép User cập nhật thông tin của một Document hiện có (đổi tên). |
+| **Cập nhật Document** | UC này cho phép User cập nhật thông tin của một Document hiện có (cập nhật tên hiển thị). |
 | **Xóa Document** | UC này cho phép User xóa một Document khỏi Session. |

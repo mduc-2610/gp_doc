@@ -47,7 +47,7 @@
 | **Actor** | User |
 | **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang ở giao diện Session chi tiết<br>- User có quyền chỉnh sửa Session |
 | **Hậu điều kiện** | - Thông tin Document được cập nhật trong hệ thống |
-| **Kịch bản chính** | 1. Tại giao diện Session chi tiết, User xem danh sách Document trong sidebar<br>2. User click icon menu trên một Document cần cập nhật và chọn "Đổi tên"<br>3. Hệ thống mở dialog cho phép cập nhật thông tin Document<br>4. User nhập tên mới cho Document và click nút "Lưu"<br>5. Hệ thống validate dữ liệu<br>6. Hệ thống gửi yêu cầu cập nhật đến backend<br>7. Backend cập nhật Document trong cơ sở dữ liệu và trả về thông tin Document mới<br>8. Hệ thống cập nhật dữ liệu trong danh sách và hiển thị thông báo "Cập nhật Document thành công" |
+| **Kịch bản chính** | 1. Tại giao diện Session chi tiết, User xem danh sách Document trong sidebar<br>2. User click icon menu trên một Document cần cập nhật và chọn "Chỉnh sửa"<br>3. Hệ thống mở dialog cho phép cập nhật thông tin Document<br>4. User nhập tên hiển thị mới cho Document và click nút "Cập nhật"<br>5. Hệ thống validate dữ liệu<br>6. Hệ thống gửi yêu cầu cập nhật đến backend<br>7. Backend cập nhật Document trong cơ sở dữ liệu và trả về thông tin Document mới<br>8. Hệ thống cập nhật dữ liệu trong danh sách và hiển thị thông báo "Cập nhật Document thành công" |
 | **Ngoại lệ** | - Tên Document không hợp lệ: hiển thị lỗi validation<br>- Document không tồn tại: hiển thị thông báo lỗi<br>- Không có quyền chỉnh sửa: không hiển thị tùy chọn cập nhật<br>- Lỗi cập nhật: hiển thị thông báo lỗi từ server |
 
 ---

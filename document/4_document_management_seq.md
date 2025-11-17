@@ -309,7 +309,7 @@ sequenceDiagram
 
 ---
 
-## 4. Cập nhật Document (Đổi tên)
+## 4. Cập nhật Document
 
 ```mermaid
 sequenceDiagram
@@ -332,16 +332,16 @@ sequenceDiagram
     
     DocumentActionDialog-->>User: Hiển thị menu actions
     
-    User->>DocumentActionDialog: Click "Rename"
-    DocumentActionDialog->>DocumentActionDialog: handleRenameClick()<br/>Set showUpdateDialog=true
+    User->>DocumentActionDialog: Click "Update"
+    DocumentActionDialog->>DocumentActionDialog: handleUpdateClick()<br/>Set showUpdateDialog=true
     
     DocumentActionDialog->>DocumentUpdateDialog: Render with document
     activate DocumentUpdateDialog
     
-    DocumentUpdateDialog-->>User: Hiển thị rename dialog<br/>Auto-focus input với tên hiện tại
+    DocumentUpdateDialog-->>User: Hiển thị update dialog<br/>Auto-focus input với tên hiện tại
     
-    User->>DocumentUpdateDialog: Nhập tên mới và click "Rename"
-    DocumentUpdateDialog->>DocumentUpdateDialog: handleRename()<br/>Validate tên
+    User->>DocumentUpdateDialog: Nhập tên mới và click "Update"
+    DocumentUpdateDialog->>DocumentUpdateDialog: handleUpdate()<br/>Validate tên
     
     DocumentUpdateDialog->>DocAgentService: updateDocument(id, {source_name})
     activate DocAgentService
@@ -363,10 +363,10 @@ sequenceDiagram
     DocAgentService-->>DocumentUpdateDialog: ServiceResult~Document~
     deactivate DocAgentService
     
-    DocumentUpdateDialog->>SideBarLeft: onDocumentRenamed(updatedDocument)
+    DocumentUpdateDialog->>SideBarLeft: onDocumentUpdated(updatedDocument)
     SideBarLeft->>SideBarLeft: Update document in list
     
-    DocumentUpdateDialog->>DocAgentPage: onDocumentRenamed(updatedDocument)
+    DocumentUpdateDialog->>DocAgentPage: onDocumentUpdated(updatedDocument)
     activate DocAgentPage
     DocAgentPage->>DocAgentPage: Update documents state
     deactivate DocAgentPage

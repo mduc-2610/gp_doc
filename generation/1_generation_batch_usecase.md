@@ -1,4 +1,3 @@
-````markdown
 # Use Case Diagram - Generation với Batch
 
 ```mermaid
@@ -59,4 +58,3 @@ graph TB
 - Truy cập chi tiết Session là điều kiện tiên quyết để sử dụng các chức năng generation.
 - Các thao tác quản lý generation được thực hiện trong giao diện Generation.
 - User có thể reject và regenerate để cải thiện kết quả.
-````
