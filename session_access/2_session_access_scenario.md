@@ -86,8 +86,8 @@
 |-----------|----------|
 | **Use Case** | Quản lý liên kết chia sẻ công khai |
 | **Actor** | User |
-| **Tiền điều kiện** | User đã đăng nhập thành công |
-| **Hậu điều kiện** | Cấu hình chia sẻ công khai được cập nhật |
+| **Tiền điều kiện** | - User đã đăng nhập thành công |
+| **Hậu điều kiện** | - Cấu hình chia sẻ công khai được cập nhật trong hệ thống |
 | **Kịch bản chính** | 1. User mở dialog chia sẻ<br>2. Hệ thống hiển thị cấu hình liên kết chia sẻ công khai<br>3. User có thể thực hiện các thao tác:<br>&nbsp;&nbsp;&nbsp;&nbsp;**a. Bật/tắt liên kết:**<br>&nbsp;&nbsp;&nbsp;&nbsp;- User bật hoặc tắt chế độ chia sẻ công khai<br>&nbsp;&nbsp;&nbsp;&nbsp;- Hệ thống gửi yêu cầu cập nhật đến backend<br>&nbsp;&nbsp;&nbsp;&nbsp;- Backend cập nhật trạng thái liên kết<br>&nbsp;&nbsp;&nbsp;&nbsp;- Hệ thống hiển thị thông báo thành công<br>&nbsp;&nbsp;&nbsp;&nbsp;**b. Thay đổi quyền mặc định:**<br>&nbsp;&nbsp;&nbsp;&nbsp;- User chọn quyền mặc định mới (Reader/Contributor/Manager)<br>&nbsp;&nbsp;&nbsp;&nbsp;- Hệ thống gửi yêu cầu cập nhật đến backend<br>&nbsp;&nbsp;&nbsp;&nbsp;- Backend cập nhật quyền mặc định<br>&nbsp;&nbsp;&nbsp;&nbsp;- Hệ thống hiển thị thông báo thành công<br>&nbsp;&nbsp;&nbsp;&nbsp;**c. Sao chép liên kết:**<br>&nbsp;&nbsp;&nbsp;&nbsp;- User click nút sao chép liên kết<br>&nbsp;&nbsp;&nbsp;&nbsp;- Hệ thống sao chép URL Session vào clipboard và hiển thị thông báo "Đã sao chép liên kết" |
 | **Ngoại lệ** | - Liên kết không tồn tại: tạo liên kết mới<br>- Lỗi cập nhật: hiển thị thông báo lỗi từ server |
 
@@ -99,7 +99,7 @@
 |-----------|----------|
 | **Use Case** | Nhận cập nhật quyền realtime |
 | **Actor** | User |
-| **Tiền điều kiện** | - User đã đăng nhập<br>- User đang truy cập Session |
-| **Hậu điều kiện** | Giao diện được cập nhật theo thay đổi quyền |
+| **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang truy cập Session |
+| **Hậu điều kiện** | - Giao diện được cập nhật theo thay đổi quyền |
 | **Kịch bản chính** | 1. User truy cập Session<br>2. Hệ thống thiết lập kết nối realtime và lắng nghe các sự kiện thay đổi quyền<br>3. Khi có sự kiện từ server:<br>&nbsp;&nbsp;&nbsp;&nbsp;**a. Nhận quyền mới:**<br>&nbsp;&nbsp;&nbsp;&nbsp;- Hệ thống hiển thị thông báo "Bạn đã được cấp quyền truy cập", tải lại thông tin quyền và cập nhật hiển thị Session<br>&nbsp;&nbsp;&nbsp;&nbsp;**b. Quyền thay đổi:**<br>&nbsp;&nbsp;&nbsp;&nbsp;- Hệ thống hiển thị thông báo "Quyền của bạn đã được cập nhật" và tải lại thông tin quyền<br>&nbsp;&nbsp;&nbsp;&nbsp;**c. Quyền bị thu hồi:**<br>&nbsp;&nbsp;&nbsp;&nbsp;- Hệ thống hiển thị thông báo "Quyền truy cập của bạn đã bị thu hồi" và chuyển sang giao diện yêu cầu truy cập<br>&nbsp;&nbsp;&nbsp;&nbsp;**d. Có yêu cầu truy cập mới:**<br>&nbsp;&nbsp;&nbsp;&nbsp;- Hệ thống cập nhật danh sách yêu cầu và hiển thị thông báo "Có yêu cầu truy cập mới"<br>&nbsp;&nbsp;&nbsp;&nbsp;**e. Yêu cầu bị xóa:**<br>&nbsp;&nbsp;&nbsp;&nbsp;- Hệ thống cập nhật danh sách yêu cầu<br>&nbsp;&nbsp;&nbsp;&nbsp;**f. Cấu hình liên kết thay đổi:**<br>&nbsp;&nbsp;&nbsp;&nbsp;- Hệ thống tải lại cấu hình liên kết chia sẻ<br>4. Khi User rời Session, hệ thống đóng kết nối realtime |
 | **Ngoại lệ** | - Mất kết nối realtime: hiển thị cảnh báo và tự động kết nối lại<br>- Lỗi nhận thông báo: ghi log lỗi |
