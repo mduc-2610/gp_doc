@@ -125,7 +125,7 @@ classDiagram
     class DocumentActionDialog {
         - showUpdateDialog: Boolean
         - showDeleteDialog: Boolean
-        + handleRenameClick()
+        + handleUpdateClick()
         + handleDeleteClick()
     }
 

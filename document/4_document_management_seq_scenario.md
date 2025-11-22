@@ -44,7 +44,7 @@
 28. DocAgentService gửi POST request tới `/document/file` hoặc `/document/url` endpoint
 29. Backend route nhận request và DocumentProcessService được gọi `process_file()` hoặc `process_url()`
 
-**Backend Processing - Step 1: Lấy Parse Model Config**
+**Backend Processing - Step 1: Lấy Parse ModelConfig**
 30. DocumentProcessService gọi `get_parse_task_type()` để xác định task type
 31. DocumentProcessService gọi `ModelConfigService.get_model_by_type_and_task()`
 32. ModelConfigService truy vấn database để lấy ModelConfig với wrapper.task_type tương ứng
@@ -82,7 +82,7 @@
 45. DocumentProcessService gọi `DocumentService.update_document()`
 46. DocumentService UPDATE Document trong database với processing_status mới
 
-**Backend Processing - Step 5: Lấy Embedding Model Config**
+**Backend Processing - Step 5: Lấy Embedding ModelConfig**
 47. DocumentProcessService gọi `ModelConfigService.get_model_by_type_and_task()`
 48. ModelConfigService truy vấn database để lấy ModelConfig cho embedding
 49. ModelConfigService trả về embedding_model_config (chứa wrapper info như "fastembed", "openai")

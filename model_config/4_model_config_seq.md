@@ -1,6 +1,6 @@
-# Sequence Diagram - Quản lý Model Config và Model Wrapper
+# Sequence Diagram - Quản lý ModelConfig và ModelWrapper
 
-## 1. Xem danh sách Model Config
+## 1. Xem danh sách ModelConfig
 
 ```mermaid
 sequenceDiagram
@@ -31,14 +31,14 @@ sequenceDiagram
     deactivate ModelConfigRoutes
     
     ModelConfigTab->>ModelConfigTab: Cập nhật state models với dữ liệu nhận được
-    ModelConfigTab-->>User: Hiển thị danh sách Model Config
+    ModelConfigTab-->>User: Hiển thị danh sách ModelConfig
     deactivate ModelConfigTab
     deactivate ModelConfigPage
 ```
 
 ---
 
-## 2. Tạo Model Config mới
+## 2. Tạo ModelConfig mới
 
 ```mermaid
 sequenceDiagram
@@ -67,7 +67,7 @@ sequenceDiagram
     ModelConfigRoutes-->>ModelConfigTab: List[ModelConfigResponse]
     deactivate ModelConfigRoutes
     
-    ModelConfigTab-->>User: Hiển thị danh sách Model Config
+    ModelConfigTab-->>User: Hiển thị danh sách ModelConfig
     
     User->>ModelConfigTab: Chọn task type
     ModelConfigTab-->>User: Lọc và hiển thị models theo task type
@@ -119,7 +119,7 @@ sequenceDiagram
 
 ---
 
-## 3. Chỉnh sửa Model Config
+## 3. Chỉnh sửa ModelConfig
 
 ```mermaid
 sequenceDiagram
@@ -148,12 +148,12 @@ sequenceDiagram
     ModelConfigRoutes-->>ModelConfigTab: List[ModelConfigResponse]
     deactivate ModelConfigRoutes
     
-    ModelConfigTab-->>User: Hiển thị danh sách Model Config
+    ModelConfigTab-->>User: Hiển thị danh sách ModelConfig
     
-    User->>ModelConfigTab: Chọn task type và xem danh sách Model Config
+    User->>ModelConfigTab: Chọn task type và xem danh sách ModelConfig
     ModelConfigTab-->>User: Lọc và hiển thị models theo task type
     
-    User->>ModelConfigTab: Click "Edit" trên Model Config
+    User->>ModelConfigTab: Click "Edit" trên ModelConfig
     ModelConfigTab->>ModelConfigUpdateDialog: Mở dialog với dữ liệu hiện tại
     activate ModelConfigUpdateDialog
     
@@ -202,7 +202,7 @@ sequenceDiagram
 
 ---
 
-## 4. Xóa Model Config
+## 4. Xóa ModelConfig
 
 ```mermaid
 sequenceDiagram
@@ -230,12 +230,12 @@ sequenceDiagram
     ModelConfigRoutes-->>ModelConfigTab: List[ModelConfigResponse]
     deactivate ModelConfigRoutes
     
-    ModelConfigTab-->>User: Hiển thị danh sách Model Config
+    ModelConfigTab-->>User: Hiển thị danh sách ModelConfig
     
-    User->>ModelConfigTab: Chọn task type và xem danh sách Model Config
+    User->>ModelConfigTab: Chọn task type và xem danh sách ModelConfig
     ModelConfigTab-->>User: Lọc và hiển thị models theo task type
     
-    User->>ModelConfigTab: Click "Delete" trên Model Config
+    User->>ModelConfigTab: Click "Delete" trên ModelConfig
     ModelConfigTab->>ModelConfigDeleteDialog: Mở dialog xác nhận
     activate ModelConfigDeleteDialog
     ModelConfigDeleteDialog-->>User: Hiển thị xác nhận với tên Model
@@ -263,7 +263,7 @@ sequenceDiagram
 
 ---
 
-## 5. Toggle trạng thái sử dụng Model Config
+## 5. Toggle trạng thái sử dụng ModelConfig
 
 ```mermaid
 sequenceDiagram
@@ -291,12 +291,12 @@ sequenceDiagram
     ModelConfigRoutes-->>ModelConfigTab: List[ModelConfigResponse]
     deactivate ModelConfigRoutes
     
-    ModelConfigTab-->>User: Hiển thị danh sách Model Config
+    ModelConfigTab-->>User: Hiển thị danh sách ModelConfig
     
-    User->>ModelConfigTab: Chọn task type và xem danh sách Model Config
+    User->>ModelConfigTab: Chọn task type và xem danh sách ModelConfig
     ModelConfigTab-->>User: Lọc và hiển thị models theo task type
     
-    User->>ModelConfigTab: Click toggle switch "Is Used" trên Model Config
+    User->>ModelConfigTab: Click toggle switch "Is Used" trên ModelConfig
     ModelConfigTab->>ModelConfigTable: handleToggleActive(taskType, id, isUsed)
     activate ModelConfigTable
     
@@ -323,7 +323,7 @@ sequenceDiagram
 
 ---
 
-## 6. Preload Model Config
+## 6. Preload ModelConfig
 
 ```mermaid
 sequenceDiagram
@@ -351,7 +351,7 @@ sequenceDiagram
     ModelConfigRoutes-->>ModelConfigTab: List[ModelConfigResponse]
     deactivate ModelConfigRoutes
     
-    ModelConfigTab-->>User: Hiển thị danh sách Model Config (có thể rỗng)
+    ModelConfigTab-->>User: Hiển thị danh sách ModelConfig (có thể rỗng)
     
     User->>ModelConfigTab: Chọn task type
     ModelConfigTab-->>User: Lọc và hiển thị models theo task type
@@ -386,7 +386,7 @@ sequenceDiagram
 
 ---
 
-## 7. Xem danh sách Model Wrapper
+## 7. Xem danh sách ModelWrapper
 
 ```mermaid
 sequenceDiagram
@@ -418,14 +418,14 @@ sequenceDiagram
     deactivate ModelConfigRoutes
     
     ModelWrapperTab->>ModelWrapperTab: Render wrapper list
-    ModelWrapperTab-->>User: Hiển thị danh sách Model Wrapper
+    ModelWrapperTab-->>User: Hiển thị danh sách ModelWrapper
     deactivate ModelWrapperTab
     deactivate ModelConfigPage
 ```
 
 ---
 
-## 8. Tạo Model Wrapper mới (Admin only)
+## 8. Tạo ModelWrapper mới (Admin only)
 
 ```mermaid
 sequenceDiagram
@@ -486,7 +486,7 @@ sequenceDiagram
 
 ---
 
-## 9. Chỉnh sửa Model Wrapper (Admin only)
+## 9. Chỉnh sửa ModelWrapper (Admin only)
 
 ```mermaid
 sequenceDiagram
@@ -547,7 +547,7 @@ sequenceDiagram
 
 ---
 
-## 10. Xóa Model Wrapper (Admin only)
+## 10. Xóa ModelWrapper (Admin only)
 
 ```mermaid
 sequenceDiagram

@@ -9,7 +9,7 @@ graph TB
     ManageDocument["Quản lý Document"]
     ManageQuestion["Quản lý Question và Flashcard"]
     Generation["Generation"]
-    ManageModel["Quản lý Model Config"]
+    ManageModel["Quản lý ModelConfig"]
     ManageAccess["Quản lý Session Access"]
     
     Actor -->|Truy cập| Login

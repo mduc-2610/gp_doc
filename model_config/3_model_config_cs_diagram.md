@@ -1,4 +1,4 @@
-# Class Diagram - Quản lý Model Config và Model Wrapper
+# Class Diagram - Quản lý ModelConfig và ModelWrapper
 
 ```mermaid
 classDiagram
@@ -213,13 +213,13 @@ classDiagram
 - **User**: Đại diện cho User của hệ thống, có thể có nhiều Role (STUDENT, LECTURER, ADMIN).
 - **Role**: Đại diện cho vai trò của User trong hệ thống, được định danh bởi RoleType enum.
 - **RoleType**: Enum định nghĩa các loại role: STUDENT, LECTURER, ADMIN.
-- **ModelWrapper**: Đại diện cho một Model Wrapper, chứa thông tin về wrapper và instruction.
+- **ModelWrapper**: Đại diện cho một ModelWrapper, chứa thông tin về wrapper và instruction.
 - **ModelConfig**: Đại diện cho cấu hình model của User, liên kết với ModelWrapper.
 - **TaskType**: Enum định nghĩa các loại task: GENERATION, EMBEDDING, PARSE_DOC, PARSE_AUDIO, PARSE_IMAGE.
 - **ModelType**: Enum định nghĩa loại model: REMOTE, LOCAL.
 - **Lang**: Enum định nghĩa ngôn ngữ: EN, VI.
-- **ModelConfigTab & ModelConfigBaseDialog**: Component Frontend để quản lý Model Config.
-- **ModelWrapperTab & ModelWrapperBaseDialog**: Component Frontend để quản lý Model Wrapper.
+- **ModelConfigTab & ModelConfigBaseDialog**: Component Frontend để quản lý ModelConfig.
+- **ModelWrapperTab & ModelWrapperBaseDialog**: Component Frontend để quản lý ModelWrapper.
 - **ModelConfigService** (Backend): Service xử lý logic nghiệp vụ, truy vấn DB.
 - **ModelConfigRoutes** (Backend): Route handlers xử lý HTTP requests.
 - **ModelConfigResponse & ModelWrapperResponse**: DTO để trả về dữ liệu từ API.

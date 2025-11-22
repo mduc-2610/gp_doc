@@ -1,4 +1,3 @@
-````markdown
 # Class Diagram - Generation với Batch
 
 ```mermaid
@@ -518,4 +517,3 @@ classDiagram
 - **WsEnvelope & Payloads**: Schema cho WebSocket messages.
 - **GenRequest & subclasses**: Request schemas cho generation API.
 - **BatchApprovalRequest, BatchRejectionRequest, BatchRegenerationRequest**: Request schemas cho batch operations.
-````

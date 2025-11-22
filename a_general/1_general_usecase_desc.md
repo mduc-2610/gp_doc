@@ -7,12 +7,12 @@ Hệ thống DLab (Digital Learning Assistant) cung cấp các chức năng qu�
 - **Quản lý Document** → đề xuất UC quản lý Document
 - **Quản lý Question và Flashcard** → đề xuất UC quản lý Question và Flashcard
 - **Generation** → đề xuất UC generation nội dung
-- **Quản lý Model Config** → đề xuất UC quản lý Model Config
+- **Quản lý ModelConfig** → đề xuất UC quản lý ModelConfig
 - **Quản lý Session Access** → đề xuất UC quản lý Session Access
 
 **Quan hệ giữa các Use Case:**
 Đăng nhập là điều kiện tiên quyết để sử dụng tất cả các chức năng khác. Do đó:
-- UC "Quản lý Session", "Quản lý Document", "Quản lý Question và Flashcard", "Generation", "Quản lý Model Config", "Quản lý Session Access" đều include UC "Đăng nhập"
+- UC "Quản lý Session", "Quản lý Document", "Quản lý Question và Flashcard", "Generation", "Quản lý ModelConfig", "Quản lý Session Access" đều include UC "Đăng nhập"
 
 **Mô tả chi tiết các Use Case:**
 
@@ -23,5 +23,5 @@ Hệ thống DLab (Digital Learning Assistant) cung cấp các chức năng qu�
 | **Quản lý Document** | UC này cho phép User upload, xem và quản lý các tài liệu trong Session. |
 | **Quản lý Question và Flashcard** | UC này cho phép User tạo và quản lý câu hỏi và flashcard trong Session. |
 | **Generation** | UC này cho phép User tạo nội dung học tập tự động từ Document. |
-| **Quản lý Model Config** | UC này cho phép User cấu hình các model AI sử dụng trong hệ thống. |
+| **Quản lý ModelConfig** | UC này cho phép User cấu hình các model AI sử dụng trong hệ thống. |
 | **Quản lý Session Access** | UC này cho phép User chia sẻ và quản lý quyền truy cập Session. |

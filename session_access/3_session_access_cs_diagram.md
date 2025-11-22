@@ -150,7 +150,7 @@ classDiagram
         + openShareModal()
     }
 
-    class SessionShareModal {
+    class SessionShareDialog {
         - sessionId: String
         - userId: String
         - currentUserId: String
@@ -316,19 +316,19 @@ classDiagram
     SessionAccessRequest "*" -- "1" ActorType : has_actor_type
     SessionAccessRequest "*" -- "1" RequestStatus : has_status
     
-    Header --> SessionShareModal : opens
+    Header --> SessionShareDialog : opens
     Header --> Session : displays
     
-    SessionShareModal --> DocAgentService : uses
-    SessionShareModal --> SessionAccessGrant : manages
-    SessionShareModal --> SessionAccessLink : configures
-    SessionShareModal --> SessionAccessRequest : handles
+    SessionShareDialog --> DocAgentService : uses
+    SessionShareDialog --> SessionAccessGrant : manages
+    SessionShareDialog --> SessionAccessLink : configures
+    SessionShareDialog --> SessionAccessRequest : handles
     
     RequestAccessState --> DocAgentService : uses
     RequestAccessState --> SessionAccessRequest : manages
     
     DocAgentPage --> DocSocketService : uses
-    DocAgentPage --> SessionShareModal : contains
+    DocAgentPage --> SessionShareDialog : contains
     DocAgentPage --> RequestAccessState : shows_when_no_access
     DocAgentPage --> WsSessionAccessEnvelope : receives
     
@@ -362,7 +362,7 @@ classDiagram
 - **SessionAccessLink**: Cấu hình link chia sẻ công khai cho Session.
 - **SessionAccessInvite**: Lời mời chia sẻ Session từ Manager đến User.
 - **SessionAccessRequest**: Yêu cầu truy cập từ User muốn vào Session.
-- **Header & SessionShareModal** (Frontend): Giao diện quản lý chia sẻ và xử lý yêu cầu.
+- **Header & SessionShareDialog** (Frontend): Giao diện quản lý chia sẻ và xử lý yêu cầu.
 - **RequestAccessState** (Frontend): Giao diện yêu cầu truy cập khi User không có quyền.
 - **DocAgentPage** (Frontend): Component chính kết nối WebSocket để nhận cập nhật realtime.
 - **DocAgentService** (Frontend): Service xử lý API call liên quan đến session access.

@@ -6,7 +6,7 @@
 sequenceDiagram
     actor User1 as User
     participant Header as Header.tsx
-    participant ShareModal as SessionShareModal.tsx
+    participant ShareModal as SessionShareDialog.tsx
     participant SearchDialog as SearchDialog.tsx
     participant DocAgentService as DocAgentService
     participant SessionAccessRoutes as session_access_routes
@@ -105,7 +105,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User1 as User
-    participant ShareModal as SessionShareModal.tsx
+    participant ShareModal as SessionShareDialog.tsx
     participant DocAgentService as DocAgentService
     participant SessionAccessRoutes as session_access_routes
     participant SessionAccessService as SessionAccessService
@@ -157,7 +157,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User1 as User
-    participant ShareModal as SessionShareModal.tsx
+    participant ShareModal as SessionShareDialog.tsx
     participant DocAgentService as DocAgentService
     participant SessionAccessRoutes as session_access_routes
     participant SessionAccessService as SessionAccessService
@@ -222,7 +222,7 @@ sequenceDiagram
     participant WSManager as WSSessionAccessManager
     participant WebSocket as WebSocket
     actor User2 as User
-    participant ShareModal as SessionShareModal.tsx
+    participant ShareModal as SessionShareDialog.tsx
 
     User1->>DocAgentPage: Truy cập Session URL
     activate DocAgentPage
@@ -291,7 +291,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor ManagerUser as User (Manager)
-    participant ShareModal as SessionShareModal.tsx
+    participant ShareModal as SessionShareDialog.tsx
     participant DocAgentService as DocAgentService
     participant SessionAccessRoutes as session_access_routes
     participant SessionAccessService as SessionAccessService
@@ -368,7 +368,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User1 as User
-    participant ShareModal as SessionShareModal.tsx
+    participant ShareModal as SessionShareDialog.tsx
     participant DocAgentService as DocAgentService
     participant SessionAccessRoutes as session_access_routes
     participant SessionAccessService as SessionAccessService
@@ -431,7 +431,7 @@ sequenceDiagram
     participant WSManager as WSSessionAccessManager
     participant WebSocket as WebSocket
     actor User2 as User
-    participant ShareModal as SessionShareModal.tsx
+    participant ShareModal as SessionShareDialog.tsx
 
     User1->>RequestAccessState: Trong trạng thái "Pending", click "Cancel Request"
     activate RequestAccessState
@@ -480,7 +480,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User1 as User
-    participant ShareModal as SessionShareModal.tsx
+    participant ShareModal as SessionShareDialog.tsx
     participant DocAgentService as DocAgentService
     participant SessionAccessRoutes as session_access_routes
     participant SessionAccessService as SessionAccessService

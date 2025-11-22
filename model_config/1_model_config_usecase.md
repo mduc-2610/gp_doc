@@ -1,4 +1,4 @@
-# Use Case Diagram - Quản lý Model Config và Model Wrapper
+# Use Case Diagram - Quản lý ModelConfig và ModelWrapper
 
 ```mermaid
 graph TB
@@ -6,17 +6,17 @@ graph TB
     AdminActor["👤 Admin"]
     
     AccessModelConfigPage["Truy cập trang cấu hình Model"]
-    ViewModelConfigList["Xem danh sách Model Config"]
-    ViewWrapperList["Xem danh sách Model Wrapper"]
-    EditModelConfig["Chỉnh sửa Model Config"]
-    CreateModelConfig["Tạo Model Config mới"]
-    DeleteModelConfig["Xóa Model Config"]
-    ToggleModelConfig["Toggle trạng thái Model Config"]
+    ViewModelConfigList["Xem danh sách ModelConfig"]
+    ViewWrapperList["Xem danh sách ModelWrapper"]
+    EditModelConfig["Chỉnh sửa ModelConfig"]
+    CreateModelConfig["Tạo ModelConfig mới"]
+    DeleteModelConfig["Xóa ModelConfig"]
+    ToggleModelConfig["Toggle trạng thái ModelConfig"]
     
-    EditWrapper["Chỉnh sửa Model Wrapper"]
-    CreateWrapper["Tạo Model Wrapper mới"]
-    DeleteWrapper["Xóa Model Wrapper"]
-    PreloadModelConfig["Preload Model Config"]
+    EditWrapper["Chỉnh sửa ModelWrapper"]
+    CreateWrapper["Tạo ModelWrapper mới"]
+    DeleteWrapper["Xóa ModelWrapper"]
+    PreloadModelConfig["Preload ModelConfig"]
     
     Actor -->|Truy cập| AccessModelConfigPage
     AdminActor -->|Truy cập| AccessModelConfigPage
@@ -68,6 +68,6 @@ graph TB
 ```
 
 **Ghi chú:**
-- Truy cập trang cấu hình Model là điều kiện tiên quyết để sử dụng các chức năng Model Config và Wrapper.
+- Truy cập trang cấu hình Model là điều kiện tiên quyết để sử dụng các chức năng ModelConfig và Wrapper.
 - Xem danh sách là bước đầu tiên trước khi thực hiện các thao tác quản lý.
 - Các thao tác với Wrapper (tạo, chỉnh sửa, xóa) chỉ dành cho Admin.

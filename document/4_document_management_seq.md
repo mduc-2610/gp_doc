@@ -70,7 +70,7 @@ sequenceDiagram
         DocumentRoutes->>DocumentProcessService: process_file() / process_url()
         activate DocumentProcessService
         
-        Note over DocumentProcessService: Step 1: Lấy Parse Model Config
+        Note over DocumentProcessService: Step 1: Lấy Parse ModelConfig
         DocumentProcessService->>DocumentProcessService: get_parse_task_type(file_category, source_type)
         DocumentProcessService->>ModelConfigService: get_model_by_type_and_task(user_id, ModelType.PARSE, task_type)
         activate ModelConfigService
@@ -131,7 +131,7 @@ sequenceDiagram
         DocumentService-->>DocumentProcessService: document
         deactivate DocumentService
         
-        Note over DocumentProcessService: Step 5: Lấy Embedding Model Config
+        Note over DocumentProcessService: Step 5: Lấy Embedding ModelConfig
         DocumentProcessService->>ModelConfigService: get_model_by_type_and_task(user_id, ModelType.EMBEDDING, TaskType.EMBEDDING)
         activate ModelConfigService
         ModelConfigService->>DB: Query ModelConfig

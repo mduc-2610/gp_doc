@@ -303,7 +303,7 @@ sequenceDiagram
     participant QuestionGenService as QuestionGenerationService
     participant EmbeddingFactory as EmbeddingFactory
     participant EmbeddingModel as EmbeddingModel<br/>(FastEmbed/OpenAI)
-    participant HyDETranslator as HyDETranslator
+    participant QueryTranslator as QueryTranslator
     participant QuerySimilarProcessor as QuerySimilarProcessor
     participant RAGFusion as RAGFusion
     participant Reranker as Reranker
@@ -352,14 +352,14 @@ sequenceDiagram
         deactivate QuerySimilarProcessor
     
     else Strategy = HYDE
-        QuestionGenService->>HyDETranslator: generate_hypothetical_document()
-        activate HyDETranslator
-        HyDETranslator->>Generator: generate_text()
+        QuestionGenService->>QueryTranslator: generate_hypothetical_document()
+        activate QueryTranslator
+        QueryTranslator->>Generator: generate_text()
         activate Generator
-        Generator-->>HyDETranslator: Return hyde_doc
+        Generator-->>QueryTranslator: Return hyde_doc
         deactivate Generator
-        HyDETranslator-->>QuestionGenService: Return hyde_doc
-        deactivate HyDETranslator
+        QueryTranslator-->>QuestionGenService: Return hyde_doc
+        deactivate QueryTranslator
         
         QuestionGenService->>QuerySimilarProcessor: similarity_search()
         activate QuerySimilarProcessor
@@ -385,14 +385,14 @@ sequenceDiagram
         QuerySimilarProcessor-->>QuestionGenService: Return vec_results
         deactivate QuerySimilarProcessor
         
-        QuestionGenService->>HyDETranslator: generate_hypothetical_document()
-        activate HyDETranslator
-        HyDETranslator->>Generator: generate_text()
+        QuestionGenService->>QueryTranslator: generate_hypothetical_document()
+        activate QueryTranslator
+        QueryTranslator->>Generator: generate_text()
         activate Generator
-        Generator-->>HyDETranslator: Return hyde_doc
+        Generator-->>QueryTranslator: Return hyde_doc
         deactivate Generator
-        HyDETranslator-->>QuestionGenService: Return hyde_doc
-        deactivate HyDETranslator
+        QueryTranslator-->>QuestionGenService: Return hyde_doc
+        deactivate QueryTranslator
         
         QuestionGenService->>QuerySimilarProcessor: similarity_search()
         activate QuerySimilarProcessor
