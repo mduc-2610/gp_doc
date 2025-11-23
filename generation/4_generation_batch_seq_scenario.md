@@ -2,7 +2,7 @@
 
 ## Kịch bản 1: Tạo yêu cầu generation
 
-1. Tại giao diện Session chi tiết, User click nút "Generate"
+1. Tại giao diện Session chi tiết, User click "Generate"
 2. DocAgentPage.js hiển thị QuestionGenDialog
 3. QuestionGenDialog gọi `DocAgentService.getUserGenerationProcess()` để kiểm tra process đang chạy
 4. DocAgentService gửi GET request tới `/gen/user-process` với userId và resultType
@@ -10,7 +10,7 @@
 6. Backend trả về null (không có process đang chạy)
 7. QuestionGenDialog hiển thị form generation với danh sách Documents
 8. User chọn documents, điền số lượng, topic, và các tham số nâng cao
-9. User click nút "Generate"
+9. User click "Generate"
 10. QuestionGenDialog validate form data
 11. QuestionGenDialog gọi `DocAgentService.batchGenerate()` với QuestionGenRequest và FlashcardGenRequest
 12. DocAgentService gửi POST request tới `/gen/batch-generate`
@@ -74,7 +74,7 @@
 ## Kịch bản 3: Hủy tiến trình generation
 
 1. User đang xem LiveProgress của generation process
-2. User click nút "Cancel Process"
+2. User click "Cancel Process"
 3. LiveProgress hiển thị confirm dialog
 4. User xác nhận muốn hủy
 5. LiveProgress gọi DocAgentService.cancelProcess() với processId và userId
@@ -136,7 +136,7 @@
 
 1. User đang xem batch items trong QuestionApprovalTab
 2. User chọn các items bằng checkbox (hoặc select all)
-3. User click nút "Approve Selected"
+3. User click "Approve Selected"
 4. QuestionApprovalTab validate có items được chọn
 5. QuestionApprovalTab gọi DocAgentService.approve() với BatchApprovalRequest
 6. DocAgentService gửi POST request tới `/batch/approve`
@@ -170,7 +170,7 @@
 1. User đang xem batch items trong QuestionApprovalTab
 2. User chọn các items muốn reject bằng checkbox
 3. User nhập feedback text trong textarea (tùy chọn)
-4. User click nút "Reject Selected"
+4. User click "Reject Selected"
 5. QuestionApprovalTab validate có items được chọn
 6. QuestionApprovalTab validate feedback length <= 500 characters
 7. QuestionApprovalTab gọi DocAgentService.reject() với BatchRejectionRequest
@@ -199,7 +199,7 @@
 ## Kịch bản 7: Tạo yêu cầu regenerate
 
 1. User đang xem batch với rejected items
-2. User click nút "Regenerate"
+2. User click "Regenerate"
 3. QuestionApprovalTab gọi DocAgentService.regenerate() với BatchRegenerationRequest
 4. DocAgentService gửi POST request tới `/gen/regenerate`
 5. Backend gen_routes nhận request

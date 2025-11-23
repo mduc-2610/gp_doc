@@ -14,7 +14,7 @@ sequenceDiagram
     participant FlashcardGenService as FlashcardGenerationService
     participant DB as Database
 
-    User->>DocAgentPage: Click nút "Tạo"
+    User->>DocAgentPage: Click "Tạo"
     activate DocAgentPage
     DocAgentPage->>QuestionGenDialog: Hiển thị dialog
     activate QuestionGenDialog

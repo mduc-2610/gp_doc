@@ -12,7 +12,7 @@
 8. DocAgentService nhận response và đóng gói với ServiceResult<Session>
 9. DocAgentPage nhận ServiceResult<Session> và cập nhật state documents
 10. SideBarLeft.tsx hiển thị danh sách Document
-11. User click nút "Upload" trên SideBarLeft
+11. User click "Upload" trên SideBarLeft
 12. SideBarLeft.tsx gọi `onUploadClick()`
 13. DocAgentPage cập nhật state `isUploadDialogOpen = true`
 14. DocumentUploadDialog component được render với 2 tabs: "Tệp" và "Liên kết"
@@ -26,14 +26,14 @@
 **Nếu upload URL:**
 15b. User chọn tab "Liên kết"
 16b. User nhập URL vào input field
-17b. User click nút "Thêm"
+17b. User click "Thêm"
 18b. DocumentUploadDialog gọi `addUrlItem()`
 19b. DocumentUploadDialog validate số lượng URL bằng `validateUrlCount()`
 20b. DocumentUploadDialog thêm URL vào uploadItems
 
 **Tiếp tục cho cả File và URL:**
 21. DocumentUploadDialog hiển thị danh sách items trong upload queue
-22. User click nút tải lên (hiển thị số lượng mục)
+22. User click tải lên (hiển thị số lượng mục)
 23. DocumentUploadDialog gọi `handleUploadAll()`
 24. DocumentUploadDialog lặp qua từng uploadItem và gọi `uploadSingleItem()`
 
@@ -204,7 +204,7 @@
 11. DocumentUpdateDialog component được render với props document
 12. DocumentUpdateDialog auto-focus vào input và điền sẵn tên hiện tại
 13. User nhập tên hiển thị mới vào input field
-14. User click nút "Update"
+14. User click "Update"
 15. DocumentUpdateDialog gọi `handleUpdate()`
 16. DocumentUpdateDialog validate tên không rỗng
 17. DocumentUpdateDialog gọi `DocAgentService.updateDocument()`
@@ -241,7 +241,7 @@
 10. DocumentActionDialog cập nhật state `showDeleteDialog = true` và đóng dropdown
 11. DocumentDeleteDialog component được render với props document
 12. DocumentDeleteDialog hiển thị confirm message với tên Document
-13. User click nút "Delete" để xác nhận xóa
+13. User click "Delete" để xác nhận xóa
 14. DocumentDeleteDialog gọi `handleDelete()`
 15. DocumentDeleteDialog gọi `DocAgentService.deleteDocument()`
 16. DocAgentService gửi DELETE request tới `/document/documents/{documentId}`

@@ -2,7 +2,7 @@
 
 ## Kịch bản 1: Xem danh sách Session
 
-1. Sau khi đăng nhập, User click nút "Tài liệu" tại sidebar
+1. Sau khi đăng nhập, User click "Tài liệu" tại sidebar
 2. DocAgentSessionPage.js khởi tạo và gọi `DocAgentService.getSessions()` để lấy danh sách Session
 3. DocAgentService gửi request GET tới endpoint `/session/by-user/{userId}`
 4. Backend route trong session_routes.py nhận request
@@ -18,7 +18,7 @@
 
 ## Kịch bản 2: Tạo Session mới
 
-1. Sau khi đăng nhập, User click nút "Tài liệu" tại sidebar
+1. Sau khi đăng nhập, User click "Tài liệu" tại sidebar
 2. DocAgentSessionPage.js khởi tạo và gọi `DocAgentService.getSessions()` để lấy danh sách Session
 3. DocAgentService gửi request GET tới endpoint `/session/by-user/{userId}`
 4. Backend route trong session_routes.py nhận request
@@ -29,11 +29,11 @@
 9. DocAgentService nhận danh sách từ response và đóng gói với ServiceResult<Session[]>
 10. DocAgentSessionPage.js cập nhật state `sessions` với dữ liệu nhận được
 11. Component re-render và hiển thị danh sách Session cho User
-12. User click nút "Tạo Session mới"
+12. User click "Tạo Session mới"
 13. DocAgentSessionPage.js gọi tới hàm `handleCreateSession()`
 14. Hàm `handleCreateSession()` mở dialog SessionCreateDialog.js
 15. SessionCreateDialog.js hiển thị giao diện cho User
-16. User nhập tên Session, mô tả Session, và click nút "Tạo"
+16. User nhập tên Session, mô tả Session, và click "Tạo"
 17. SessionCreateDialog.js gọi tới lớp DocAgentService
 18. Lớp DocAgentService gọi tới hàm `createSession()`
 19. Hàm `createSession()` gửi yêu cầu với phương thức POST đến endpoint `/session`
@@ -53,7 +53,7 @@
 
 ## Kịch bản 3: Chỉnh sửa Session
 
-1. Sau khi đăng nhập, User click nút "Tài liệu" tại sidebar
+1. Sau khi đăng nhập, User click "Tài liệu" tại sidebar
 2. DocAgentSessionPage.js khởi tạo và gọi `DocAgentService.getSessions()` để lấy danh sách Session
 3. DocAgentService gửi request GET tới endpoint `/session/by-user/{userId}`
 4. Backend route trong session_routes.py nhận request
@@ -64,10 +64,10 @@
 9. DocAgentService nhận danh sách từ response và đóng gói với ServiceResult<Session[]>
 10. DocAgentSessionPage.js cập nhật state `sessions` với dữ liệu nhận được
 11. Component re-render và hiển thị danh sách Session cho User
-12. User click nút "Chỉnh sửa" trên một Session
+12. User click "Chỉnh sửa" trên một Session
 13. DocAgentSessionPage.js gọi tới dialog SessionUpdateDialog.js
 14. SessionUpdateDialog.js hiển thị giao diện với thông tin Session hiện tại
-15. User nhập thông tin và click nút "Lưu"
+15. User nhập thông tin và click "Lưu"
 16. SessionUpdateDialog.js gọi tới lớp DocAgentService
 17. Lớp DocAgentService gọi tới hàm `updateSession()`
 18. Hàm `updateSession()` gửi yêu cầu với phương thức PUT đến endpoint `/session/{sessionId}`
@@ -86,7 +86,7 @@
 
 ## Kịch bản 4: Xóa Session
 
-1. Sau khi đăng nhập, User click nút "Tài liệu" tại sidebar
+1. Sau khi đăng nhập, User click "Tài liệu" tại sidebar
 2. DocAgentSessionPage.js khởi tạo và gọi `DocAgentService.getSessions()` để lấy danh sách Session
 3. DocAgentService gửi request GET tới endpoint `/session/by-user/{userId}`
 4. Backend route trong session_routes.py nhận request
@@ -97,11 +97,11 @@
 9. DocAgentService nhận danh sách từ response và đóng gói với ServiceResult<Session[]>
 10. DocAgentSessionPage.js cập nhật state `sessions` với dữ liệu nhận được
 11. Component re-render và hiển thị danh sách Session cho User
-12. User click nút "Xóa" trên một Session
+12. User click "Xóa" trên một Session
 13. DocAgentSessionPage.js gọi tới dialog SessionDeleteDialog.js
 14. SessionDeleteDialog.js hiển thị giao diện xác nhận xóa
 15. User xem thông tin Session sắp xóa
-16. User click nút "Xóa"
+16. User click "Xóa"
 17. SessionDeleteDialog.js gọi tới lớp DocAgentService
 18. Lớp DocAgentService gọi tới hàm `deleteSession()`
 19. Hàm `deleteSession()` gửi yêu cầu với phương thức DELETE đến endpoint `/session/{sessionId}`

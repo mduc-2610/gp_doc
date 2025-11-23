@@ -15,7 +15,7 @@ sequenceDiagram
     participant WebSocket as WebSocket
     actor User2 as User
 
-    User1->>Header: Click nút "Chia sẻ"
+    User1->>Header: Click "Chia sẻ"
     activate Header
     Header->>ShareModal: Mở modal
     activate ShareModal

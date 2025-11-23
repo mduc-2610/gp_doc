@@ -36,7 +36,7 @@ sequenceDiagram
     activate SideBarLeft
     SideBarLeft-->>User: Hiển thị danh sách Document
     
-    User->>SideBarLeft: Click nút "Tải lên"
+    User->>SideBarLeft: Click "Tải lên"
     SideBarLeft->>DocAgentPage: onUploadClick()
     DocAgentPage->>DocumentUploadDialog: Open dialog
     activate DocumentUploadDialog

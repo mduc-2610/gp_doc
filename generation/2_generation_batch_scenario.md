@@ -8,7 +8,7 @@
 | **Actor** | User |
 | **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang ở giao diện Session chi tiết<br>- Session có ít nhất một Document |
 | **Hậu điều kiện** | - Yêu cầu generation được tạo trong hệ thống<br>- Tiến trình generation bắt đầu thực thi |
-| **Kịch bản chính** | 1. Tại giao diện Session chi tiết, User click icon sparkles tại sidebar<br>2. Hệ thống hiển thị dialog tạo generation<br>3. Hệ thống kiểm tra xem có tiến trình generation đang chạy không<br>4. Nếu không có tiến trình đang chạy, hiển thị form generation<br>5. User chọn các tham số generation:<br>&nbsp;&nbsp;&nbsp;&nbsp;- Document nguồn (có thể chọn nhiều)<br>&nbsp;&nbsp;&nbsp;&nbsp;- Số lượng Question/Flashcard<br>&nbsp;&nbsp;&nbsp;&nbsp;- Topic (tùy chọn)<br>&nbsp;&nbsp;&nbsp;&nbsp;- Cognitive levels (cho Question)<br>&nbsp;&nbsp;&nbsp;&nbsp;- Question types<br>&nbsp;&nbsp;&nbsp;&nbsp;- Flashcard types<br>6. User click nút "Tạo"<br>7. Hệ thống gửi yêu cầu batch generate đến backend<br>8. Backend xử lý yêu cầu và trả về thông tin process<br>9. Hệ thống nhận response và tự động kết nối với tiến trình<br>10. Dialog đóng lại và hệ thống bắt đầu hiển thị progress bar trong tab tương ứng |
+| **Kịch bản chính** | 1. Tại giao diện Session chi tiết, User click icon sparkles tại sidebar<br>2. Hệ thống hiển thị dialog tạo generation<br>3. Hệ thống kiểm tra xem có tiến trình generation đang chạy không<br>4. Nếu không có tiến trình đang chạy, hiển thị form generation<br>5. User chọn các tham số generation:<br>&nbsp;&nbsp;&nbsp;&nbsp;- Document nguồn (có thể chọn nhiều)<br>&nbsp;&nbsp;&nbsp;&nbsp;- Số lượng Question/Flashcard<br>&nbsp;&nbsp;&nbsp;&nbsp;- Topic (tùy chọn)<br>&nbsp;&nbsp;&nbsp;&nbsp;- Cognitive levels (cho Question)<br>&nbsp;&nbsp;&nbsp;&nbsp;- Question types<br>&nbsp;&nbsp;&nbsp;&nbsp;- Flashcard types<br>6. User click "Tạo"<br>7. Hệ thống gửi yêu cầu batch generate đến backend<br>8. Backend xử lý yêu cầu và trả về thông tin process<br>9. Hệ thống nhận response và tự động kết nối với tiến trình<br>10. Dialog đóng lại và hệ thống bắt đầu hiển thị progress bar trong tab tương ứng |
 | **Ngoại lệ** | - Không có Document: hiển thị thông báo "Hãy chọn ít nhất một tài liệu."<br>- Có tiến trình đang chạy: hiển thị cảnh báo và không cho phép tạo mới<br>- Dữ liệu không hợp lệ: hiển thị lỗi validation<br>- Lỗi tạo tiến trình: hiển thị thông báo "Tạo nội dung thất bại. Vui lòng thử lại." |
 
 ---
@@ -34,7 +34,7 @@
 | **Actor** | User |
 | **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang có tiến trình generation đang chạy |
 | **Hậu điều kiện** | - Tiến trình generation bị hủy<br>- Trạng thái cập nhật thành cancelled |
-| **Kịch bản chính** | 1. User đang xem progress bar của tiến trình generation<br>2. User click nút "Hủy tiến trình"<br>3. Hệ thống hiển thị dialog xác nhận hủy<br>4. User xác nhận muốn hủy<br>5. Hệ thống gửi yêu cầu cancel đến backend<br>6. Backend cập nhật trạng thái thành cancelled<br>7. Backend dừng generation<br>8. Hệ thống nhận response và cập nhật UI<br>9. Hệ thống hiển thị thông báo "Đã hủy tiến trình thành công" |
+| **Kịch bản chính** | 1. User đang xem progress bar của tiến trình generation<br>2. User click "Hủy tiến trình"<br>3. Hệ thống hiển thị dialog xác nhận hủy<br>4. User xác nhận muốn hủy<br>5. Hệ thống gửi yêu cầu cancel đến backend<br>6. Backend cập nhật trạng thái thành cancelled<br>7. Backend dừng generation<br>8. Hệ thống nhận response và cập nhật UI<br>9. Hệ thống hiển thị thông báo "Đã hủy tiến trình thành công" |
 | **Ngoại lệ** | - Tiến trình đã hoàn thành: hiển thị thông báo không thể hủy<br>- Lỗi cancel: hiển thị thông báo lỗi từ server |
 
 ---
@@ -60,7 +60,7 @@
 | **Actor** | User |
 | **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang xem kết quả batch trong approval tab |
 | **Hậu điều kiện** | - Các item được approve lưu vào Session<br>- Item có thể được sử dụng trong Session |
-| **Kịch bản chính** | 1. User đang xem batch items trong approval tab<br>2. User chọn các item muốn approve bằng checkbox<br>3. User click nút "Phê duyệt đã chọn" hoặc "Phê duyệt tất cả"<br>4. Hệ thống gửi yêu cầu approve đến backend<br>5. Backend cập nhật status của items thành "approved"<br>6. Backend lưu items vào Session<br>7. Hệ thống nhận response và cập nhật UI<br>8. Hệ thống reload tab data để hiển thị items mới<br>9. Hệ thống hiển thị thông báo approval thành công<br>10. Nếu còn items chưa xử lý, tiếp tục hiển thị approval tab, nếu không thì ẩn |
+| **Kịch bản chính** | 1. User đang xem batch items trong approval tab<br>2. User chọn các item muốn approve bằng checkbox<br>3. User click "Phê duyệt đã chọn" hoặc "Phê duyệt tất cả"<br>4. Hệ thống gửi yêu cầu approve đến backend<br>5. Backend cập nhật status của items thành "approved"<br>6. Backend lưu items vào Session<br>7. Hệ thống nhận response và cập nhật UI<br>8. Hệ thống reload tab data để hiển thị items mới<br>9. Hệ thống hiển thị thông báo approval thành công<br>10. Nếu còn items chưa xử lý, tiếp tục hiển thị approval tab, nếu không thì ẩn |
 | **Ngoại lệ** | - Không có item nào được chọn: hiển thị thông báo "Vui lòng chọn ít nhất một mục để phê duyệt"<br>- Lỗi approve: hiển thị thông báo "Không thể phê duyệt mục" |
 
 ---
@@ -73,7 +73,7 @@
 | **Actor** | User |
 | **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang xem kết quả batch trong approval tab |
 | **Hậu điều kiện** | - Các item bị reject với feedback<br>- Item có thể được regenerate |
-| **Kịch bản chính** | 1. User đang xem batch items trong approval tab<br>2. User chọn các item muốn reject bằng checkbox<br>3. User nhập feedback text (tùy chọn, max 500 ký tự)<br>4. User click nút "Hủy" hoặc "Tạo lại"<br>5. Hệ thống gửi yêu cầu reject đến backend<br>6. Backend cập nhật status của items thành "rejected"<br>7. Backend lưu feedback<br>8. Hệ thống nhận response và cập nhật UI<br>9. Hệ thống hiển thị thông báo rejection thành công<br>10. Nếu còn items chưa xử lý, tiếp tục hiển thị approval tab<br>11. Nếu có rejected items, hiển thị nút "Tạo lại" |
+| **Kịch bản chính** | 1. User đang xem batch items trong approval tab<br>2. User chọn các item muốn reject bằng checkbox<br>3. User nhập feedback text (tùy chọn, max 500 ký tự)<br>4. User click "Hủy" hoặc "Tạo lại"<br>5. Hệ thống gửi yêu cầu reject đến backend<br>6. Backend cập nhật status của items thành "rejected"<br>7. Backend lưu feedback<br>8. Hệ thống nhận response và cập nhật UI<br>9. Hệ thống hiển thị thông báo rejection thành công<br>10. Nếu còn items chưa xử lý, tiếp tục hiển thị approval tab<br>11. Nếu có rejected items, hiển thị nút "Tạo lại" |
 | **Ngoại lệ** | - Không có item nào được chọn: hiển thị thông báo "Vui lòng chọn ít nhất một mục"<br>- Feedback quá dài: hiển thị lỗi validation<br>- Lỗi reject: hiển thị thông báo "Không thể hủy mục" hoặc "Không thể tạo lại mục" |
 
 ---
@@ -86,7 +86,7 @@
 | **Actor** | User |
 | **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User có batch với rejected items và feedback |
 | **Hậu điều kiện** | - Yêu cầu regenerate được tạo trong hệ thống<br>- Tiến trình generation mới bắt đầu thực thi |
-| **Kịch bản chính** | 1. User đang xem batch với rejected items<br>2. User click nút "Regenerate"<br>3. Hệ thống gửi yêu cầu regenerate đến backend<br>4. Backend tạo yêu cầu regenerate mới dựa trên feedback<br>5. Backend trả về thông tin process mới<br>6. Hệ thống nhận response và kết nối với tiến trình mới<br>7. Hệ thống hiển thị progress bar cho tiến trình regenerate<br>8. Sau khi regenerate hoàn thành, hiển thị approval tab mới |
+| **Kịch bản chính** | 1. User đang xem batch với rejected items<br>2. User click icon regenerate<br>3. Hệ thống gửi yêu cầu regenerate đến backend<br>4. Backend tạo yêu cầu regenerate mới dựa trên feedback<br>5. Backend trả về thông tin process mới<br>6. Hệ thống nhận response và kết nối với tiến trình mới<br>7. Hệ thống hiển thị progress bar cho tiến trình regenerate<br>8. Sau khi regenerate hoàn thành, hiển thị approval tab mới |
 | **Ngoại lệ** | - Không có rejected items: không cho phép regenerate<br>- Lỗi regenerate: hiển thị thông báo lỗi từ server |
 
 ```

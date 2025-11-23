@@ -10,7 +10,7 @@ sequenceDiagram
     participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
 
-    User->>ModelConfigPage: Click nút "Mô hình" tại sidebar
+    User->>ModelConfigPage: Click "Mô hình" tại sidebar
     activate ModelConfigPage
     
     ModelConfigPage-->>User: Hiển thị giao diện với tab "Cấu Hình Mô Hình"
@@ -50,7 +50,7 @@ sequenceDiagram
     participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
 
-    User->>ModelConfigPage: Click nút "Mô hình" tại sidebar
+    User->>ModelConfigPage: Click "Mô hình" tại sidebar
     activate ModelConfigPage
     ModelConfigPage-->>User: Hiển thị giao diện
     
@@ -131,7 +131,7 @@ sequenceDiagram
     participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
 
-    User->>ModelConfigPage: Click nút "Mô hình" tại sidebar
+    User->>ModelConfigPage: Click "Mô hình" tại sidebar
     activate ModelConfigPage
     ModelConfigPage-->>User: Hiển thị giao diện
     
@@ -213,7 +213,7 @@ sequenceDiagram
     participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
 
-    User->>ModelConfigPage: Click nút "Mô hình" tại sidebar
+    User->>ModelConfigPage: Click "Mô hình" tại sidebar
     activate ModelConfigPage
     ModelConfigPage-->>User: Hiển thị giao diện
     
@@ -274,7 +274,7 @@ sequenceDiagram
     participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
 
-    User->>ModelConfigPage: Click nút "Mô hình" tại sidebar
+    User->>ModelConfigPage: Click "Mô hình" tại sidebar
     activate ModelConfigPage
     ModelConfigPage-->>User: Hiển thị giao diện
     
@@ -334,7 +334,7 @@ sequenceDiagram
     participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
 
-    User->>ModelConfigPage: Click nút "Mô hình" tại sidebar
+    User->>ModelConfigPage: Click "Mô hình" tại sidebar
     activate ModelConfigPage
     ModelConfigPage-->>User: Hiển thị giao diện
     
@@ -396,7 +396,7 @@ sequenceDiagram
     participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
 
-    User->>ModelConfigPage: Click nút "Mô hình" tại sidebar
+    User->>ModelConfigPage: Click "Mô hình" tại sidebar
     activate ModelConfigPage
     
     User->>ModelConfigPage: Click tab "Model Wrappers"
@@ -436,7 +436,7 @@ sequenceDiagram
     participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
 
-    Admin->>ModelConfigPage: Click nút "Mô hình" tại sidebar
+    Admin->>ModelConfigPage: Click "Mô hình" tại sidebar
     activate ModelConfigPage
     ModelConfigPage-->>Admin: Hiển thị giao diện
     
@@ -497,7 +497,7 @@ sequenceDiagram
     participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
 
-    Admin->>ModelConfigPage: Click nút "Mô hình" tại sidebar
+    Admin->>ModelConfigPage: Click "Mô hình" tại sidebar
     activate ModelConfigPage
     ModelConfigPage-->>Admin: Hiển thị giao diện
     
@@ -558,7 +558,7 @@ sequenceDiagram
     participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
 
-    Admin->>ModelConfigPage: Click nút "Mô hình" tại sidebar
+    Admin->>ModelConfigPage: Click "Mô hình" tại sidebar
     activate ModelConfigPage
     ModelConfigPage-->>Admin: Hiển thị giao diện
     

@@ -71,13 +71,13 @@ sequenceDiagram
     
     DocAgentSessionPage-->>User: Hiển thị danh sách Session
     
-    User->>DocAgentSessionPage: Click nút "Tạo phiên mới"
+    User->>DocAgentSessionPage: Click "Tạo phiên mới"
     
     DocAgentSessionPage->>SessionCreateDialog: Mở dialog
     activate SessionCreateDialog
     SessionCreateDialog-->>User: Hiển thị form tạo Session
     
-    User->>SessionCreateDialog: Nhập thông tin và click nút "Tạo phiên"
+    User->>SessionCreateDialog: Nhập thông tin và click "Tạo phiên"
     SessionCreateDialog->>SessionCreateDialog: Validate form
     SessionCreateDialog->>DocAgentService: createSession()
     deactivate SessionCreateDialog
@@ -142,7 +142,7 @@ sequenceDiagram
     
     DocAgentSessionPage-->>User: Hiển thị danh sách Session
     
-    User->>DocAgentSessionPage: Click nút "Chỉnh sửa phiên" trên một Session
+    User->>DocAgentSessionPage: Click "Chỉnh sửa phiên" trên một Session
     
     DocAgentSessionPage->>SessionUpdateDialog: Mở dialog với dữ liệu Session
     activate SessionUpdateDialog
@@ -150,7 +150,7 @@ sequenceDiagram
     SessionUpdateDialog->>SessionUpdateDialog: Initialize form fields
     SessionUpdateDialog-->>User: Hiển thị form chỉnh sửa Session
     
-    User->>SessionUpdateDialog: Nhập thông tin và click nút "Lưu phiên"
+    User->>SessionUpdateDialog: Nhập thông tin và click "Lưu phiên"
     
     SessionUpdateDialog->>DocAgentService: updateSession()
     deactivate SessionUpdateDialog
@@ -210,13 +210,13 @@ sequenceDiagram
     
     DocAgentSessionPage-->>User: Hiển thị danh sách Session
     
-    User->>DocAgentSessionPage: Click nút "Xóa phiên" trên Session
+    User->>DocAgentSessionPage: Click "Xóa phiên" trên Session
     
     DocAgentSessionPage->>SessionDeleteDialog: Mở dialog xác nhận xóa
     activate SessionDeleteDialog
     SessionDeleteDialog-->>User: Hiển thị dialog xác nhận xóa
     
-    User->>SessionDeleteDialog: Click nút "Xóa phiên"
+    User->>SessionDeleteDialog: Click "Xóa phiên"
     SessionDeleteDialog->>DocAgentService: deleteSession()
     deactivate SessionDeleteDialog
     activate DocAgentService

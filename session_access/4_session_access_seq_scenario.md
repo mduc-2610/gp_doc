@@ -2,14 +2,14 @@
 
 ## Kịch bản 1: Chia sẻ Session với User cụ thể
 
-1. Tại giao diện Session chi tiết, User click nút "Share" trên Header
+1. Tại giao diện Session chi tiết, User click "Share" trên Header
 2. Header.tsx mở SessionShareDialog với prop `open=true`
 3. SessionShareDialog.tsx khởi tạo, hiển thị modal và gọi `DocAgentService.getSessionGrants()` để lấy danh sách User đã được chia sẻ
 4. DocAgentService gửi request GET tới endpoint `/session-access/grant/by-session/{sessionId}`
 5. Backend route nhận request, SessionAccessService được gọi `get_session_access_grants_by_session()`, truy vấn cơ sở dữ liệu và trả danh sách SessionAccessGrant
 6. session_access_routes.py trả về danh sách SessionAccessGrantResponse JSON
 7. DocAgentService nhận danh sách từ response, đóng gói với ServiceResult<SessionAccessGrant[]> và SessionShareDialog hiển thị danh sách User đã được chia sẻ
-8. User click nút "Add people"
+8. User click "Add people"
 9. Component hiển thị SearchDialog
 10. User tìm kiếm, chọn User cần chia sẻ, chọn mức quyền (Reader/Contributor/Manager) và click "Add" để xác nhận
 11. SessionShareDialog gọi `DocAgentService.createInvite()` với thông tin invited_to và invited_level
@@ -125,7 +125,7 @@
 ## Kịch bản 7: Hủy yêu cầu truy cập
 
 1. User đang xem RequestAccessState với trạng thái "Đang chờ"
-2. User click nút "Hủy yêu cầu"
+2. User click "Hủy yêu cầu"
 3. RequestAccessState gọi `DocAgentService.deleteRequest()`
 4. DocAgentService gửi DELETE request tới `/session-access/request/{requestId}`
 5. Backend route nhận request, SessionAccessService được gọi `delete_session_access_request()`, lấy request từ cơ sở dữ liệu, xóa request và commit transaction
@@ -192,7 +192,7 @@
 ## Kịch bản 10: Copy liên kết chia sẻ
 
 1. Manager mở SessionShareDialog
-2. Manager click nút "Copy link"
+2. Manager click "Copy link"
 3. SessionShareDialog gọi `handleCopyLink()`
 4. Component lấy URL hiện tại của Session
 5. Component sử dụng navigator.clipboard.writeText() để copy URL

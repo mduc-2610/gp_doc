@@ -12,9 +12,9 @@
 8. question_routes.py trả về danh sách QuestionResponse JSON
 9. DocAgentService nhận danh sách từ response và đóng gói với ServiceResult<Question[]>
 10. QuestionEditTab.js nhận ServiceResult<Question[]> và hiển thị danh sách Question
-11. User click nút "Thêm Question mới"
+11. User click "Thêm Question mới"
 12. QuestionEditTab.js tạo một object Question tạm thời và hiển thị ở chế độ edit
-13. User nhập thông tin và click nút "Lưu"
+13. User nhập thông tin và click "Lưu"
 14. QuestionEditTab.js gọi `DocAgentService.createQuestion()`
 15. DocAgentService gửi POST request tới `/question/questions` endpoint
 16. Backend route nhận request và QuestionService được gọi `create_question()`
@@ -42,7 +42,7 @@
 10. QuestionEditTab.js nhận ServiceResult<Question[]> và hiển thị danh sách Question
 11. User click icon chỉnh sửa trên một Question
 12. QuestionEditTab.js hiển thị QuestionEditItem ở chế độ edit với dữ liệu Question đó
-13. User nhập thông tin và click nút "Lưu"
+13. User nhập thông tin và click "Lưu"
 14. QuestionEditTab.js gọi `DocAgentService.updateQuestion()`
 15. DocAgentService gửi PUT request tới `/question/questions/{questionId}`
 16. Backend route nhận request và QuestionService được gọi `update_question()`
@@ -96,12 +96,12 @@
 8. QuestionTab.js nhận ServiceResult<Question[]> và hiển thị Question đầu tiên
 9. User xem Question và các tùy chọn trả lời
 10. User chọn tùy chọn hoặc nhập đáp án
-11. User click nút "Tiếp theo"
+11. User click "Tiếp theo"
 12. QuestionTab.js lưu lựa chọn của User
 13. QuestionTab.js cập nhật `currentIndex` tăng lên 1
 14. Component re-render và hiển thị Question tiếp theo
 15. User tiếp tục trả lời cho đến Question cuối cùng
-16. Sau Question cuối cùng, User click nút "Hoàn thành"
+16. Sau Question cuối cùng, User click "Hoàn thành"
 17. QuestionTab.js tính điểm so sánh đáp án
 18. Component re-render và hiển thị kết quả
 
@@ -119,9 +119,9 @@
 8. flashcard_routes.py trả về danh sách FlashcardResponse JSON
 9. DocAgentService nhận danh sách từ response và đóng gói với ServiceResult<Flashcard[]>
 10. FlashcardEditTab.js nhận ServiceResult<Flashcard[]> và hiển thị danh sách Flashcard
-11. User click nút "Thêm flashcard mới"
+11. User click "Thêm flashcard mới"
 12. FlashcardEditTab.js tạo một object Flashcard tạm thời và hiển thị ở chế độ edit
-13. User nhập thông tin và click nút "Lưu"
+13. User nhập thông tin và click "Lưu"
 14. FlashcardEditTab.js gọi `DocAgentService.createFlashcard()`
 15. DocAgentService gửi POST request tới `/flashcard/flashcards`
 16. Backend route nhận request và FlashcardService được gọi `create_flashcard()`
@@ -149,7 +149,7 @@
 10. FlashcardEditTab.js nhận ServiceResult<Flashcard[]> và hiển thị danh sách Flashcard
 11. User click icon chỉnh sửa trên một flashcard
 12. FlashcardEditTab.js hiển thị FlashcardEditItem ở chế độ edit với dữ liệu flashcard đó
-13. User nhập thông tin và click nút "Lưu"
+13. User nhập thông tin và click "Lưu"
 14. FlashcardEditTab.js gọi `DocAgentService.updateFlashcard()`
 15. DocAgentService gửi PUT request tới `/flashcard/flashcards/{flashcardId}`
 16. Backend route nhận request và FlashcardService được gọi `update_flashcard()`
