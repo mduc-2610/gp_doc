@@ -11,8 +11,8 @@ Chức năng quản lý các Session (Session Management) có các giao diện t
 **Quan hệ giữa các Use Case:**
 Đăng nhập, xem danh sách Session là bắt buộc mới có thể thực hiện được các thao tác khác (tạo, xem chi tiết, chỉnh sửa, xóa Session). Do đó:
 - UC "Xem danh sách Session" include UC "Đăng nhập"
-- UC "Tạo Session mới", "Xem chi tiết Session", "Chỉnh sửa Session", "Xóa Session" đều include UC "Xem danh sách Session"
-- UC "Chỉnh sửa Session" include UC "Xem chi tiết Session"
+- UC "Xem danh sách Session" có các extension points: Tạo Session, Xem chi tiết Session, Xóa Session
+- UC "Xem chi tiết Session" có extension point: Chỉnh sửa Session
 
 **Mô tả chi tiết các Use Case:**
 

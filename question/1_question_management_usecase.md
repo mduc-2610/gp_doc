@@ -6,67 +6,80 @@ graph TB
     Actor["👤 User"]
     
     Login["Đăng nhập"]
-    ListSessions["Xem danh sách Session"]
-    ViewSessionDetail["Xem chi tiết Session"]
-    EditQuestion["Chỉnh sửa Question"]
-    CreateQuestion["Tạo Question mới"]
-    DeleteQuestion["Xóa Question"]
+    ListSessions["Xem danh sách Session<br/><b>extension points</b><br/>Xem chi tiết Session"]
+    ViewSessionDetail["Xem chi tiết Session<br/><b>extension points</b><br/>Luyện tập với Flashcard<br/>Luyện tập với Question<br/>Xem danh sách Flashcard<br/>Xem danh sách Question"]
+    
+    PracticeFlashcard["Luyện tập với Flashcard"]
     PracticeQuestion["Luyện tập với Question"]
     
+    ViewFlashcardList["Xem danh sách Flashcard<br/><b>extension points</b><br/>Thêm Flashcard<br/>Chỉnh sửa Flashcard<br/>Xóa Flashcard"]
+    ViewQuestionList["Xem danh sách Question<br/><b>extension points</b><br/>Thêm Question<br/>Chỉnh sửa Question<br/>Xóa Question"]
+    
+    CreateFlashcard["Thêm Flashcard"]
     EditFlashcard["Chỉnh sửa Flashcard"]
-    CreateFlashcard["Tạo Flashcard mới"]
     DeleteFlashcard["Xóa Flashcard"]
-    PracticeFlashcard["Luyện tập với Flashcard"]
+    
+    CreateQuestion["Thêm Question"]
+    EditQuestion["Chỉnh sửa Question"]
+    DeleteQuestion["Xóa Question"]
     
     Actor -->|Truy cập| Login
-    Login -->|include| ListSessions
+    Login -.->|<<Include>>| ListSessions
     ListSessions -->|Thực hiện| Actor
     
-    ListSessions -->|include| ViewSessionDetail
+    ListSessions -.->|<<Extend>>| ViewSessionDetail
     ViewSessionDetail -->|Thực hiện| Actor
     
-    ViewSessionDetail -->|include| EditQuestion
-    EditQuestion -->|Thực hiện| Actor
+    ViewSessionDetail -.->|<<Extend>>| PracticeFlashcard
+    PracticeFlashcard -->|Thực hiện| Actor
     
-    ViewSessionDetail -->|include| CreateQuestion
-    CreateQuestion -->|Thực hiện| Actor
-    
-    ViewSessionDetail -->|include| DeleteQuestion
-    DeleteQuestion -->|Thực hiện| Actor
-    
-    ViewSessionDetail -->|include| PracticeQuestion
+    ViewSessionDetail -.->|<<Extend>>| PracticeQuestion
     PracticeQuestion -->|Thực hiện| Actor
     
-    ViewSessionDetail -->|include| EditFlashcard
-    EditFlashcard -->|Thực hiện| Actor
+    ViewSessionDetail -.->|<<Extend>>| ViewFlashcardList
+    ViewFlashcardList -->|Thực hiện| Actor
     
-    ViewSessionDetail -->|include| CreateFlashcard
+    ViewFlashcardList -.->|<<Extend>>| CreateFlashcard
     CreateFlashcard -->|Thực hiện| Actor
     
-    ViewSessionDetail -->|include| DeleteFlashcard
+    ViewFlashcardList -.->|<<Extend>>| EditFlashcard
+    EditFlashcard -->|Thực hiện| Actor
+    
+    ViewFlashcardList -.->|<<Extend>>| DeleteFlashcard
     DeleteFlashcard -->|Thực hiện| Actor
     
-    ViewSessionDetail -->|include| PracticeFlashcard
-    PracticeFlashcard -->|Thực hiện| Actor
+    ViewSessionDetail -.->|<<Extend>>| ViewQuestionList
+    ViewQuestionList -->|Thực hiện| Actor
+    
+    ViewQuestionList -.->|<<Extend>>| CreateQuestion
+    CreateQuestion -->|Thực hiện| Actor
+    
+    ViewQuestionList -.->|<<Extend>>| EditQuestion
+    EditQuestion -->|Thực hiện| Actor
+    
+    ViewQuestionList -.->|<<Extend>>| DeleteQuestion
+    DeleteQuestion -->|Thực hiện| Actor
     
     style Actor fill:#e1f5ff
     style Login fill:#fff3e0
     style ListSessions fill:#f3e5f5
     style ViewSessionDetail fill:#fce4ec
-    style EditQuestion fill:#e8f5e9
-    style CreateQuestion fill:#e8f5e9
-    style DeleteQuestion fill:#ffebee
-    style PracticeQuestion fill:#fce4ec
-    style EditFlashcard fill:#e8f5e9
-    style CreateFlashcard fill:#e8f5e9
-    style DeleteFlashcard fill:#ffebee
     style PracticeFlashcard fill:#fce4ec
+    style PracticeQuestion fill:#fce4ec
+    style ViewFlashcardList fill:#e0f2f1
+    style ViewQuestionList fill:#e0f2f1
+    style CreateFlashcard fill:#e8f5e9
+    style EditFlashcard fill:#e8f5e9
+    style DeleteFlashcard fill:#ffebee
+    style CreateQuestion fill:#e8f5e9
+    style EditQuestion fill:#e8f5e9
+    style DeleteQuestion fill:#ffebee
 ```
 
 **Ghi chú:**
 - Đăng nhập là điều kiện tiên quyết để truy cập hệ thống.
 - Xem danh sách Session là bước cần thiết để có thể xem chi tiết Session.
-- Xem chi tiết Session là điều kiện tiên quyết để sử dụng các chức năng Question và Flashcard.
-- Các thao tác chỉnh sửa, tạo mới, xóa được thực hiện trong giao diện Edit.
+- Xem chi tiết Session có các extension points cho phép truy cập danh sách và luyện tập.
+- Xem danh sách Question/Flashcard có các extension points cho các thao tác chỉnh sửa, tạo mới, xóa.
 - Các thao tác Luyện tập được thực hiện trong giao diện xem danh sách tương ứng.
 

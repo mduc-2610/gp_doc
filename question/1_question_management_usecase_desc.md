@@ -13,9 +13,10 @@ Chức năng quản lý Question và flashcard (Question & Flashcard Management)
 **Quan hệ giữa các Use Case:**
 Đăng nhập và xem danh sách Session là bắt buộc để có thể xem chi tiết Session và sử dụng các tab Question và flashcard. Do đó:
 - UC "Xem danh sách Session" include UC "Đăng nhập"
-- UC "Xem chi tiết Session" include UC "Xem danh sách Session"
-- UC "Chỉnh sửa Question", "Tạo Question mới", "Xóa Question", "Luyện tập với Question" include UC "Xem chi tiết Session"
-- UC "Chỉnh sửa Flashcard", "Tạo Flashcard mới", "Xóa Flashcard", "Luyện tập với Flashcard" include UC "Xem chi tiết Session"
+- UC "Xem danh sách Session" có extension point: Xem chi tiết Session
+- UC "Xem chi tiết Session" có các extension points: Xem danh sách Question, Xem danh sách Flashcard, Luyện tập với Question, Luyện tập với Flashcard
+- UC "Xem danh sách Question" có các extension points: Thêm Question, Chỉnh sửa Question, Xóa Question
+- UC "Xem danh sách Flashcard" có các extension points: Thêm Flashcard, Chỉnh sửa Flashcard, Xóa Flashcard
 
 **Mô tả chi tiết các Use Case:**
 

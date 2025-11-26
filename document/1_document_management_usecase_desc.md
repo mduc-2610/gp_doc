@@ -3,15 +3,15 @@
 Chức năng quản lý Document (Document Management) có các giao diện tương tác với User:
 - **Upload Document** → đề xuất UC upload Document
 - **Xem danh sách Document** → đề xuất UC xem danh sách Document
-- **Xem thông tin Document** → đề xuất UC xem thông tin Document
 - **Cập nhật Document** → đề xuất UC cập nhật Document
 - **Xóa Document** → đề xuất UC xóa Document
 
 **Quan hệ giữa các Use Case:**
 Đăng nhập và xem danh sách Session là bắt buộc để có thể xem chi tiết Session và sử dụng các chức năng quản lý Document. Do đó:
 - UC "Xem danh sách Session" include UC "Đăng nhập"
-- UC "Xem chi tiết Session" include UC "Xem danh sách Session"
-- UC "Upload Document", "Xem danh sách Document", "Xem thông tin Document", "Cập nhật Document", "Xóa Document" include UC "Xem chi tiết Session"
+- UC "Xem danh sách Session" có extension point: Xem chi tiết Session
+- UC "Xem chi tiết Session" có các extension points: Upload Document, Xem danh sách Document
+- UC "Xem danh sách Document" có các extension points: Cập nhật Document, Xóa Document
 
 **Mô tả chi tiết các Use Case:**
 
@@ -19,6 +19,5 @@ Chức năng quản lý Document (Document Management) có các giao diện tư�
 |----------|------|
 | **Upload Document** | UC này cho phép User tải lên Document mới vào Session. User có thể upload file hoặc cung cấp URL. |
 | **Xem danh sách Document** | UC này cho phép User xem danh sách tất cả các Document trong Session. |
-| **Xem thông tin Document** | UC này cho phép User xem chi tiết thông tin của một Document cụ thể. |
 | **Cập nhật Document** | UC này cho phép User cập nhật thông tin của một Document hiện có (cập nhật tên hiển thị). |
 | **Xóa Document** | UC này cho phép User xóa một Document khỏi Session. |

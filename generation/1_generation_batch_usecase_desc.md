@@ -12,9 +12,10 @@ Chức năng Generation với Batch (Generation & Batch Management) có các gia
 **Quan hệ giữa các Use Case:**
 Đăng nhập và xem danh sách Session là bắt buộc để có thể xem chi tiết Session và sử dụng các chức năng liên quan Generation. Do đó:
 - UC "Xem danh sách Session" include UC "Đăng nhập"
-- UC "Xem chi tiết Session" include UC "Xem danh sách Session"
-- UC "Tạo yêu cầu Generation", "Theo dõi tiến trình Generation", "Hủy tiến trình Generation" include UC "Xem chi tiết Session"
-- UC "Xem kết quả batch", "Duyệt kết quả Batch", "Từ chối kết quả Batch", "Tạo yêu cầu regenerate" include UC "Xem chi tiết Session"
+- UC "Xem danh sách Session" có extension point: Xem chi tiết Session
+- UC "Xem chi tiết Session" có các extension points: Tạo yêu cầu Generation, Xem kết quả batch
+- UC "Tạo yêu cầu Generation" include "Theo dõi tiến trình Generation" và có extension point: Hủy tiến trình Generation
+- UC "Xem kết quả batch" có các extension points: Duyệt kết quả Batch, Từ chối kết quả Batch, Tạo yêu cầu regenerate
 
 **Mô tả chi tiết các Use Case:**
 

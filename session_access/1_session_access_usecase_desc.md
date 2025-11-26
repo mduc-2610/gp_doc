@@ -13,8 +13,8 @@ Chức năng quản lý Session Access (Session Access Management) có các giao
 **Quan hệ giữa các Use Case:**
 Đăng nhập và xem danh sách Session là bắt buộc để có thể xem chi tiết Session và sử dụng các chức năng quản lý truy cập. Do đó:
 - UC "Xem danh sách Session" include UC "Đăng nhập"
-- UC "Xem chi tiết Session" include UC "Xem danh sách Session"
-- UC "Chia sẻ Session", "Cập nhật quyền", "Thu hồi quyền", "Xử lý yêu cầu", "Quản lý liên kết chia sẻ" include UC "Xem chi tiết Session"
+- UC "Xem danh sách Session" có extension point: Xem chi tiết Session
+- UC "Xem chi tiết Session" có các extension points: Chia sẻ Session, Cập nhật quyền, Thu hồi quyền, Xử lý yêu cầu, Quản lý liên kết chia sẻ, Cập nhật quyền realtime
 - UC "Yêu cầu truy cập", "Hủy yêu cầu" có thể thực hiện khi **chưa có quyền truy cập** hoặc quyền bị hạn chế
 - UC "Nhận cập nhật quyền" hoạt động thông qua WebSocket connection tự động khi User vào Session
 

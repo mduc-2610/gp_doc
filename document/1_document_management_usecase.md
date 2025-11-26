@@ -5,34 +5,32 @@ graph TB
     Actor["👤 User"]
     
     Login["Đăng nhập"]
-    ListSessions["Xem danh sách Session"]
-    ViewSessionDetail["Xem chi tiết Session"]
+    ListSessions["Xem danh sách Session<br/><b>extension points</b><br/>Xem chi tiết Session"]
+    ViewSessionDetail["Xem chi tiết Session<br/><b>extension points</b><br/>Upload Document<br/>Xem danh sách Document"]
+    
     UploadDocument["Upload Document"]
-    ViewDocumentList["Xem danh sách Document"]
-    ViewDocumentInfo["Xem thông tin Document"]
+    
+    ViewDocumentList["Xem danh sách Document<br/><b>extension points</b><br/>Xóa Document<br/>Cập nhật Document"]
     UpdateDocument["Cập nhật Document"]
     DeleteDocument["Xóa Document"]
     
     Actor -->|Truy cập| Login
-    Login -->|include| ListSessions
+    Login -.->|<<Include>>| ListSessions
     ListSessions -->|Thực hiện| Actor
     
-    ListSessions -->|include| ViewSessionDetail
+    ListSessions -.->|<<Extend>>| ViewSessionDetail
     ViewSessionDetail -->|Thực hiện| Actor
     
-    ViewSessionDetail -->|include| UploadDocument
+    ViewSessionDetail -.->|<<Extend>>| UploadDocument
     UploadDocument -->|Thực hiện| Actor
     
-    ViewSessionDetail -->|include| ViewDocumentList
+    ViewSessionDetail -.->|<<Extend>>| ViewDocumentList
     ViewDocumentList -->|Thực hiện| Actor
     
-    ViewSessionDetail -->|include| ViewDocumentInfo
-    ViewDocumentInfo -->|Thực hiện| Actor
-    
-    ViewSessionDetail -->|include| UpdateDocument
+    ViewDocumentList -.->|<<Extend>>| UpdateDocument
     UpdateDocument -->|Thực hiện| Actor
     
-    ViewSessionDetail -->|include| DeleteDocument
+    ViewDocumentList -.->|<<Extend>>| DeleteDocument
     DeleteDocument -->|Thực hiện| Actor
     
     style Actor fill:#e1f5ff
@@ -41,7 +39,6 @@ graph TB
     style ViewSessionDetail fill:#fce4ec
     style UploadDocument fill:#e8f5e9
     style ViewDocumentList fill:#e8f5e9
-    style ViewDocumentInfo fill:#e8f5e9
     style UpdateDocument fill:#e8f5e9
     style DeleteDocument fill:#ffebee
 ```
@@ -49,6 +46,7 @@ graph TB
 **Ghi chú:**
 - Đăng nhập là điều kiện tiên quyết để truy cập hệ thống.
 - Xem danh sách Session là bước cần thiết để có thể xem chi tiết Session.
-- Xem chi tiết Session là điều kiện tiên quyết để sử dụng các chức năng quản lý Document.
+- Xem chi tiết Session có các extension points cho Upload và Xem danh sách Document.
+- Xem danh sách Document có các extension points cho Cập nhật và Xóa Document.
 - Các thao tác được thực hiện trong SideBarLeft và các dialog tương ứng.
 - Upload Document hỗ trợ cả file và URL.

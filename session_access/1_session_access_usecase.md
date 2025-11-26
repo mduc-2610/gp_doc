@@ -5,48 +5,46 @@ graph TB
     User["👤 User"]
     
     Login["Đăng nhập"]
-    ListSessions["Xem danh sách Session"]
-    ViewSessionDetail["Xem chi tiết Session"]
+    ListSessions["Xem danh sách Session<br/><b>extension points</b><br/>Xem chi tiết Session"]
+    ViewSessionDetail["Xem chi tiết Session<br/><b>extension points</b><br/>Cập nhật quyền realtime<br/>Chia sẻ Session với User<br/>Cập nhật quyền truy cập<br/>ExtensionPoint<br/>ExtensionPoint<br/>Quản lý liên kết chia sẻ"]
     
     ShareSession["Chia sẻ Session với User"]
     UpdatePermission["Cập nhật quyền truy cập"]
     RevokePermission["Thu hồi quyền truy cập"]
     HandleRequest["Xử lý yêu cầu truy cập"]
     ManageLink["Quản lý liên kết chia sẻ"]
+    ReceiveUpdate["Cập nhật quyền realtime"]
     
     RequestAccess["Yêu cầu truy cập Session"]
-    CancelRequest["Hủy yêu cầu truy cập"]
-    
-    ReceiveUpdate["Nhận cập nhật quyền realtime"]
+    CancelRequest["Hủy yêu cầu truy cập Session"]
     
     User -->|Truy cập| Login
-    Login -->|include| ListSessions
+    Login -.->|<<Include>>| ListSessions
     ListSessions -->|Thực hiện| User
     
-    ListSessions -->|include| ViewSessionDetail
+    ListSessions -.->|<<Extend>>| ViewSessionDetail
     ViewSessionDetail -->|Thực hiện| User
     
-    ViewSessionDetail -->|include| ShareSession
+    ViewSessionDetail -.->|<<Extend>>| ShareSession
     ShareSession -->|Thực hiện| User
     
-    ViewSessionDetail -->|include| UpdatePermission
+    ViewSessionDetail -.->|<<Extend>>| UpdatePermission
     UpdatePermission -->|Thực hiện| User
     
-    ViewSessionDetail -->|include| RevokePermission
+    ViewSessionDetail -.->|<<Extend>>| RevokePermission
     RevokePermission -->|Thực hiện| User
     
-    ViewSessionDetail -->|include| HandleRequest
+    ViewSessionDetail -.->|<<Extend>>| HandleRequest
     HandleRequest -->|Thực hiện| User
     
-    ViewSessionDetail -->|include| ManageLink
+    ViewSessionDetail -.->|<<Extend>>| ManageLink
     ManageLink -->|Thực hiện| User
     
-    RequestAccess -->|Thực hiện| User
-    
-    CancelRequest -->|Thực hiện| User
-    
-    ViewSessionDetail -->|extend| ReceiveUpdate
+    ViewSessionDetail -.->|<<Extend>>| ReceiveUpdate
     ReceiveUpdate -->|Nhận| User
+    
+    User -->|Thực hiện| RequestAccess
+    User -->|Thực hiện| CancelRequest
     
     style User fill:#e1f5ff
     style Login fill:#fff3e0
@@ -65,7 +63,7 @@ graph TB
 **Ghi chú:**
 - Đăng nhập là điều kiện tiên quyết để truy cập hệ thống.
 - Xem danh sách Session là bước cần thiết để có thể xem chi tiết Session.
-- Xem chi tiết Session là điều kiện tiên quyết cho các thao tác quản lý Session Access.
+- Xem chi tiết Session có các extension points cho các thao tác quản lý Session Access.
 - Phân quyền cụ thể được xử lý bởi hệ thống quản lý quyền truy cập.
 - User có thể yêu cầu và hủy yêu cầu truy cập khi chưa có quyền.
 - User nhận thông báo realtime khi quyền thay đổi.

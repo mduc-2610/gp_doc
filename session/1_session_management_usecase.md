@@ -5,26 +5,26 @@ graph TB
     Actor["👤 User"]
     
     Login["Đăng nhập"]
-    ListSessions["Xem danh sách Session"]
-    CreateSession["Tạo Session mới"]
-    ViewSessionDetail["Xem chi tiết Session"]
+    ListSessions["Xem danh sách Session<br/><b>extension points</b><br/>Xóa Session<br/>Tạo Session<br/>Xem chi tiết Session"]
+    CreateSession["Tạo Session"]
+    ViewSessionDetail["Xem chi tiết Session<br/><b>extension points</b><br/>Chỉnh sửa Session"]
     EditSession["Chỉnh sửa Session"]
     DeleteSession["Xóa Session"]
     
     Actor -->|Truy cập| Login
-    Login -->|include| ListSessions
+    Login -.->|<<Include>>| ListSessions
     ListSessions -->|Thực hiện| Actor
     
-    ListSessions -->|include| CreateSession
+    ListSessions -.->|<<Extend>>| CreateSession
     CreateSession -->|Thực hiện| Actor
     
-    ListSessions -->|include| ViewSessionDetail
+    ListSessions -.->|<<Extend>>| ViewSessionDetail
     ViewSessionDetail -->|Thực hiện| Actor
     
-    ViewSessionDetail -->|include| EditSession
+    ViewSessionDetail -.->|<<Extend>>| EditSession
     EditSession -->|Thực hiện| Actor
     
-    ListSessions -->|include| DeleteSession
+    ListSessions -.->|<<Extend>>| DeleteSession
     DeleteSession -->|Thực hiện| Actor
     
     style Actor fill:#e1f5ff
@@ -38,4 +38,5 @@ graph TB
 
 **Ghi chú:**
 - Đăng nhập là điều kiện tiên quyết để truy cập các chức năng quản lý Session.
-- Use Case "Xem danh sách Session" là trung tâm, từ đó User có thể thực hiện các thao tác: Tạo, Xem chi tiết, Chỉnh sửa, và Xóa Session.
+- Use Case "Xem danh sách Session" là trung tâm với các extension points cho phép User thực hiện: Tạo, Xem chi tiết, và Xóa Session.
+- Use Case "Xem chi tiết Session" có extension point cho phép Chỉnh sửa Session.
