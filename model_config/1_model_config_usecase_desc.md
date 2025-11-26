@@ -13,7 +13,8 @@ Chức năng quản lý ModelConfig và ModelWrapper (ModelConfig & ModelWrapper
 - **Preload ModelConfig** → đề xuất UC preload ModelConfig
 
 **Quan hệ giữa các Use Case:**
-Truy cập trang cấu hình Model là bắt buộc để sử dụng các chức năng quản lý ModelConfig và Wrapper. Do đó:
+Đăng nhập là bắt buộc để truy cập trang cấu hình Model và sử dụng các chức năng quản lý ModelConfig và Wrapper. Do đó:
+- UC "Truy cập trang cấu hình Model" include UC "Đăng nhập"
 - UC "Xem danh sách ModelConfig", "Xem danh sách ModelWrapper" include UC "Truy cập trang cấu hình Model"
 - UC "Chỉnh sửa ModelConfig", "Tạo ModelConfig mới", "Xóa ModelConfig", "Toggle trạng thái ModelConfig", "Preload ModelConfig" include UC "Xem danh sách ModelConfig"
 - UC "Chỉnh sửa ModelWrapper", "Tạo ModelWrapper mới", "Xóa ModelWrapper" include UC "Xem danh sách ModelWrapper" và require role Admin

@@ -4,6 +4,8 @@
 graph TB
     User["👤 User"]
     
+    Login["Đăng nhập"]
+    ListSessions["Xem danh sách Session"]
     ViewSessionDetail["Xem chi tiết Session"]
     
     ShareSession["Chia sẻ Session với User"]
@@ -17,7 +19,12 @@ graph TB
     
     ReceiveUpdate["Nhận cập nhật quyền realtime"]
     
-    User -->|Xem| ViewSessionDetail
+    User -->|Truy cập| Login
+    Login -->|include| ListSessions
+    ListSessions -->|Thực hiện| User
+    
+    ListSessions -->|include| ViewSessionDetail
+    ViewSessionDetail -->|Thực hiện| User
     
     ViewSessionDetail -->|include| ShareSession
     ShareSession -->|Thực hiện| User
@@ -42,7 +49,9 @@ graph TB
     ReceiveUpdate -->|Nhận| User
     
     style User fill:#e1f5ff
-    style ViewSessionDetail fill:#fff3e0
+    style Login fill:#fff3e0
+    style ListSessions fill:#f3e5f5
+    style ViewSessionDetail fill:#fce4ec
     style ShareSession fill:#e8f5e9
     style UpdatePermission fill:#e8f5e9
     style RevokePermission fill:#ffebee
@@ -54,8 +63,9 @@ graph TB
 ```
 
 **Ghi chú:**
-- User có thể thực hiện các chức năng quản lý Session Access.
+- Đăng nhập là điều kiện tiên quyết để truy cập hệ thống.
+- Xem danh sách Session là bước cần thiết để có thể xem chi tiết Session.
+- Xem chi tiết Session là điều kiện tiên quyết cho các thao tác quản lý Session Access.
 - Phân quyền cụ thể được xử lý bởi hệ thống quản lý quyền truy cập.
 - User có thể yêu cầu và hủy yêu cầu truy cập khi chưa có quyền.
 - User nhận thông báo realtime khi quyền thay đổi.
-- Xem chi tiết Session là điều kiện tiên quyết cho các thao tác quản lý.

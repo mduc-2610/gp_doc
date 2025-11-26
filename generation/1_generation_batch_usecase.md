@@ -4,6 +4,8 @@
 graph TB
     Actor["👤 User"]
     
+    Login["Đăng nhập"]
+    ListSessions["Xem danh sách Session"]
     ViewSessionDetail["Xem chi tiết Session"]
     CreateGenRequest["Tạo yêu cầu generation"]
     TrackProgress["Theo dõi tiến trình generation"]
@@ -13,7 +15,12 @@ graph TB
     RejectBatch["Từ chối kết quả batch"]
     RegenerateRequest["Tạo yêu cầu regenerate"]
     
-    Actor -->|Xem| ViewSessionDetail
+    Actor -->|Truy cập| Login
+    Login -->|include| ListSessions
+    ListSessions -->|Thực hiện| Actor
+    
+    ListSessions -->|include| ViewSessionDetail
+    ViewSessionDetail -->|Thực hiện| Actor
     
     ViewSessionDetail -->|include| CreateGenRequest
     CreateGenRequest -->|Thực hiện| Actor
@@ -44,7 +51,9 @@ graph TB
     RegenerateRequest -.->|trigger| TrackProgress
     
     style Actor fill:#e1f5ff
-    style ViewSessionDetail fill:#fff3e0
+    style Login fill:#fff3e0
+    style ListSessions fill:#f3e5f5
+    style ViewSessionDetail fill:#fce4ec
     style CreateGenRequest fill:#e8f5e9
     style TrackProgress fill:#e3f2fd
     style CancelProcess fill:#ffebee
@@ -55,6 +64,8 @@ graph TB
 ```
 
 **Ghi chú:**
+- Đăng nhập là điều kiện tiên quyết để truy cập hệ thống.
+- Xem danh sách Session là bước cần thiết để có thể xem chi tiết Session.
 - Xem chi tiết Session là điều kiện tiên quyết để sử dụng các chức năng generation.
 - Các thao tác quản lý generation được thực hiện trong giao diện Generation.
 - User có thể reject và regenerate để cải thiện kết quả.

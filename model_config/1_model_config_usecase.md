@@ -5,6 +5,7 @@ graph TB
     Actor["👤 User"]
     AdminActor["👤 Admin"]
     
+    Login["Đăng nhập"]
     AccessModelConfigPage["Truy cập trang cấu hình Model"]
     ViewModelConfigList["Xem danh sách ModelConfig"]
     ViewWrapperList["Xem danh sách ModelWrapper"]
@@ -18,8 +19,12 @@ graph TB
     DeleteWrapper["Xóa ModelWrapper"]
     PreloadModelConfig["Preload ModelConfig"]
     
-    Actor -->|Truy cập| AccessModelConfigPage
-    AdminActor -->|Truy cập| AccessModelConfigPage
+    Actor -->|Truy cập| Login
+    AdminActor -->|Truy cập| Login
+    
+    Login -->|include| AccessModelConfigPage
+    AccessModelConfigPage -->|Thực hiện| Actor
+    AccessModelConfigPage -->|Thực hiện| AdminActor
     
     AccessModelConfigPage -->|include| ViewModelConfigList
     ViewModelConfigList -->|Thực hiện| Actor
@@ -54,7 +59,8 @@ graph TB
     
     style Actor fill:#e1f5ff
     style AdminActor fill:#ffe1f5
-    style AccessModelConfigPage fill:#fff3e0
+    style Login fill:#fff3e0
+    style AccessModelConfigPage fill:#f3e5f5
     style ViewModelConfigList fill:#e0f2f1
     style ViewWrapperList fill:#e0f2f1
     style EditModelConfig fill:#e8f5e9
@@ -68,6 +74,7 @@ graph TB
 ```
 
 **Ghi chú:**
+- Đăng nhập là điều kiện tiên quyết để truy cập hệ thống.
 - Truy cập trang cấu hình Model là điều kiện tiên quyết để sử dụng các chức năng ModelConfig và Wrapper.
 - Xem danh sách là bước đầu tiên trước khi thực hiện các thao tác quản lý.
 - Các thao tác với Wrapper (tạo, chỉnh sửa, xóa) chỉ dành cho Admin.
