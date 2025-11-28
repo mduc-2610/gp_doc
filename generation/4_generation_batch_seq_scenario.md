@@ -1,224 +1,318 @@
 # Sequence Scenario - Generation với Batch
 
-## Kịch bản 1: Tạo yêu cầu generation
+## 1. Xem kết quả Batch
 
-1. Tại giao diện Session chi tiết, User click "Generate"
-2. DocAgentPage.js hiển thị QuestionGenDialog
-3. QuestionGenDialog gọi `DocAgentService.getUserGenerationProcess()` để kiểm tra process đang chạy
-4. DocAgentService gửi GET request tới `/gen/user-process` với userId và resultType
-5. Backend GenerationProcessService kiểm tra có process active không
-6. Backend trả về null (không có process đang chạy)
-7. QuestionGenDialog hiển thị form generation với danh sách Documents
-8. User chọn documents, điền số lượng, topic, và các tham số nâng cao
-9. User click "Generate"
-10. QuestionGenDialog validate form data
-11. QuestionGenDialog gọi `DocAgentService.batchGenerate()` với QuestionGenRequest và FlashcardGenRequest
-12. DocAgentService gửi POST request tới `/gen/batch-generate`
-13. Backend gen_routes nhận request và tạo QuestionGenerationService và FlashcardGenerationService
-14. Backend tạo GenerationProcess cho Question với status PENDING
-15. Backend tạo GenerationBatch cho Question
-16. Backend tạo GenerationProcess cho Flashcard với status PENDING
-17. Backend tạo GenerationBatch cho Flashcard
-18. Backend trả về BatchGenerateResponse với question_process_id và flashcard_process_id
-19. DocAgentService nhận response và trả về ServiceResult
-20. QuestionGenDialog gọi onContentGenerated callback
-21. DocAgentPage nhận callback và gọi handleContentGenerated()
-22. DocAgentPage kết nối WebSocket cho Question với DocSocketService.connectQuestionSocket()
-23. DocSocketService tạo WebSocket connection tới `/gen/ws/question/{processId}`
-24. WebSocket connection established
-25. DocSocketService gửi message "start" với userId
-26. Lặp lại bước 22-25 cho Flashcard
-27. DocAgentPage đóng QuestionGenDialog
-28. DocAgentPage hiển thị LiveProgress trong QuestionTab và FlashcardTab
+1. User click tab "Câu hỏi"
+2. QuestionTab.tsx khởi tạo và gọi QuestionApprovalTab.tsx
+3. QuestionApprovalTab.tsx gọi hàm loadUserPendingBatch()
+4. QuestionApprovalTab.tsx gọi DocAgentService
+5. DocAgentService gọi hàm getUserPendingBatch()
+6. DocAgentService gửi yêu cầu GET "/batch/pending-batch?user_id&session_id&result_type" đến batch_routes.py
+7. batch_routes.py gọi BatchService.get_user_pending_batch()
+8. BatchService xử lý yêu cầu và gọi chính nó
+9. BatchService gọi GenerationBatch
+10. GenerationBatch khởi tạo đối tượng GenerationBatch()
+11. GenerationBatch trả về dữ liệu cho BatchService
+12. BatchService trả về batch cho batch_routes.py
+13. batch_routes.py trả về kết quả cho DocAgentService
+14. DocAgentService gọi hàm getBatchItemsByBatch()
+15. DocAgentService gửi yêu cầu GET "/batch/batch-items/by-batch/{batch_id}" đến batch_routes.py
+16. batch_routes.py gọi BatchService.get_batch_items_by_batch()
+17. BatchService xử lý yêu cầu và gọi chính nó
+18. BatchService gọi BatchItem
+19. BatchItem khởi tạo đối tượng BatchItem()
+20. BatchItem trả về dữ liệu cho BatchService
+21. BatchService trả về danh sách batch items cho batch_routes.py
+22. batch_routes.py trả về kết quả cho DocAgentService
+23. Nếu batch không null, DocAgentService trả về kết quả cho QuestionApprovalTab.tsx
+24. QuestionApprovalTab.tsx hiển thị kết quả batch cho User
 
 ---
 
-## Kịch bản 2: Theo dõi tiến trình generation qua WebSocket
+## 2. Duyệt kết quả Batch
 
-1. Sau khi tạo yêu cầu generation thành công, frontend nhận được process_id
-2. Frontend gọi DocSocketService để thiết lập WebSocket connection
-3. DocSocketService tạo WebSocket URL và kết nối tới backend endpoint
-4. Backend nhận WebSocket connection request
-5. Backend kiểm tra model config cho generation và embedding
-6. Backend validate API keys nếu là remote model
-7. Backend tạo service instance (QuestionGenerationService hoặc FlashcardGenerationService)
-8. Backend register WebSocket vào manager
-9. Frontend gửi message "start" kèm user_id qua WebSocket
-10. Backend nhận message "start"
-11. Backend kiểm tra nếu pipeline chưa chạy, khởi động pipeline
-12. Backend gọi service.generate() để bắt đầu pipeline execution
-13. Backend gửi snapshot ban đầu với thông tin process và danh sách steps
-14. Frontend nhận snapshot message
-15. Frontend parse snapshot data và cập nhật state với danh sách steps và process info
-16. Frontend render LiveProgress component với danh sách steps
-17. Backend bắt đầu thực hiện step đầu tiên của pipeline
-18. Backend cập nhật step status thành RUNNING
-19. Backend gửi state update message với thông tin step đang chạy
-20. Frontend nhận state update message
-21. Frontend cập nhật step tương ứng trong danh sách steps
-22. Frontend re-render LiveProgress với step status mới
-23. Backend hoàn thành step và cập nhật status thành COMPLETED
-24. Backend gửi state update message với step COMPLETED
-25. Frontend nhận message và cập nhật UI
-26. Backend lặp lại bước 17-25 cho các steps tiếp theo (retrieve_context → generate_content → validate_results → save_batch)
-27. Sau khi tất cả steps hoàn thành, backend gửi notify message với code "finished"
-28. Frontend nhận finished message
-29. Frontend gọi callback xử lý khi generation hoàn thành
-30. Frontend đóng WebSocket connection
-31. Frontend cập nhật state, xóa process và socket info
-32. Frontend gọi API kiểm tra batch pending
-33. Nếu có batch pending, hiển thị tab approval để User xem kết quả
+1. User click tab "Câu hỏi"
+2. FlashcardTab.tsx khởi tạo và gọi FlashcardApprovalTab.tsx
+3. FlashcardApprovalTab.tsx gọi hàm loadUserPendingBatch()
+4. FlashcardApprovalTab.tsx hiển thị danh sách batch cho User
+5. User chọn các bản ghi và click "Phê duyệt"
+6. FlashcardApprovalTab.tsx gọi hàm handleApprovalBatch()
+7. FlashcardApprovalTab.tsx gọi DocAgentService
+8. DocAgentService gọi hàm approvedBatch()
+9. DocAgentService gửi yêu cầu POST "/batch/approve" đến batch_routes.py
+10. batch_routes.py gọi BatchService.approve_batch()
+11. BatchService xử lý yêu cầu approve và gọi chính nó
+12. BatchService gọi MessageResponse
+13. MessageResponse khởi tạo đối tượng MessageResponse()
+14. MessageResponse trả về thông báo cho BatchService
+15. BatchService trả về kết quả cho batch_routes.py
+16. batch_routes.py trả về thông báo thành công cho DocAgentService
+17. DocAgentService trả về kết quả cho FlashcardTab.tsx
+18. FlashcardTab.tsx hiển thị thông báo thành công cho User
 
 ---
 
-## Kịch bản 3: Hủy tiến trình generation
+## 3. Từ chối kết quả Batch
 
-1. User đang xem LiveProgress của generation process
-2. User click "Cancel Process"
-3. LiveProgress hiển thị confirm dialog
-4. User xác nhận muốn hủy
-5. LiveProgress gọi DocAgentService.cancelProcess() với processId và userId
-6. DocAgentService gửi POST request tới `/gen/cancel/{processId}`
-7. Backend gen_routes nhận request
-8. Backend gọi GenerationProcessService.cancel_process()
-9. GenerationProcessService lấy process từ database
-10. GenerationProcessService validate user_id matches
-11. GenerationProcessService cập nhật process status thành CANCELLED
-12. GenerationProcessService commit transaction
-13. GenerationProcessService trả về dict với status="cancelled"
-14. Backend gen_routes trả về MessageResponse
-15. DocAgentService nhận response và parse
-16. DocAgentService trả về ServiceResult với success
-17. LiveProgress nhận response
-18. LiveProgress gọi onCancelComplete callback
-19. DocAgentPage đóng WebSocket connection
-20. DocAgentPage cập nhật generationState, remove process
-21. LiveProgress hiển thị thông báo "Process cancelled successfully"
-22. Backend pipeline check process status, thấy CANCELLED và throw ProcessCanceledException
-23. Backend catch exception và dừng execution
-24. Backend gọi ws_generation_manager.send_notify() với code="cancelled"
-25. WSGenerationManager broadcast message tới các WebSocket còn lại (nếu có)
+1. User click tab "Câu hỏi"
+2. FlashcardTab.tsx khởi tạo và gọi FlashcardApprovalTab.tsx
+3. FlashcardApprovalTab.tsx gọi hàm loadUserPendingBatch()
+4. FlashcardApprovalTab.tsx hiển thị danh sách batch cho User
+5. User chọn các bản ghi và click "Từ chối"
+6. FlashcardApprovalTab.tsx gọi hàm handleRejectBatch()
+7. FlashcardApprovalTab.tsx gọi DocAgentService
+8. DocAgentService gọi hàm rejectBatch()
+9. DocAgentService gửi yêu cầu POST "/batch/reject" đến batch_routes.py
+10. batch_routes.py gọi BatchService.reject_batch()
+11. BatchService xử lý yêu cầu reject và gọi chính nó
+12. BatchService gọi MessageResponse
+13. MessageResponse khởi tạo đối tượng MessageResponse()
+14. MessageResponse trả về thông báo cho BatchService
+15. BatchService trả về kết quả cho batch_routes.py
+16. batch_routes.py trả về thông báo thành công cho DocAgentService
+17. DocAgentService trả về kết quả cho FlashcardTab.tsx
+18. FlashcardTab.tsx hiển thị thông báo cho User
 
 ---
 
-## Kịch bản 4: Xem kết quả batch sau khi generation hoàn thành
+## 4. Tạo yêu cầu regenerate
 
-1. Generation process hoàn thành và gọi onFinished handler
-2. QuestionTab/FlashcardTab gọi checkForPendingBatch()
-3. Tab gọi DocAgentService.getPendingBatch() với userId, sessionId, resultType
-4. DocAgentService gửi GET request tới `/batch/pending-batch`
-5. Backend batch_routes nhận request
-6. Backend gọi BatchService.get_pending_batch()
-7. BatchService query database tìm GenerationBatch với status PENDING và result_type
-8. BatchService trả về GenerationBatch hoặc None
-9. Backend batch_routes trả về GenerationBatchResponse
-10. DocAgentService nhận response và parse
-11. DocAgentService trả về ServiceResult với GenerationBatch
-12. Tab nhận batch và set pendingBatchProcessId
-13. Tab gọi DocAgentService.getBatchItems() với batchId
-14. DocAgentService gửi GET request tới `/batch/batch-item/by-batch/{batchId}`
-15. Backend batch_routes nhận request
-16. Backend gọi BatchService.get_batch_items_by_batch()
-17. BatchService query database lấy tất cả BatchItem của batch
-18. BatchService join với Question hoặc Flashcard table
-19. BatchService trả về list of BatchItem với item data
-20. Backend batch_routes trả về list of BatchItemResponse
-21. DocAgentService nhận response và parse
-22. DocAgentService trả về ServiceResult với BatchItem[]
-23. Tab nhận batch items và extract Questions/Flashcards
-24. Tab set showApprovalTab = true
-25. QuestionApprovalTab/FlashcardApprovalTab render với danh sách items
-26. User xem items trong approval tab, có thể switch giữa single và list layout
-
----
-
-## Kịch bản 5: Duyệt kết quả batch
-
-1. User đang xem batch items trong QuestionApprovalTab
-2. User chọn các items bằng checkbox (hoặc select all)
-3. User click "Approve Selected"
-4. QuestionApprovalTab validate có items được chọn
-5. QuestionApprovalTab gọi DocAgentService.approve() với BatchApprovalRequest
-6. DocAgentService gửi POST request tới `/batch/approve`
-7. Backend batch_routes nhận request
-8. Backend gọi BatchService.approve_batch()
-9. BatchService start database transaction
-10. BatchService bulk update batch_item status thành APPROVED cho selected items
-11. BatchService extract question_ids từ selected items
-12. BatchService bulk insert Questions vào session
-13. BatchService update batch approved_items_count
-14. BatchService check nếu tất cả items đã processed, update batch status
-15. BatchService commit transaction
-16. BatchService trả về MessageResponse
-17. Backend batch_routes trả về MessageResponse
-18. DocAgentService nhận response
-19. DocAgentService trả về ServiceResult với success
-20. QuestionApprovalTab nhận response
-21. QuestionApprovalTab gọi onApprovalComplete callback
-22. QuestionTab reload data bằng cách gọi DocAgentService.getQuestionsBySession()
-23. Backend trả về danh sách Questions đã được approve
-24. QuestionTab cập nhật internalQuestions và hiển thị
-25. QuestionApprovalTab check nếu còn pending items
-26. Nếu không còn, set showApprovalTab = false
-27. Nếu còn, tiếp tục hiển thị approval tab với remaining items
-28. Hiển thị toast notification "Items approved successfully"
+1. User click tab "Câu hỏi"
+2. FlashcardTab.tsx khởi tạo và gọi FlashcardApprovalTab.tsx
+3. FlashcardApprovalTab.tsx gọi hàm loadUserPendingBatch()
+4. FlashcardApprovalTab.tsx hiển thị danh sách batch cho User
+5. User nhập yêu cầu sau khi bị từ chối và click "Tạo lại"
+6. FlashcardApprovalTab.tsx gọi hàm handleRegenerate()
+7. FlashcardApprovalTab.tsx gọi hàm validate()
+8. FlashcardApprovalTab.tsx gọi DocAgentService
+9. DocAgentService gọi hàm createFlashcardProcess()
+10. DocAgentService gửi yêu cầu POST "/gen/process/flashcard?queryConfigId&Req=queryConfig&Req" đến batch_routes.py
+11. batch_routes.py gọi GenerationProcessService.create_flashcard_process()
+12. GenerationProcessService xử lý yêu cầu và gọi chính nó
+13. GenerationProcessService gọi ModelConfig
+14. ModelConfig khởi tạo đối tượng ModelConfig()
+15. ModelConfig trả về dữ liệu cho GenerationProcessService
+16. GenerationProcessService gọi hàm create_process()
+17. GenerationProcessService gọi GenerationProcess
+18. GenerationProcess khởi tạo đối tượng GenerationProcess()
+19. GenerationProcess trả về dữ liệu cho GenerationProcessService
+20. GenerationProcessService gọi ModelUsage
+21. ModelUsage khởi tạo đối tượng ModelUsage()
+22. ModelUsage trả về dữ liệu cho GenerationProcessService
+23. GenerationProcessService gọi QueryContext
+24. QueryContext khởi tạo đối tượng QueryContext()
+25. QueryContext trả về dữ liệu cho GenerationProcessService
+26. GenerationProcessService gọi hàm create_steps()
+27. GenerationProcessService gọi GenerationProcessStep
+28. GenerationProcessStep khởi tạo đối tượng GenerationProcessStep()
+29. GenerationProcessStep trả về dữ liệu cho GenerationProcessService
+30. GenerationProcessService trả về process đã tạo cho batch_routes.py
+31. batch_routes.py trả về kết quả cho DocAgentService
+32. DocAgentService trả về process cho FlashcardTab.tsx
+33. FlashcardTab.tsx hiển thị thông báo cho User
 
 ---
 
-## Kịch bản 6: Từ chối kết quả batch
+## 5. Hủy tiến trình Generation
 
-1. User đang xem batch items trong QuestionApprovalTab
-2. User chọn các items muốn reject bằng checkbox
-3. User nhập feedback text trong textarea (tùy chọn)
-4. User click "Reject Selected"
-5. QuestionApprovalTab validate có items được chọn
-6. QuestionApprovalTab validate feedback length <= 500 characters
-7. QuestionApprovalTab gọi DocAgentService.reject() với BatchRejectionRequest
-8. DocAgentService gửi POST request tới `/batch/reject`
-9. Backend batch_routes nhận request
-10. Backend gọi BatchService.reject_batch()
-11. BatchService start database transaction
-12. BatchService bulk update batch_item status thành REJECTED cho selected items
-13. Nếu có feedback, BatchService create BatchFeedback với feedback_type=REJECTION
-14. BatchService update batch rejected_items_count
-15. BatchService check nếu tất cả items đã processed, update batch status
-16. BatchService commit transaction
-17. BatchService trả về MessageResponse
-18. Backend batch_routes trả về MessageResponse
-19. DocAgentService nhận response
-20. DocAgentService trả về ServiceResult với success
-21. QuestionApprovalTab nhận response
-22. QuestionApprovalTab reload batch items để cập nhật status
-23. QuestionApprovalTab check nếu có rejected items, hiển thị nút "Regenerate"
-24. QuestionApprovalTab check nếu còn pending items
-25. Nếu không còn và không có rejected items, set showApprovalTab = false
-26. Hiển thị toast notification "Items rejected successfully"
+1. User click "Hủy tiến trình" và xác nhận
+2. LiveProgress.tsx gọi hàm handleCancelProcess()
+3. LiveProgress.tsx gọi DocAgentService
+4. DocAgentService gọi hàm cancelProcess()
+5. DocAgentService gửi yêu cầu POST "/process/{process_id}/cancel" đến gen_routes.py
+6. gen_routes.py gọi GenerationProcessService.cancel_process()
+7. GenerationProcessService gọi hàm cancel_process()
+8. GenerationProcessService xử lý yêu cầu và gọi chính nó
+9. GenerationProcessService gọi MessageResponse
+10. MessageResponse khởi tạo đối tượng MessageResponse()
+11. MessageResponse trả về thông báo cho GenerationProcessService
+12. GenerationProcessService trả về kết quả cho gen_routes.py
+13. gen_routes.py trả về thông báo thành công cho DocAgentService
+14. DocAgentService trả về kết quả cho LiveProgress.tsx
+15. LiveProgress.tsx hiển thị thông báo cho User
 
 ---
 
-## Kịch bản 7: Tạo yêu cầu regenerate
+## 6. Tạo yêu cầu Generation
 
-1. User đang xem batch với rejected items
-2. User click "Regenerate"
-3. QuestionApprovalTab gọi DocAgentService.regenerate() với BatchRegenerationRequest
-4. DocAgentService gửi POST request tới `/gen/regenerate`
-5. Backend gen_routes nhận request
-6. Backend gọi QuestionGenerationService.regenerate()
-7. QuestionGenerationService lấy batch cũ từ database
-8. QuestionGenerationService lấy rejected items từ batch
-9. QuestionGenerationService lấy feedback từ BatchFeedback
-10. QuestionGenerationService tạo GenerationProcess mới với process_order + 1
-11. QuestionGenerationService tạo GenerationBatch mới với parent_batch_id = batch cũ
-12. QuestionGenerationService build regeneration prompt với feedback guidance
-13. QuestionGenerationService bắt đầu execute_pipeline() trong background
-14. Backend gen_routes trả về GenerationBatch mới
-15. DocAgentService nhận response
-16. DocAgentService trả về ServiceResult với GenerationBatch
-17. QuestionApprovalTab nhận response
-18. QuestionApprovalTab set showApprovalTab = false (tạm thời)
-19. DocAgentPage tự động kết nối WebSocket với process mới
-20. DocAgentPage hiển thị LiveProgress cho regeneration process
-21. Pipeline regeneration chạy tương tự như generation ban đầu
-22. Sau khi hoàn thành, hiển thị approval tab mới với batch mới
-23. User xem kết quả regeneration và approve/reject lại
+1. User nhập thông tin và click "Tạo"
+2. QuestionGenDialog.tsx gọi hàm handleGenerate()
+3. QuestionGenDialog.tsx gọi hàm validate()
+4. QuestionGenDialog.tsx gọi DocAgentService
+5. DocAgentService gọi hàm createFlashcardProcess()
+6. DocAgentService gửi yêu cầu POST "/gen/process/flashcard?queryConfigId&Req=queryConfig&Req" đến gen_routes.py
+7. gen_routes.py gọi GenerationProcessService.create_flashcard_process()
+8. GenerationProcessService xử lý yêu cầu và gọi chính nó
+9. GenerationProcessService gọi ModelConfigService.get_model_by_team()
+10. ModelConfigService xử lý yêu cầu và gọi chính nó
+11. ModelConfigService gọi ModelConfig
+12. ModelConfig khởi tạo đối tượng ModelConfig()
+13. ModelConfig trả về dữ liệu cho ModelConfigService
+14. ModelConfigService trả về model config cho GenerationProcessService
+15. GenerationProcessService gọi hàm create_process()
+16. GenerationProcessService gọi GenerationProcess
+17. GenerationProcess khởi tạo đối tượng GenerationProcess()
+18. GenerationProcess trả về dữ liệu cho GenerationProcessService
+19. GenerationProcessService gọi ModelUsage
+20. ModelUsage khởi tạo đối tượng ModelUsage()
+21. ModelUsage trả về dữ liệu cho GenerationProcessService
+22. GenerationProcessService gọi QueryContext
+23. QueryContext khởi tạo đối tượng QueryContext()
+24. QueryContext trả về dữ liệu cho GenerationProcessService
+25. GenerationProcessService gọi hàm create_steps()
+26. GenerationProcessService gọi GenerationProcessStep
+27. GenerationProcessStep khởi tạo đối tượng GenerationProcessStep()
+28. GenerationProcessStep trả về dữ liệu cho GenerationProcessService
+29. GenerationProcessService trả về process đã tạo cho gen_routes.py
+30. gen_routes.py trả về kết quả cho DocAgentService
+31. DocAgentService hiển thị kết quả cho User
 
+---
+
+## 7. Theo dõi tiến trình Generation - Khởi tạo
+
+1. User theo dõi tiến trình
+2. LiveProgress.tsx gọi DocSocketService
+3. DocSocketService gọi GenerationPipelineService
+4. GenerationPipelineService gọi hàm execute_pipeline()
+5. GenerationPipelineService gọi hàm step_query_preprocessing()
+6. GenerationPipelineService gọi WsGenerationManager
+7. WsGenerationManager gọi hàm create()
+8. WsGenerationManager trả về cho GenerationPipelineService
+9. GenerationPipelineService gọi EmbeddingFactory
+10. EmbeddingFactory gọi BaseEmbedding
+11. BaseEmbedding khởi tạo đối tượng BaseEmbedding()
+12. BaseEmbedding trả về cho EmbeddingFactory
+13. EmbeddingFactory trả về cho GenerationPipelineService
+14. GenerationPipelineService gọi QueryDecoder
+15. QueryDecoder gọi hàm route_query()
+16. QueryDecoder trả về cho GenerationPipelineService
+17. GenerationPipelineService gọi hàm create_embeddings()
+18. GenerationPipelineService gọi QueryConstructor
+19. QueryConstructor gọi hàm generate_multi_query()
+20. QueryConstructor trả về cho GenerationPipelineService
+21. Nếu DataMap == database, GenerationPipelineService gọi hàm do.composite_query()
+22. GenerationPipelineService gọi hàm update_step()
+23. GenerationPipelineService gọi GenerationProcessStep
+24. GenerationProcessStep khởi tạo đối tượng GenerationProcessStep()
+25. GenerationProcessStep trả về cho GenerationPipelineService
+26. GenerationPipelineService gọi WsGenerationManager
+27. WsGenerationManager gọi hàm send_state()
+28. WsGenerationManager gọi WsEnvelope
+29. WsEnvelope khởi tạo đối tượng WsEnvelope()
+30. WsEnvelope trả về cho WsGenerationManager
+31. WsGenerationManager trả về cho LiveProgress.tsx
+32. WsGenerationManager broadcast thông tin
+33. LiveProgress.tsx hiển thị cho User
+
+---
+
+## 8. Theo dõi tiến trình Generation - Retrieval
+
+1. User theo dõi tiến trình
+2. LiveProgress.tsx gọi DocSocketService
+3. DocSocketService gọi GenerationPipelineService
+4. GenerationPipelineService gọi hàm execute_pipeline()
+5. GenerationPipelineService gọi hàm step_query_preprocessing()
+6. GenerationPipelineService gọi WsGenerationManager
+7. WsGenerationManager gọi hàm create()
+8. WsGenerationManager trả về cho GenerationPipelineService
+9. GenerationPipelineService gọi EmbeddingFactory
+10. EmbeddingFactory gọi BaseEmbedding
+11. BaseEmbedding khởi tạo đối tượng BaseEmbedding()
+12. BaseEmbedding trả về cho EmbeddingFactory
+13. EmbeddingFactory trả về cho GenerationPipelineService
+14. GenerationPipelineService gọi QueryConstructor
+15. QueryConstructor gọi hàm create_embeddings()
+16. QueryConstructor trả về cho GenerationPipelineService
+17. GenerationPipelineService gọi hàm route_query()
+18. GenerationPipelineService gọi hàm create_embeddings()
+19. GenerationPipelineService gọi Retriever
+20. Retriever gọi hàm similarity_search()
+21. Retriever trả về cho GenerationPipelineService
+22. GenerationPipelineService gọi hàm re_hybrid_rerank()
+23. GenerationPipelineService gọi hàm update_step()
+24. GenerationPipelineService gọi GenerationProcessStep
+25. GenerationProcessStep khởi tạo đối tượng GenerationProcessStep()
+26. GenerationProcessStep trả về cho GenerationPipelineService
+27. GenerationPipelineService gọi WsGenerationManager
+28. WsGenerationManager gọi hàm send_state()
+29. WsGenerationManager gọi WsEnvelope
+30. WsEnvelope khởi tạo đối tượng WsEnvelope()
+31. WsEnvelope trả về cho WsGenerationManager
+32. WsGenerationManager trả về cho LiveProgress.tsx
+33. WsGenerationManager broadcast thông tin
+34. LiveProgress.tsx hiển thị cho User
+
+---
+
+## 9. Theo dõi tiến trình Generation - Duplicate Prevention
+
+1. User theo dõi tiến trình
+2. LiveProgress.tsx gọi DocSocketService
+3. DocSocketService gọi GenerationPipelineService
+4. GenerationPipelineService gọi hàm execute_pipeline()
+5. GenerationPipelineService gọi hàm step_duplicate_preventation()
+6. GenerationPipelineService gọi WsGenerationManager
+7. WsGenerationManager gọi hàm find_similar_processed()
+8. WsGenerationManager trả về cho GenerationPipelineService
+9. GenerationPipelineService gọi BatchService
+10. BatchService gọi hàm get_batch_items_by_processed()
+11. BatchService trả về cho GenerationPipelineService
+12. GenerationPipelineService gọi QuerySimilarProcessor
+13. QuerySimilarProcessor gọi hàm find()
+14. QuerySimilarProcessor trả về cho GenerationPipelineService
+15. Nếu DataMap == database, GenerationPipelineService gọi hàm get_batch_items_by_processed()
+16. GenerationPipelineService gọi hàm update_step()
+17. GenerationPipelineService gọi GenerationProcessStep
+18. GenerationProcessStep khởi tạo đối tượng GenerationProcessStep()
+19. GenerationProcessStep trả về cho GenerationPipelineService
+20. GenerationPipelineService gọi WsGenerationManager
+21. WsGenerationManager gọi hàm send_state()
+22. WsGenerationManager gọi WsEnvelope
+23. WsEnvelope khởi tạo đối tượng WsEnvelope()
+24. WsEnvelope trả về cho WsGenerationManager
+25. WsGenerationManager trả về cho LiveProgress.tsx
+26. WsGenerationManager broadcast thông tin
+27. LiveProgress.tsx hiển thị cho User
+
+---
+
+## 10. Theo dõi tiến trình Generation - Generation
+
+1. User theo dõi tiến trình
+2. LiveProgress.tsx gọi DocSocketService
+3. DocSocketService gọi GenerationPipelineService
+4. GenerationPipelineService gọi hàm execute_pipeline()
+5. GenerationPipelineService gọi hàm step_generation()
+6. GenerationPipelineService gọi WsGenerationManager
+7. WsGenerationManager gọi hàm get_batch_items_by_data()
+8. WsGenerationManager trả về cho GenerationPipelineService
+9. GenerationPipelineService gọi PromptBuilder
+10. PromptBuilder gọi hàm build_element_prompt()
+11. PromptBuilder trả về cho GenerationPipelineService
+12. GenerationPipelineService gọi PromptInputor
+13. PromptInputor gọi hàm build_element_prompt()
+14. PromptInputor trả về cho GenerationPipelineService
+15. GenerationPipelineService gọi Generator
+16. Generator gọi hàm validate_for_generation()
+17. Generator gọi hàm build_example_prompt()
+18. Generator gọi hàm hybrid_rerank()
+19. Generator gọi hàm generate_text()
+20. Generator trả về cho GenerationPipelineService
+21. GenerationPipelineService gọi hàm regenerate_items()
+22. GenerationPipelineService gọi BulkItem
+23. BulkItem khởi tạo đối tượng BulkItem()
+24. BulkItem trả về cho GenerationPipelineService
+25. GenerationPipelineService gọi hàm update_step()
+26. GenerationPipelineService gọi GenerationProcessStep
+27. GenerationProcessStep khởi tạo đối tượng GenerationProcessStep()
+28. GenerationProcessStep trả về cho GenerationPipelineService
+29. GenerationPipelineService gọi WsGenerationManager
+30. WsGenerationManager gọi hàm send_state()
+31. WsGenerationManager gọi WsEnvelope
+32. WsEnvelope khởi tạo đối tượng WsEnvelope()
+33. WsEnvelope trả về cho WsGenerationManager
+34. WsGenerationManager trả về cho LiveProgress.tsx
+35. WsGenerationManager broadcast thông tin
+36. LiveProgress.tsx hiển thị cho User

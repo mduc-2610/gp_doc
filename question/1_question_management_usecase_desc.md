@@ -1,11 +1,16 @@
 # Use Case Description - Quản lý Question và Flashcard
 
 Chức năng quản lý Question và flashcard (Question & Flashcard Management) có các giao diện tương tác với User:
+- **Đăng nhập** → đề xuất UC đăng nhập
+- **Xem danh sách Session** → đề xuất UC xem danh sách Session
+- **Xem chi tiết Session** → đề xuất UC xem chi tiết Session
+- **Xem danh sách Question** → đề xuất UC xem danh sách Question
+- **Xem danh sách Flashcard** → đề xuất UC xem danh sách Flashcard
+- **Thêm Question** → đề xuất UC thêm Question
 - **Chỉnh sửa Question** → đề xuất UC chỉnh sửa Question
-- **Tạo Question mới** → đề xuất UC tạo Question mới
 - **Xóa Question** → đề xuất UC xóa Question
+- **Thêm Flashcard** → đề xuất UC thêm Flashcard
 - **Chỉnh sửa Flashcard** → đề xuất UC chỉnh sửa flashcard
-- **Tạo Flashcard mới** → đề xuất UC tạo flashcard mới
 - **Xóa Flashcard** → đề xuất UC xóa flashcard
 - **Luyện tập với Question** → đề xuất UC luyện tập với Question
 - **Luyện tập với Flashcard** → đề xuất UC luyện tập với Flashcard
@@ -22,12 +27,17 @@ Chức năng quản lý Question và flashcard (Question & Flashcard Management)
 
 | **Use Case** | Mô tả |
 |----------|------|
+| **Đăng nhập** | UC này cho phép User xác thực danh tính để truy cập hệ thống. |
+| **Xem danh sách Session** | UC này cho phép User xem danh sách tất cả các Session đã tạo. |
+| **Xem chi tiết Session** | UC này cho phép User xem thông tin chi tiết của một Session và truy cập các chức năng quản lý Question và Flashcard. |
+| **Xem danh sách Question** | UC này cho phép User xem danh sách tất cả các Question trong một Session. |
+| **Xem danh sách Flashcard** | UC này cho phép User xem danh sách tất cả các Flashcard trong một Session. |
+| **Thêm Question** | UC này cho phép User tạo một Question mới cho Session. |
 | **Chỉnh sửa Question** | UC này cho phép User cập nhật thông tin của một Question hiện có. |
-| **Tạo Question mới** | UC này cho phép User tạo một Question mới cho Session. |
 | **Xóa Question** | UC này cho phép User xóa một Question khỏi Session. |
-| **Chỉnh sửa Flashcard** | UC này cho phép User cập nhật thông tin của một flashcard hiện có. |
-| **Tạo Flashcard mới** | UC này cho phép User tạo một flashcard mới cho Session. |
-| **Xóa Flashcard** | UC này cho phép User xóa một flashcard khỏi Session. |
+| **Thêm Flashcard** | UC này cho phép User tạo một Flashcard mới cho Session. |
+| **Chỉnh sửa Flashcard** | UC này cho phép User cập nhật thông tin của một Flashcard hiện có. |
+| **Xóa Flashcard** | UC này cho phép User xóa một Flashcard khỏi Session. |
 | **Luyện tập với Question** | UC này cho phép User luyện tập với các Question của một Session. |
-| **Luyện tập với Flashcard** | UC này cho phép User luyện tập với các flashcard của một Session. |
+| **Luyện tập với Flashcard** | UC này cho phép User luyện tập với các Flashcard của một Session. |
 

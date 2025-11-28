@@ -5,35 +5,45 @@
 ```mermaid
 sequenceDiagram
     actor User
-    participant ModelConfigPage as ModelConfigPage.tsx
     participant ModelConfigTab as ModelConfigTab.tsx
-    participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
+    participant ModelConfigRoutes as model_config_routes.py
+    participant ModelConfigService as ModelConfigService
+    participant ModelConfig as ModelConfig
 
-    User->>ModelConfigPage: Click "Mô hình" tại sidebar
-    activate ModelConfigPage
-    
-    ModelConfigPage-->>User: Hiển thị giao diện với tab "Cấu Hình Mô Hình"
-    
-    ModelConfigPage->>ModelConfigTab: Khởi tạo ModelConfigTab
+    User->>ModelConfigTab: Click "Cấu hình mô hình" tab
     activate ModelConfigTab
     
-    ModelConfigTab->>ModelConfigRoutes: GET /model-config
+    ModelConfigTab->>ModelConfigTab: loadModelsFromUser()
+    ModelConfigTab->>ModelConfigService: gọi
+    deactivate ModelConfigTab
+    activate ModelConfigService
+    
+    ModelConfigService->>ModelConfigService: getModelsByUser()
+    ModelConfigService->>ModelConfigRoutes: GET "/model-config/by-user/{user_id}"
     activate ModelConfigRoutes
     
     ModelConfigRoutes->>ModelConfigService: get_models_by_user()
     activate ModelConfigService
     
-    ModelConfigService-->>ModelConfigRoutes: List[ModelConfig]
+    ModelConfigService->>ModelConfigService: gọi
+    ModelConfigService->>ModelConfig: gọi
+    activate ModelConfig
+    
+    ModelConfig->>ModelConfig: ModelConfig()
+    ModelConfig-->>ModelConfigService: trả về
+    deactivate ModelConfig
+    
+    ModelConfigService-->>ModelConfigRoutes: trả về
     deactivate ModelConfigService
     
-    ModelConfigRoutes-->>ModelConfigTab: List[ModelConfigResponse]
+    ModelConfigRoutes-->>ModelConfigService: trả về
     deactivate ModelConfigRoutes
     
-    ModelConfigTab->>ModelConfigTab: Cập nhật state models với dữ liệu nhận được
-    ModelConfigTab-->>User: Hiển thị danh sách ModelConfig
-    deactivate ModelConfigTab
-    deactivate ModelConfigPage
+    ModelConfigService-->>ModelConfigTab: trả về
+    deactivate ModelConfigService
+    
+    ModelConfigTab-->>User: Hiển thị
 ```
 
 ---
@@ -43,78 +53,84 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    participant ModelConfigPage as ModelConfigPage.tsx
     participant ModelConfigTab as ModelConfigTab.tsx
     participant ModelConfigCreateDialog as ModelConfigCreateDialog.tsx
-    participant ModelWrapperTable as ModelWrapperTable.tsx
-    participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
+    participant ModelConfigRoutes as model_config_routes.py
+    participant ModelConfigService as ModelConfigService
+    participant ModelConfig as ModelConfig
+    participant ModelWrapper as ModelWrapper
 
-    User->>ModelConfigPage: Click "Mô hình" tại sidebar
-    activate ModelConfigPage
-    ModelConfigPage-->>User: Hiển thị giao diện
-    
-    User->>ModelConfigPage: Click tab "Model Configurations"
-    ModelConfigPage->>ModelConfigTab: Khởi tạo ModelConfigTab
+    User->>ModelConfigTab: Click "Tạo mô hình"
     activate ModelConfigTab
     
-    ModelConfigTab->>ModelConfigRoutes: GET /model-config
-    activate ModelConfigRoutes
-    ModelConfigRoutes->>ModelConfigService: get_models_by_user()
-    activate ModelConfigService
-    ModelConfigService-->>ModelConfigRoutes: List[ModelConfig]
-    deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelConfigTab: List[ModelConfigResponse]
-    deactivate ModelConfigRoutes
-    
-    ModelConfigTab-->>User: Hiển thị danh sách ModelConfig
-    
-    User->>ModelConfigTab: Chọn task type
-    ModelConfigTab-->>User: Lọc và hiển thị models theo task type
-    
-    User->>ModelConfigTab: Click "Add Model"
-    ModelConfigTab->>ModelConfigCreateDialog: Mở dialog
+    ModelConfigTab->>ModelConfigCreateDialog: gọi
+    deactivate ModelConfigTab
     activate ModelConfigCreateDialog
     
-    ModelConfigCreateDialog->>ModelConfigRoutes: GET /model-config/wrapper?task_type=GENERATION
+    ModelConfigCreateDialog->>ModelConfigCreateDialog: loadWrappers()
+    ModelConfigCreateDialog->>ModelConfigService: gọi
+    deactivate ModelConfigCreateDialog
+    activate ModelConfigService
+    
+    ModelConfigService->>ModelConfigService: getWrappers()
+    ModelConfigService->>ModelConfigRoutes: GET "/model-config/wrapper"
     activate ModelConfigRoutes
+    
     ModelConfigRoutes->>ModelConfigService: get_wrappers()
     activate ModelConfigService
-    ModelConfigService-->>ModelConfigRoutes: List[ModelWrapper]
+    
+    ModelConfigService->>ModelConfigService: gọi
+    ModelConfigService->>ModelWrapper: gọi
+    activate ModelWrapper
+    
+    ModelWrapper->>ModelWrapper: ModelWrapper()
+    ModelWrapper-->>ModelConfigService: trả về
+    deactivate ModelWrapper
+    
+    ModelConfigService-->>ModelConfigRoutes: trả về
     deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelConfigCreateDialog: List[ModelWrapperResponse]
+    
+    ModelConfigRoutes-->>ModelConfigService: trả về
     deactivate ModelConfigRoutes
     
-    ModelConfigCreateDialog->>ModelWrapperTable: Hiển thị bảng Wrapper
-    activate ModelWrapperTable
-    ModelWrapperTable-->>User: Hiển thị danh sách Wrapper
+    ModelConfigService-->>User: Hiển thị
+    deactivate ModelConfigService
     
-    User->>ModelWrapperTable: Chọn Wrapper (click Switch)
-    ModelWrapperTable->>ModelConfigCreateDialog: Update selectedWrapperId
-    deactivate ModelWrapperTable
+    User->>ModelConfigCreateDialog: Nhập thông tin và click "Lưu thay đổi"
+    activate ModelConfigCreateDialog
     
-    User->>ModelConfigCreateDialog: Nhập thông tin và click "Save"
-    ModelConfigCreateDialog->>ModelConfigCreateDialog: Validate form
-    ModelConfigCreateDialog->>ModelConfigTab: handleSave()
-    
-    ModelConfigTab->>ModelConfigRoutes: POST /model-config
-    activate ModelConfigRoutes
-    ModelConfigRoutes->>ModelConfigService: create_model(create_data)
+    ModelConfigCreateDialog->>ModelConfigCreateDialog: validate()
+    ModelConfigCreateDialog->>ModelConfigCreateDialog: handleCreateModel()
+    ModelConfigCreateDialog->>ModelConfigService: gọi
+    deactivate ModelConfigCreateDialog
     activate ModelConfigService
     
-    ModelConfigService->>ModelConfigService: Create ModelConfig<br/>db.commit()
+    ModelConfigService->>ModelConfigService: createModel()
+    ModelConfigService->>ModelConfigRoutes: POST "/model-config"
+    activate ModelConfigRoutes
     
-    ModelConfigService-->>ModelConfigRoutes: ModelConfig
+    ModelConfigRoutes->>ModelConfigService: create_model()
+    activate ModelConfigService
+    
+    ModelConfigService->>ModelConfigService: gọi
+    ModelConfigService->>ModelConfig: gọi
+    activate ModelConfig
+    
+    ModelConfig->>ModelConfig: ModelConfig()
+    ModelConfig-->>ModelConfigService: trả về
+    deactivate ModelConfig
+    
+    ModelConfigService-->>ModelConfigRoutes: trả về
     deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelConfigTab: ModelConfigResponse
+    
+    ModelConfigRoutes-->>ModelConfigService: trả về
     deactivate ModelConfigRoutes
     
-    ModelConfigTab->>ModelConfigTab: Cập nhật danh sách với model mới
-    ModelConfigTab-->>User: Hiển thị danh sách mới và thông báo "Model created successfully"
+    ModelConfigService-->>ModelConfigTab: trả về
+    deactivate ModelConfigService
     
-    deactivate ModelConfigCreateDialog
-    deactivate ModelConfigTab
-    deactivate ModelConfigPage
+    ModelConfigTab-->>User: Hiển thị
 ```
 
 ---
@@ -124,80 +140,84 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    participant ModelConfigPage as ModelConfigPage.tsx
     participant ModelConfigTab as ModelConfigTab.tsx
     participant ModelConfigUpdateDialog as ModelConfigUpdateDialog.tsx
-    participant ModelWrapperTable as ModelWrapperTable.tsx
-    participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
+    participant ModelConfigRoutes as model_config_routes.py
+    participant ModelConfigService as ModelConfigService
+    participant ModelConfig as ModelConfig
+    participant ModelWrapper as ModelWrapper
 
-    User->>ModelConfigPage: Click "Mô hình" tại sidebar
-    activate ModelConfigPage
-    ModelConfigPage-->>User: Hiển thị giao diện
-    
-    User->>ModelConfigPage: Click tab "Model Configurations"
-    ModelConfigPage->>ModelConfigTab: Khởi tạo ModelConfigTab
+    User->>ModelConfigTab: Click icon update trên một ModelConfig
     activate ModelConfigTab
     
-    ModelConfigTab->>ModelConfigRoutes: GET /model-config
-    activate ModelConfigRoutes
-    ModelConfigRoutes->>ModelConfigService: get_models_by_user()
-    activate ModelConfigService
-    ModelConfigService-->>ModelConfigRoutes: List[ModelConfig]
-    deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelConfigTab: List[ModelConfigResponse]
-    deactivate ModelConfigRoutes
-    
-    ModelConfigTab-->>User: Hiển thị danh sách ModelConfig
-    
-    User->>ModelConfigTab: Chọn task type và xem danh sách ModelConfig
-    ModelConfigTab-->>User: Lọc và hiển thị models theo task type
-    
-    User->>ModelConfigTab: Click "Edit" trên ModelConfig
-    ModelConfigTab->>ModelConfigUpdateDialog: Mở dialog với dữ liệu hiện tại
+    ModelConfigTab->>ModelConfigUpdateDialog: gọi
+    deactivate ModelConfigTab
     activate ModelConfigUpdateDialog
     
-    ModelConfigUpdateDialog->>ModelConfigRoutes: GET /model-config/wrapper?task_type=GENERATION
+    ModelConfigUpdateDialog->>ModelConfigUpdateDialog: loadWrappers()
+    ModelConfigUpdateDialog->>ModelConfigService: gọi
+    deactivate ModelConfigUpdateDialog
+    activate ModelConfigService
+    
+    ModelConfigService->>ModelConfigService: getWrappers()
+    ModelConfigService->>ModelConfigRoutes: GET "/model-config/wrapper"
     activate ModelConfigRoutes
+    
     ModelConfigRoutes->>ModelConfigService: get_wrappers()
     activate ModelConfigService
-    ModelConfigService-->>ModelConfigRoutes: List[ModelWrapper]
+    
+    ModelConfigService->>ModelConfigService: gọi
+    ModelConfigService->>ModelWrapper: gọi
+    activate ModelWrapper
+    
+    ModelWrapper->>ModelWrapper: ModelWrapper()
+    ModelWrapper-->>ModelConfigService: trả về
+    deactivate ModelWrapper
+    
+    ModelConfigService-->>ModelConfigRoutes: trả về
     deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelConfigUpdateDialog: List[ModelWrapperResponse]
+    
+    ModelConfigRoutes-->>ModelConfigService: trả về
     deactivate ModelConfigRoutes
     
-    ModelConfigUpdateDialog->>ModelWrapperTable: Hiển thị bảng với Wrapper hiện tại
-    activate ModelWrapperTable
-    ModelWrapperTable-->>User: Hiển thị danh sách Wrapper
+    ModelConfigService-->>User: Hiển thị
+    deactivate ModelConfigService
     
-    opt Thay đổi Wrapper
-        User->>ModelWrapperTable: Chọn Wrapper khác
-        ModelWrapperTable->>ModelConfigUpdateDialog: Update selectedWrapperId
-    end
-    deactivate ModelWrapperTable
+    User->>ModelConfigUpdateDialog: Nhập thông tin và click "Lưu thay đổi"
+    activate ModelConfigUpdateDialog
     
-    User->>ModelConfigUpdateDialog: Cập nhật thông tin và click "Save"
-    ModelConfigUpdateDialog->>ModelConfigUpdateDialog: Validate form
-    ModelConfigUpdateDialog->>ModelConfigTab: handleSave()
+    ModelConfigUpdateDialog->>ModelConfigUpdateDialog: validate()
+    ModelConfigUpdateDialog->>ModelConfigUpdateDialog: handleUpdateModel()
+    ModelConfigUpdateDialog->>ModelConfigService: gọi
+    deactivate ModelConfigUpdateDialog
+    activate ModelConfigService
     
-    ModelConfigTab->>ModelConfigRoutes: PUT /model-config/{model_id}
+    ModelConfigService->>ModelConfigService: updateModel()
+    ModelConfigService->>ModelConfigRoutes: PUT "/model-config/{model_id}"
     activate ModelConfigRoutes
+    
     ModelConfigRoutes->>ModelConfigService: update_model()
     activate ModelConfigService
     
-    ModelConfigService->>ModelConfigService: Get ModelConfig<br/>Update fields<br/>db.commit()
+    ModelConfigService->>ModelConfigService: gọi
+    ModelConfigService->>ModelConfig: gọi
+    activate ModelConfig
     
-    ModelConfigService-->>ModelConfigRoutes: ModelConfig
+    ModelConfig->>ModelConfig: ModelConfig()
+    ModelConfig-->>ModelConfigService: trả về
+    deactivate ModelConfig
+    
+    ModelConfigService-->>ModelConfigRoutes: trả về
     deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelConfigTab: ModelConfigResponse
+    
+    ModelConfigRoutes-->>ModelConfigService: trả về
     deactivate ModelConfigRoutes
     
-    ModelConfigTab->>ModelConfigTab: Cập nhật item trong danh sách
-    ModelConfigTab-->>User: Hiển thị danh sách mới và thông báo "Model updated successfully"
+    ModelConfigService-->>ModelConfigTab: trả về
+    deactivate ModelConfigService
     
-    deactivate ModelConfigUpdateDialog
-    deactivate ModelConfigTab
-    deactivate ModelConfigPage
+    ModelConfigTab-->>User: Hiển thị
 ```
 
 ---
@@ -207,401 +227,354 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    participant ModelConfigPage as ModelConfigPage.tsx
     participant ModelConfigTab as ModelConfigTab.tsx
-    participant ModelConfigDeleteDialog as ModelConfigDeleteDialog.tsx
-    participant ModelConfigRoutes as model_config_routes
+    participant ModelConfigUpdateDialog as ModelConfigUpdateDialog.tsx
     participant ModelConfigService as ModelConfigService
+    participant ModelConfigRoutes as model_config_routes.py
+    participant ModelConfigService as ModelConfigService
+    participant MessageResponse as MessageResponse
 
-    User->>ModelConfigPage: Click "Mô hình" tại sidebar
-    activate ModelConfigPage
-    ModelConfigPage-->>User: Hiển thị giao diện
-    
-    User->>ModelConfigPage: Click tab "Model Configurations"
-    ModelConfigPage->>ModelConfigTab: Khởi tạo ModelConfigTab
+    User->>ModelConfigTab: Click icon delete trên một ModelConfig
     activate ModelConfigTab
     
-    ModelConfigTab->>ModelConfigRoutes: GET /model-config
-    activate ModelConfigRoutes
-    ModelConfigRoutes->>ModelConfigService: get_models_by_user()
+    ModelConfigTab->>ModelConfigUpdateDialog: gọi
+    deactivate ModelConfigTab
+    activate ModelConfigUpdateDialog
+    ModelConfigUpdateDialog-->>User: Hiển thị
+    deactivate ModelConfigUpdateDialog
+    
+    User->>ModelConfigUpdateDialog: Click "Xác nhận"
+    activate ModelConfigUpdateDialog
+    
+    ModelConfigUpdateDialog->>ModelConfigUpdateDialog: handleDeleteModel()
+    ModelConfigUpdateDialog->>ModelConfigService: gọi
+    deactivate ModelConfigUpdateDialog
     activate ModelConfigService
-    ModelConfigService-->>ModelConfigRoutes: List[ModelConfig]
-    deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelConfigTab: List[ModelConfigResponse]
-    deactivate ModelConfigRoutes
     
-    ModelConfigTab-->>User: Hiển thị danh sách ModelConfig
-    
-    User->>ModelConfigTab: Chọn task type và xem danh sách ModelConfig
-    ModelConfigTab-->>User: Lọc và hiển thị models theo task type
-    
-    User->>ModelConfigTab: Click "Delete" trên ModelConfig
-    ModelConfigTab->>ModelConfigDeleteDialog: Mở dialog xác nhận
-    activate ModelConfigDeleteDialog
-    ModelConfigDeleteDialog-->>User: Hiển thị xác nhận với tên Model
-    
-    User->>ModelConfigDeleteDialog: Click "Delete" xác nhận
-    ModelConfigDeleteDialog->>ModelConfigDeleteDialog: handleConfirm()
-    ModelConfigDeleteDialog->>ModelConfigTab: onConfirm(modelId)
-    
-    ModelConfigTab->>ModelConfigRoutes: DELETE /model-config/{model_id}
+    ModelConfigService->>ModelConfigService: deleteModel()
+    ModelConfigService->>ModelConfigRoutes: DELETE "/model-config/{model_id}"
     activate ModelConfigRoutes
+    
     ModelConfigRoutes->>ModelConfigService: delete_model()
     activate ModelConfigService
-    ModelConfigService-->>ModelConfigRoutes: Success
+    
+    ModelConfigService->>ModelConfigService: gọi
+    ModelConfigService->>MessageResponse: gọi
+    activate MessageResponse
+    
+    MessageResponse->>MessageResponse: MessageResponse()
+    MessageResponse-->>ModelConfigService: trả về
+    deactivate MessageResponse
+    
+    ModelConfigService-->>ModelConfigRoutes: trả về
     deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelConfigTab: MessageResponse
+    
+    ModelConfigRoutes-->>ModelConfigService: trả về
     deactivate ModelConfigRoutes
     
-    ModelConfigTab->>ModelConfigTab: Xóa item khỏi danh sách
-    ModelConfigTab-->>User: Hiển thị danh sách mới và thông báo "Model deleted successfully"
+    ModelConfigService-->>ModelConfigTab: trả về
+    deactivate ModelConfigService
     
-    deactivate ModelConfigDeleteDialog
-    deactivate ModelConfigTab
-    deactivate ModelConfigPage
+    ModelConfigTab-->>User: Hiển thị
 ```
 
 ---
 
-## 5. Toggle trạng thái sử dụng ModelConfig
+## 5. Preload ModelConfig
 
 ```mermaid
 sequenceDiagram
     actor User
     participant ModelConfigPage as ModelConfigPage.tsx
-    participant ModelConfigTab as ModelConfigTab.tsx
-    participant ModelConfigTable as ModelConfigTable.tsx
-    participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
+    participant ModelConfigRoutes as model_config_routes.py
+    participant ModelConfigService as ModelConfigService
+    participant ModelConfig as ModelConfig
+    participant MessageResponse as MessageResponse
 
-    User->>ModelConfigPage: Click "Mô hình" tại sidebar
+    User->>ModelConfigPage: Click "Tải mô hình mẫu" và xác nhận
     activate ModelConfigPage
-    ModelConfigPage-->>User: Hiển thị giao diện
     
-    User->>ModelConfigPage: Click tab "Model Configurations"
-    ModelConfigPage->>ModelConfigTab: Khởi tạo ModelConfigTab
-    activate ModelConfigTab
+    ModelConfigPage->>ModelConfigPage: handlePreloadModels()
+    ModelConfigPage->>ModelConfigService: gọi
+    deactivate ModelConfigPage
+    activate ModelConfigService
     
-    ModelConfigTab->>ModelConfigRoutes: GET /model-config
+    ModelConfigService->>ModelConfigService: preloadModels()
+    ModelConfigService->>ModelConfigRoutes: GET "/model-config/preload/{user_id}"
     activate ModelConfigRoutes
+    
+    ModelConfigRoutes->>ModelConfigService: preload_models()
+    activate ModelConfigService
+    
+    ModelConfigService->>ModelConfigService: gọi
+    ModelConfigService->>ModelConfig: gọi
+    activate ModelConfig
+    
+    ModelConfig->>ModelConfig: ModelConfig()
+    ModelConfig-->>ModelConfigService: trả về
+    deactivate ModelConfig
+    
+    ModelConfigService-->>ModelConfigRoutes: trả về
+    deactivate ModelConfigService
+    
+    ModelConfigRoutes-->>ModelConfigService: trả về
+    deactivate ModelConfigRoutes
+    
+    ModelConfigService-->>ModelConfigPage: trả về
+    deactivate ModelConfigService
+    
+    ModelConfigPage->>ModelConfigPage: loadModelsFromUser()
+    ModelConfigPage->>ModelConfigService: gọi
+    activate ModelConfigService
+    
+    ModelConfigService->>ModelConfigService: getModelsByUser()
+    ModelConfigService->>ModelConfigRoutes: GET "/model-config/by-user/{user_id}"
+    activate ModelConfigRoutes
+    
     ModelConfigRoutes->>ModelConfigService: get_models_by_user()
     activate ModelConfigService
-    ModelConfigService-->>ModelConfigRoutes: List[ModelConfig]
+    
+    ModelConfigService->>ModelConfigService: gọi
+    ModelConfigService->>ModelConfig: gọi
+    activate ModelConfig
+    
+    ModelConfig->>ModelConfig: ModelConfig()
+    ModelConfig-->>ModelConfigService: trả về
+    deactivate ModelConfig
+    
+    ModelConfigService-->>ModelConfigRoutes: trả về
     deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelConfigTab: List[ModelConfigResponse]
+    
+    ModelConfigRoutes-->>ModelConfigService: trả về
     deactivate ModelConfigRoutes
     
-    ModelConfigTab-->>User: Hiển thị danh sách ModelConfig
-    
-    User->>ModelConfigTab: Chọn task type và xem danh sách ModelConfig
-    ModelConfigTab-->>User: Lọc và hiển thị models theo task type
-    
-    User->>ModelConfigTab: Click toggle switch "Is Used" trên ModelConfig
-    ModelConfigTab->>ModelConfigTable: handleToggleActive(taskType, id, isUsed)
-    activate ModelConfigTable
-    
-    ModelConfigTable->>ModelConfigRoutes: PUT /model-config/{model_id}
-    activate ModelConfigRoutes
-    ModelConfigRoutes->>ModelConfigService: update_model(model_id, {is_used})
-    activate ModelConfigService
-    
-    ModelConfigService->>ModelConfigService: Update is_used<br/>Set other configs is_used=false<br/>db.commit()
-    
-    ModelConfigService-->>ModelConfigRoutes: ModelConfig
+    ModelConfigService-->>ModelConfigPage: trả về
     deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelConfigTable: ModelConfigResponse
-    deactivate ModelConfigRoutes
     
-    ModelConfigTable->>ModelConfigTab: Cập nhật danh sách models
-    deactivate ModelConfigTable
-    
-    ModelConfigTab-->>User: Hiển thị trạng thái mới và thông báo "Model status updated successfully"
-    
-    deactivate ModelConfigTab
-    deactivate ModelConfigPage
+    ModelConfigPage-->>User: Hiển thị
 ```
 
 ---
 
-## 6. Preload ModelConfig
+## 6. Xem danh sách ModelWrapper
 
 ```mermaid
 sequenceDiagram
     actor User
-    participant ModelConfigPage as ModelConfigPage.tsx
-    participant ModelConfigTab as ModelConfigTab.tsx
-    participant ConfirmDialog as AlertDialog
-    participant ModelConfigRoutes as model_config_routes
-    participant ModelConfigService as ModelConfigService
-
-    User->>ModelConfigPage: Click "Mô hình" tại sidebar
-    activate ModelConfigPage
-    ModelConfigPage-->>User: Hiển thị giao diện
-    
-    User->>ModelConfigPage: Click tab "Model Configurations"
-    ModelConfigPage->>ModelConfigTab: Khởi tạo ModelConfigTab
-    activate ModelConfigTab
-    
-    ModelConfigTab->>ModelConfigRoutes: GET /model-config
-    activate ModelConfigRoutes
-    ModelConfigRoutes->>ModelConfigService: get_models_by_user()
-    activate ModelConfigService
-    ModelConfigService-->>ModelConfigRoutes: List[ModelConfig]
-    deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelConfigTab: List[ModelConfigResponse]
-    deactivate ModelConfigRoutes
-    
-    ModelConfigTab-->>User: Hiển thị danh sách ModelConfig (có thể rỗng)
-    
-    User->>ModelConfigTab: Chọn task type
-    ModelConfigTab-->>User: Lọc và hiển thị models theo task type
-    
-    User->>ModelConfigTab: Click "Preload Models"
-    ModelConfigTab->>ConfirmDialog: Hiển thị confirm dialog
-    activate ConfirmDialog
-    ConfirmDialog-->>User: "Do you want to preload default models?"
-    
-    User->>ConfirmDialog: Xác nhận preload
-    ConfirmDialog->>ModelConfigTab: Confirmed
-    deactivate ConfirmDialog
-    
-    ModelConfigTab->>ModelConfigRoutes: POST /model-config/preload/{user_id}
-    activate ModelConfigRoutes
-    ModelConfigRoutes->>ModelConfigService: preload_models_for_user(user_id)
-    activate ModelConfigService
-    
-    ModelConfigService->>ModelConfigService: Create default ModelConfigs<br/>db.commit()
-    
-    ModelConfigService-->>ModelConfigRoutes: List[ModelConfig]
-    deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelConfigTab: List[ModelConfigResponse]
-    deactivate ModelConfigRoutes
-    
-    ModelConfigTab->>ModelConfigTab: Cập nhật danh sách với items mới
-    ModelConfigTab-->>User: Hiển thị danh sách mới và thông báo "Models preloaded successfully"
-    
-    deactivate ModelConfigTab
-    deactivate ModelConfigPage
-```
-
----
-
-## 7. Xem danh sách ModelWrapper
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant ModelConfigPage as ModelConfigPage.tsx
     participant ModelWrapperTab as ModelWrapperTab.tsx
-    participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
+    participant ModelConfigRoutes as model_config_routes.py
+    participant ModelConfigService as ModelConfigService
+    participant ModelWrapper as ModelWrapper
 
-    User->>ModelConfigPage: Click "Mô hình" tại sidebar
-    activate ModelConfigPage
-    
-    User->>ModelConfigPage: Click tab "Model Wrappers"
-    ModelConfigPage->>ModelWrapperTab: Khởi tạo ModelWrapperTab
+    User->>ModelWrapperTab: Click "Cấu hình Wrapper" tab
     activate ModelWrapperTab
     
-    ModelWrapperTab->>ModelConfigRoutes: GET /model-config/wrapper
+    ModelWrapperTab->>ModelWrapperTab: loadWrappers()
+    ModelWrapperTab->>ModelConfigService: gọi
+    deactivate ModelWrapperTab
+    activate ModelConfigService
+    
+    ModelConfigService->>ModelConfigService: getWrappers()
+    ModelConfigService->>ModelConfigRoutes: GET "/model-config/wrapper"
     activate ModelConfigRoutes
     
     ModelConfigRoutes->>ModelConfigService: get_wrappers()
     activate ModelConfigService
     
-    ModelConfigService->>ModelConfigService: Query all wrappers<br/>Order by task_type, updated_at DESC
+    ModelConfigService->>ModelConfigService: gọi
+    ModelConfigService->>ModelWrapper: gọi
+    activate ModelWrapper
     
-    ModelConfigService-->>ModelConfigRoutes: List[ModelWrapper]
+    ModelWrapper->>ModelWrapper: ModelWrapper()
+    ModelWrapper-->>ModelConfigService: trả về
+    deactivate ModelWrapper
+    
+    ModelConfigService-->>ModelConfigRoutes: trả về
     deactivate ModelConfigService
     
-    ModelConfigRoutes-->>ModelWrapperTab: List[ModelWrapperResponse]
+    ModelConfigRoutes-->>ModelConfigService: trả về
     deactivate ModelConfigRoutes
     
-    ModelWrapperTab->>ModelWrapperTab: Render wrapper list
-    ModelWrapperTab-->>User: Hiển thị danh sách ModelWrapper
-    deactivate ModelWrapperTab
-    deactivate ModelConfigPage
+    ModelConfigService-->>ModelWrapperTab: trả về
+    deactivate ModelConfigService
+    
+    ModelWrapperTab-->>User: Hiển thị
 ```
 
 ---
 
-## 8. Tạo ModelWrapper mới (Admin only)
+## 7. Tạo ModelWrapper mới (Admin only)
 
 ```mermaid
 sequenceDiagram
     actor Admin
-    participant ModelConfigPage as ModelConfigPage.tsx
     participant ModelWrapperTab as ModelWrapperTab.tsx
     participant ModelWrapperCreateDialog as ModelWrapperCreateDialog.tsx
-    participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
+    participant ModelConfigRoutes as model_config_routes.py
+    participant ModelConfigService as ModelConfigService
+    participant ModelWrapper as ModelWrapper
 
-    Admin->>ModelConfigPage: Click "Mô hình" tại sidebar
-    activate ModelConfigPage
-    ModelConfigPage-->>Admin: Hiển thị giao diện
-    
-    Admin->>ModelConfigPage: Click tab "Model Wrappers"
-    ModelConfigPage->>ModelWrapperTab: Khởi tạo ModelWrapperTab
+    Admin->>ModelWrapperTab: Click "Tạo Wrapper"
     activate ModelWrapperTab
     
-    ModelWrapperTab->>ModelConfigRoutes: GET /model-config/wrapper
-    activate ModelConfigRoutes
-    ModelConfigRoutes->>ModelConfigService: get_wrappers()
-    activate ModelConfigService
-    ModelConfigService-->>ModelConfigRoutes: List[ModelWrapper]
-    deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelWrapperTab: List[ModelWrapperResponse]
-    deactivate ModelConfigRoutes
-    
-    ModelWrapperTab-->>Admin: Hiển thị danh sách Wrapper
-    
-    Admin->>ModelWrapperTab: Click "Add Wrapper"
-    ModelWrapperTab->>ModelWrapperCreateDialog: Mở dialog
+    ModelWrapperTab->>ModelWrapperCreateDialog: gọi
+    deactivate ModelWrapperTab
     activate ModelWrapperCreateDialog
-    ModelWrapperCreateDialog-->>Admin: Hiển thị form trống
+    ModelWrapperCreateDialog-->>Admin: Hiển thị
+    deactivate ModelWrapperCreateDialog
     
-    Admin->>ModelWrapperCreateDialog: Nhập thông tin và click "Save"
-    ModelWrapperCreateDialog->>ModelWrapperCreateDialog: Validate form
-    ModelWrapperCreateDialog->>ModelWrapperTab: handleSave()
+    Admin->>ModelWrapperCreateDialog: Nhập thông tin và click "Tạo"
+    activate ModelWrapperCreateDialog
     
-    ModelWrapperTab->>ModelConfigRoutes: POST /model-config/wrapper
+    ModelWrapperCreateDialog->>ModelWrapperCreateDialog: validate()
+    ModelWrapperCreateDialog->>ModelWrapperCreateDialog: handleCreateWrapper()
+    ModelWrapperCreateDialog->>ModelConfigService: gọi
+    deactivate ModelWrapperCreateDialog
+    activate ModelConfigService
+    
+    ModelConfigService->>ModelConfigService: createWrapper()
+    ModelConfigService->>ModelConfigRoutes: POST "/model-config/wrapper"
     activate ModelConfigRoutes
+    
     ModelConfigRoutes->>ModelConfigService: create_wrapper()
     activate ModelConfigService
     
-    ModelConfigService->>ModelConfigService: Create ModelWrapper<br/>db.commit()
+    ModelConfigService->>ModelConfigService: gọi
+    ModelConfigService->>ModelWrapper: gọi
+    activate ModelWrapper
     
-    ModelConfigService-->>ModelConfigRoutes: ModelWrapper
+    ModelWrapper->>ModelWrapper: ModelWrapper()
+    ModelWrapper-->>ModelConfigService: trả về
+    deactivate ModelWrapper
+    
+    ModelConfigService-->>ModelConfigRoutes: trả về
     deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelWrapperTab: ModelWrapperResponse
+    
+    ModelConfigRoutes-->>ModelConfigService: trả về
     deactivate ModelConfigRoutes
     
-    ModelWrapperTab->>ModelWrapperTab: Cập nhật danh sách với wrapper mới
-    ModelWrapperTab-->>Admin: Hiển thị danh sách mới và thông báo "Wrapper created successfully"
+    ModelConfigService-->>ModelWrapperTab: trả về
+    deactivate ModelConfigService
     
-    deactivate ModelWrapperCreateDialog
-    deactivate ModelWrapperTab
-    deactivate ModelConfigPage
+    ModelWrapperTab-->>Admin: Hiển thị
 ```
 
 ---
 
-## 9. Chỉnh sửa ModelWrapper (Admin only)
+## 8. Chỉnh sửa ModelWrapper (Admin only)
 
 ```mermaid
 sequenceDiagram
     actor Admin
-    participant ModelConfigPage as ModelConfigPage.tsx
     participant ModelWrapperTab as ModelWrapperTab.tsx
-    participant ModelWrapperUpdateDialog as ModelWrapperUpdateDialog.tsx
-    participant ModelConfigRoutes as model_config_routes
+    participant ModelWrapperUdateDialog as ModelWrapperUdateDialog.tsx
     participant ModelConfigService as ModelConfigService
+    participant ModelConfigRoutes as model_config_routes.py
+    participant ModelConfigService as ModelConfigService
+    participant ModelWrapper as ModelWrapper
 
-    Admin->>ModelConfigPage: Click "Mô hình" tại sidebar
-    activate ModelConfigPage
-    ModelConfigPage-->>Admin: Hiển thị giao diện
-    
-    Admin->>ModelConfigPage: Click tab "Model Wrappers"
-    ModelConfigPage->>ModelWrapperTab: Khởi tạo ModelWrapperTab
+    Admin->>ModelWrapperTab: Click icon update trên một ModelWrapper
     activate ModelWrapperTab
     
-    ModelWrapperTab->>ModelConfigRoutes: GET /model-config/wrapper
-    activate ModelConfigRoutes
-    ModelConfigRoutes->>ModelConfigService: get_wrappers()
-    activate ModelConfigService
-    ModelConfigService-->>ModelConfigRoutes: List[ModelWrapper]
-    deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelWrapperTab: List[ModelWrapperResponse]
-    deactivate ModelConfigRoutes
-    
-    ModelWrapperTab-->>Admin: Hiển thị danh sách Wrapper
-    
-    Admin->>ModelWrapperTab: Click "Edit" trên Wrapper
-    ModelWrapperTab->>ModelWrapperUpdateDialog: Mở dialog với dữ liệu hiện tại
-    activate ModelWrapperUpdateDialog
-    ModelWrapperUpdateDialog-->>Admin: Hiển thị form với thông tin Wrapper
-    
-    Admin->>ModelWrapperUpdateDialog: Cập nhật thông tin và click "Save"
-    ModelWrapperUpdateDialog->>ModelWrapperUpdateDialog: Validate form
-    ModelWrapperUpdateDialog->>ModelWrapperTab: handleSave()
-    
-    ModelWrapperTab->>ModelConfigRoutes: PUT /model-config/wrapper/{wrapper_id}
-    activate ModelConfigRoutes
-    ModelConfigRoutes->>ModelConfigService: update_wrapper(wrapper_id, update_data)
-    activate ModelConfigService
-    
-    ModelConfigService->>ModelConfigService: Get ModelWrapper<br/>Update fields<br/>db.commit()
-    
-    ModelConfigService-->>ModelConfigRoutes: ModelWrapper
-    deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelWrapperTab: ModelWrapperResponse
-    deactivate ModelConfigRoutes
-    
-    ModelWrapperTab->>ModelWrapperTab: Cập nhật item trong danh sách
-    ModelWrapperTab-->>Admin: Hiển thị danh sách mới và thông báo "Wrapper updated successfully"
-    
-    deactivate ModelWrapperUpdateDialog
+    ModelWrapperTab->>ModelWrapperUdateDialog: gọi
     deactivate ModelWrapperTab
-    deactivate ModelConfigPage
+    activate ModelWrapperUdateDialog
+    ModelWrapperUdateDialog-->>Admin: Hiển thị
+    deactivate ModelWrapperUdateDialog
+    
+    Admin->>ModelWrapperUdateDialog: Nhập thông tin và click "Cập nhật"
+    activate ModelWrapperUdateDialog
+    
+    ModelWrapperUdateDialog->>ModelWrapperUdateDialog: validate()
+    ModelWrapperUdateDialog->>ModelWrapperUdateDialog: handleUpdateWrapper()
+    ModelWrapperUdateDialog->>ModelConfigService: gọi
+    deactivate ModelWrapperUdateDialog
+    activate ModelConfigService
+    
+    ModelConfigService->>ModelConfigService: updateWrapper()
+    ModelConfigService->>ModelConfigRoutes: PUT "/model-config/wrapper/{wrapper_id}"
+    activate ModelConfigRoutes
+    
+    ModelConfigRoutes->>ModelConfigService: update_wrapper()
+    activate ModelConfigService
+    
+    ModelConfigService->>ModelConfigService: gọi
+    ModelConfigService->>ModelWrapper: gọi
+    activate ModelWrapper
+    
+    ModelWrapper->>ModelWrapper: ModelWrapper()
+    ModelWrapper-->>ModelConfigService: trả về
+    deactivate ModelWrapper
+    
+    ModelConfigService-->>ModelConfigRoutes: trả về
+    deactivate ModelConfigService
+    
+    ModelConfigRoutes-->>ModelConfigService: trả về
+    deactivate ModelConfigRoutes
+    
+    ModelConfigService-->>ModelWrapperTab: trả về
+    deactivate ModelConfigService
+    
+    ModelWrapperTab-->>Admin: Hiển thị
 ```
 
 ---
 
-## 10. Xóa ModelWrapper (Admin only)
+## 9. Xóa ModelWrapper (Admin only)
 
 ```mermaid
 sequenceDiagram
     actor Admin
-    participant ModelConfigPage as ModelConfigPage.tsx
     participant ModelWrapperTab as ModelWrapperTab.tsx
     participant ModelWrapperDeleteDialog as ModelWrapperDeleteDialog.tsx
-    participant ModelConfigRoutes as model_config_routes
     participant ModelConfigService as ModelConfigService
+    participant ModelConfigRoutes as model_config_routes.py
+    participant ModelConfigService as ModelConfigService
+    participant MessageResponse as MessageResponse
 
-    Admin->>ModelConfigPage: Click "Mô hình" tại sidebar
-    activate ModelConfigPage
-    ModelConfigPage-->>Admin: Hiển thị giao diện
-    
-    Admin->>ModelConfigPage: Click tab "Model Wrappers"
-    ModelConfigPage->>ModelWrapperTab: Khởi tạo ModelWrapperTab
+    Admin->>ModelWrapperTab: Click icon delete trên một ModelWrapper
     activate ModelWrapperTab
     
-    ModelWrapperTab->>ModelConfigRoutes: GET /model-config/wrapper
-    activate ModelConfigRoutes
-    ModelConfigRoutes->>ModelConfigService: get_wrappers()
-    activate ModelConfigService
-    ModelConfigService-->>ModelConfigRoutes: List[ModelWrapper]
-    deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelWrapperTab: List[ModelWrapperResponse]
-    deactivate ModelConfigRoutes
-    
-    ModelWrapperTab-->>Admin: Hiển thị danh sách Wrapper
-    
-    Admin->>ModelWrapperTab: Click "Delete" trên Wrapper
-    ModelWrapperTab->>ModelWrapperDeleteDialog: Mở dialog xác nhận
-    activate ModelWrapperDeleteDialog
-    ModelWrapperDeleteDialog-->>Admin: Hiển thị xác nhận với tên Wrapper
-    
-    Admin->>ModelWrapperDeleteDialog: Click "Delete" xác nhận
-    ModelWrapperDeleteDialog->>ModelWrapperDeleteDialog: handleConfirm()
-    ModelWrapperDeleteDialog->>ModelWrapperTab: onConfirm(wrapperId)
-    
-    ModelWrapperTab->>ModelConfigRoutes: DELETE /model-config/wrapper/{wrapper_id}
-    activate ModelConfigRoutes
-    ModelConfigRoutes->>ModelConfigService: delete_wrapper(wrapper_id)
-    activate ModelConfigService
-    
-    ModelConfigService->>ModelConfigService: Delete ModelWrapper<br/>Cascade delete ModelConfigs
-    
-    ModelConfigService-->>ModelConfigRoutes: Success
-    deactivate ModelConfigService
-    ModelConfigRoutes-->>ModelWrapperTab: MessageResponse
-    deactivate ModelConfigRoutes
-    
-    ModelWrapperTab->>ModelWrapperTab: Xóa item khỏi danh sách
-    ModelWrapperTab-->>Admin: Hiển thị danh sách mới và thông báo "Wrapper deleted successfully"
-    
-    deactivate ModelWrapperDeleteDialog
+    ModelWrapperTab->>ModelWrapperDeleteDialog: gọi
     deactivate ModelWrapperTab
-    deactivate ModelConfigPage
+    activate ModelWrapperDeleteDialog
+    ModelWrapperDeleteDialog-->>Admin: Hiển thị
+    deactivate ModelWrapperDeleteDialog
+    
+    Admin->>ModelWrapperDeleteDialog: Nhập thông tin và click "Cập nhật"
+    activate ModelWrapperDeleteDialog
+    
+    ModelWrapperDeleteDialog->>ModelWrapperDeleteDialog: handleDeleteWrapper()
+    ModelWrapperDeleteDialog->>ModelConfigService: gọi
+    deactivate ModelWrapperDeleteDialog
+    activate ModelConfigService
+    
+    ModelConfigService->>ModelConfigService: deleteWrapper()
+    ModelConfigService->>ModelConfigRoutes: DELETE "/model-config/wrapper/{wrapper_id}"
+    activate ModelConfigRoutes
+    
+    ModelConfigRoutes->>ModelConfigService: delete_wrapper()
+    activate ModelConfigService
+    
+    ModelConfigService->>ModelConfigService: gọi
+    ModelConfigService->>MessageResponse: gọi
+    activate MessageResponse
+    
+    MessageResponse->>MessageResponse: MessageResponse()
+    MessageResponse-->>ModelConfigService: trả về
+    deactivate MessageResponse
+    
+    ModelConfigService-->>ModelConfigRoutes: trả về
+    deactivate ModelConfigService
+    
+    ModelConfigRoutes-->>ModelConfigService: trả về
+    deactivate ModelConfigRoutes
+    
+    ModelConfigService-->>ModelWrapperTab: trả về
+    deactivate ModelConfigService
+    
+    ModelWrapperTab-->>Admin: Hiển thị
 ```

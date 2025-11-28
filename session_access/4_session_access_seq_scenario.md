@@ -1,267 +1,255 @@
 # Sequence Scenario - Quản lý Session Access
 
-## Kịch bản 1: Chia sẻ Session với User cụ thể
+## 1. Chia sẻ Session với User cụ thể
 
-1. Tại giao diện Session chi tiết, User click "Share" trên Header
-2. Header.tsx mở SessionShareDialog với prop `open=true`
-3. SessionShareDialog.tsx khởi tạo, hiển thị modal và gọi `DocAgentService.getSessionGrants()` để lấy danh sách User đã được chia sẻ
-4. DocAgentService gửi request GET tới endpoint `/session-access/grant/by-session/{sessionId}`
-5. Backend route nhận request, SessionAccessService được gọi `get_session_access_grants_by_session()`, truy vấn cơ sở dữ liệu và trả danh sách SessionAccessGrant
-6. session_access_routes.py trả về danh sách SessionAccessGrantResponse JSON
-7. DocAgentService nhận danh sách từ response, đóng gói với ServiceResult<SessionAccessGrant[]> và SessionShareDialog hiển thị danh sách User đã được chia sẻ
-8. User click "Add people"
-9. Component hiển thị SearchDialog
-10. User tìm kiếm, chọn User cần chia sẻ, chọn mức quyền (Reader/Contributor/Manager) và click "Add" để xác nhận
-11. SessionShareDialog gọi `DocAgentService.createInvite()` với thông tin invited_to và invited_level
-12. DocAgentService gửi POST request tới `/session-access/invite`
-13. Backend route nhận request, SessionAccessService được gọi `create_session_access_invite(auto_grant=true)`, kiểm tra grant/invite hiện tại, tạo SessionAccessInvite mới, tự động tạo SessionAccessGrant cho User, cập nhật invite.granted_access_id và commit transaction
-14. SessionAccessService gọi WSSessionAccessManager để broadcast event PERMISSION_GRANTED
-15. WSSessionAccessManager gửi WebSocket message đến tất cả connections của Session
-16. SessionAccessService trả SessionAccessInvite
-17. session_access_routes.py trả về SessionAccessInviteResponse JSON
-18. DocAgentService nhận response, đóng gói với ServiceResult<SessionAccessInvite> và SessionShareDialog reload danh sách grant
-19. Component re-render, hiển thị danh sách được cập nhật và Toast success notification hiển thị "Chia sẻ thành công"
-20. User được chia sẻ nhận WebSocket event PERMISSION_GRANTED, DocAgentPage xử lý event trong handler `onPermissionGranted`, hiển thị Toast "Bạn đã được cấp quyền truy cập", set permissionLoading=true để reload permission và hiển thị Session với quyền mới
-
----
-
-## Kịch bản 2: Cập nhật quyền truy cập
-
-1. User mở SessionShareDialog (đã load danh sách User)
-2. User click vào dropdown quyền của User cần cập nhật và chọn mức quyền mới (Reader/Contributor/Manager)
-3. SessionShareDialog gọi `DocAgentService.updateGrant()`
-4. DocAgentService gửi PUT request tới `/session-access/grant/{grantId}`
-5. Backend route nhận request, SessionAccessService được gọi `update_session_access_grant()`, lấy grant hiện tại từ cơ sở dữ liệu, cập nhật access_level và commit transaction
-6. SessionAccessService gọi WSSessionAccessManager để broadcast event PERMISSION_CHANGED
-7. WSSessionAccessManager gửi WebSocket message đến tất cả connections
-8. SessionAccessService trả SessionAccessGrant đã cập nhật
-9. session_access_routes.py trả về SessionAccessGrantResponse JSON
-10. DocAgentService nhận response, đóng gói với ServiceResult<SessionAccessGrant> và SessionShareDialog cập nhật grant trong danh sách
-11. Component re-render, hiển thị quyền mới và Toast success notification hiển thị "Cập nhật quyền thành công"
-12. User bị thay đổi quyền nhận WebSocket event PERMISSION_CHANGED, DocAgentPage xử lý event trong handler `onPermissionChanged`, hiển thị Toast "Quyền của bạn đã được cập nhật", set permissionLoading=true để reload permission và hiển thị với quyền mới
-
----
-
-## Kịch bản 3: Thu hồi quyền truy cập
-
-1. User mở SessionShareDialog và xem danh sách User
-2. User click icon "X" bên cạnh User cần thu hồi quyền
-3. SessionShareDialog gọi `DocAgentService.revokeGrant()`
-4. DocAgentService gửi DELETE request tới `/session-access/grant/revoke/{grantId}`
-5. Backend route nhận request, SessionAccessService được gọi `revoke_session_access_grant()`, lấy grant từ cơ sở dữ liệu, set is_active = false và commit transaction
-6. SessionAccessService gọi WSSessionAccessManager để broadcast event PERMISSION_REVOKED
-7. WSSessionAccessManager gửi WebSocket message đến tất cả connections
-8. SessionAccessService trả SessionAccessGrant (với is_active=false)
-9. session_access_routes.py trả về MessageResponse JSON
-10. DocAgentService nhận response, đóng gói với ServiceResult<MessageResponse> và SessionShareDialog xóa grant khỏi danh sách hiển thị
-11. Component re-render và Toast success notification hiển thị "Thu hồi quyền thành công"
-12. User bị thu hồi quyền nhận WebSocket event PERMISSION_REVOKED, DocAgentPage xử lý event trong handler `onPermissionRevoked`, hiển thị Toast "Quyền truy cập của bạn đã bị thu hồi", set permissionLoading=true, Permission hook phát hiện User không còn quyền, Component chuyển sang hiển thị RequestAccessState
+1. User click "Chia sẻ" tại Header
+2. Header.tsx gọi SessionShareDialog.tsx
+3. SessionShareDialog.tsx hiển thị dialog cho User
+4. User click tab "Chia sẻ"
+5. SessionShareDialog.tsx gọi hàm loadShareData()
+6. SessionShareDialog.tsx gọi AuthApi trong loop để lấy thông tin User
+7. AuthApi gọi hàm getUserById()
+8. AuthApi trả về thông tin User cho SessionShareDialog.tsx
+9. SessionShareDialog.tsx gọi DocAgentService
+10. DocAgentService gọi hàm getSessionGrantsBySession()
+11. DocAgentService gửi yêu cầu GET "/session-access/grant/by-session/{session_id}" đến session_access_routes.py
+12. session_access_routes.py gọi SessionAccessService.get_session_access_grants_by_session()
+13. SessionAccessService xử lý yêu cầu và gọi chính nó
+14. SessionAccessService gọi SessionAccessGrant
+15. SessionAccessGrant khởi tạo đối tượng SessionAccessGrant()
+16. SessionAccessGrant trả về dữ liệu cho SessionAccessService
+17. SessionAccessService trả về danh sách grant cho session_access_routes.py
+18. session_access_routes.py trả về kết quả cho DocAgentService
+19. DocAgentService gọi hàm getSessionLink()
+20. DocAgentService gửi yêu cầu GET "/session-access/link/by-session/{session_id}" đến session_access_routes.py
+21. session_access_routes.py gọi SessionAccessService.get_session_access_link_by_session()
+22. SessionAccessService xử lý yêu cầu và gọi chính nó
+23. SessionAccessService gọi SessionAccessLink
+24. SessionAccessLink khởi tạo đối tượng SessionAccessLink()
+25. SessionAccessLink trả về dữ liệu cho SessionAccessService
+26. SessionAccessService trả về link cho session_access_routes.py
+27. session_access_routes.py trả về kết quả cho DocAgentService
+28. DocAgentService hiển thị dữ liệu cho User
+29. User nhập keyword tìm kiếm User
+30. SessionShareDialog.tsx gọi SearchDialog.tsx
+31. SearchDialog.tsx gọi AuthApi
+32. AuthApi gọi hàm searchUsersByName()
+33. AuthApi trả về danh sách User cho SearchDialog.tsx
+34. SearchDialog.tsx hiển thị kết quả tìm kiếm cho User
+35. User chọn User và click "Thêm"
+36. SessionShareDialog.tsx gọi hàm validate()
+37. SessionShareDialog.tsx gọi hàm handleAddUser()
+38. SessionShareDialog.tsx gọi DocAgentService
+39. DocAgentService gọi hàm createInvite()
+40. DocAgentService gửi yêu cầu POST "/session-access/invite" đến session_access_routes.py
+41. session_access_routes.py gọi SessionAccessService.create_session_access_invite()
+42. SessionAccessService xử lý yêu cầu và gọi chính nó
+43. SessionAccessService gọi SessionAccessGrant
+44. SessionAccessGrant khởi tạo đối tượng SessionAccessGrant()
+45. SessionAccessGrant trả về dữ liệu cho SessionAccessService
+46. SessionAccessService trả về invite cho session_access_routes.py
+47. session_access_routes.py trả về kết quả cho DocAgentService
+48. DocAgentService trả về kết quả cho SessionShareDialog.tsx
+49. SessionShareDialog.tsx hiển thị thông báo cho User
 
 ---
 
-## Kịch bản 4: Yêu cầu truy cập Session
+## 2. Cập nhật quyền truy cập
 
-1. User truy cập Session URL mà không có quyền truy cập
-2. DocAgentPage component khởi tạo, check permission qua hook `useSessionPermission`, hook phát hiện User không có quyền (permission === null) và hiển thị RequestAccessState thay vì nội dung Session
-3. RequestAccessState khởi tạo, gọi `checkExistingRequest()` và gọi `DocAgentService.getUserSessionRequest()`
-4. DocAgentService gửi GET request tới `/session-access/request/by-user-session/{sessionId}/{userId}`
-5. Backend route nhận request, SessionAccessService được gọi `get_session_access_request_by_user_session()`, truy vấn request với status=PENDING và trả SessionAccessRequest nếu có, hoặc null
-6. session_access_routes.py trả về SessionAccessRequestResponse hoặc null
-7. DocAgentService nhận response, đóng gói với ServiceResult và RequestAccessState set state existingRequest, hiển thị nút "Yêu cầu truy cập" (nếu chưa có request)
-8. User click "Yêu cầu truy cập"
-9. RequestAccessState gọi `DocAgentService.createRequest()` với session_id và requested_by
-10. DocAgentService gửi POST request tới `/session-access/request`
-11. Backend route nhận request, SessionAccessService được gọi `create_session_access_request()`, kiểm tra request/grant hiện tại, tạo SessionAccessRequest mới với status=PENDING và commit transaction
-12. SessionAccessService gọi WSSessionAccessManager để broadcast event REQUEST_CREATED
-13. WSSessionAccessManager gửi WebSocket message đến User có quyền Manager
-14. SessionAccessService trả SessionAccessRequest
-15. session_access_routes.py trả về SessionAccessRequestResponse JSON
-16. DocAgentService nhận response, đóng gói với ServiceResult<SessionAccessRequest> và RequestAccessState update existingRequest
-17. Component re-render, hiển thị trạng thái "Đang chờ", Toast success notification hiển thị "Yêu cầu đã được gửi" và UI hiển thị nút "Hủy yêu cầu"
-18. User có quyền Manager (có WebSocket connection) nhận event REQUEST_CREATED, DocAgentPage xử lý event trong handler `onRequestCreated`, hiển thị Toast "Có yêu cầu truy cập mới", increment requestTabReloadKey và SessionShareDialog (nếu đang mở) tự động reload request list
+1. User chọn quyền từ dropdown của User
+2. SessionShareDialog.tsx gọi hàm handleUpdateSessionGrant()
+3. SessionShareDialog.tsx gọi DocAgentService
+4. DocAgentService gọi hàm updateSessionGrant()
+5. DocAgentService gửi yêu cầu PUT "/session-access/grant/{grant_id}" đến session_access_routes.py
+6. session_access_routes.py gọi SessionAccessService.update_session_access_grant()
+7. SessionAccessService xử lý yêu cầu và gọi chính nó
+8. SessionAccessService gọi SessionAccessGrant
+9. SessionAccessGrant khởi tạo đối tượng SessionAccessGrant()
+10. SessionAccessGrant trả về dữ liệu cho SessionAccessService
+11. SessionAccessService trả về grant đã cập nhật cho session_access_routes.py
+12. session_access_routes.py trả về kết quả cho DocAgentService
+13. DocAgentService trả về kết quả cho SessionShareDialog.tsx
+14. SessionShareDialog.tsx hiển thị thông báo cho User
 
 ---
 
-## Kịch bản 5: Chấp nhận yêu cầu truy cập
+## 3. Thu hồi quyền truy cập
 
-1. User mở SessionShareDialog
-2. User click tab "Yêu cầu"
-3. useEffect hook trigger khi activeTab thay đổi và Component gọi `DocAgentService.getSessionRequests()`
-4. DocAgentService gửi GET request tới `/session-access/request/by-session/{sessionId}`
-5. Backend route nhận request, SessionAccessService được gọi `get_session_access_requests_by_session()`, truy vấn requests với status=PENDING và trả danh sách SessionAccessRequest
-6. session_access_routes.py trả về danh sách SessionAccessRequestResponse JSON
-7. DocAgentService nhận danh sách từ response, đóng gói với ServiceResult và SessionShareDialog hiển thị danh sách request
-8. User xem thông tin User yêu cầu, chọn mức quyền sẽ cấp (Reader/Contributor/Manager) và click "Approve"
-9. SessionShareDialog gọi `DocAgentService.acceptRequest()`
-10. DocAgentService gửi POST request tới `/session-access/request/accept/{requestId}`
-11. Backend route nhận request, SessionAccessService được gọi `accept_session_access_request()`, lấy request từ cơ sở dữ liệu, cập nhật status = APPROVED, tạo SessionAccessGrant mới cho User, cập nhật request.granted_access_id và commit transaction
-12. SessionAccessService gọi WSSessionAccessManager để broadcast event PERMISSION_GRANTED
-13. WSSessionAccessManager gửi WebSocket message đến User
-14. SessionAccessService trả SessionAccessRequest đã cập nhật
-15. session_access_routes.py trả về SessionAccessRequestResponse JSON
-16. DocAgentService nhận response, đóng gói với ServiceResult và SessionShareDialog xóa request khỏi danh sách
-17. Component re-render và Toast success notification hiển thị "Đã chấp nhận yêu cầu"
-18. User nhận WebSocket event PERMISSION_GRANTED, DocAgentPage xử lý event trong handler `onPermissionGranted`, hiển thị Toast "Bạn đã được cấp quyền truy cập", set permissionLoading=true, Permission hook reload và phát hiện User đã có quyền, Component reload Session data, RequestAccessState bị unmount và Session content được hiển thị với quyền mới
+1. User click "Xóa" từ dropdown của User
+2. SessionShareDialog.tsx gọi hàm handleRemoveUser()
+3. SessionShareDialog.tsx gọi DocAgentService
+4. DocAgentService gọi hàm revokeSessionGrant()
+5. DocAgentService gửi yêu cầu DELETE "/session-access/grant/{grant_id}" đến session_access_routes.py
+6. session_access_routes.py gọi SessionAccessService.revoke_session_access_grant()
+7. SessionAccessService xử lý yêu cầu và gọi chính nó
+8. SessionAccessService gọi MessageResponse
+9. MessageResponse khởi tạo đối tượng MessageResponse()
+10. MessageResponse trả về thông báo cho SessionAccessService
+11. SessionAccessService trả về kết quả cho session_access_routes.py
+12. session_access_routes.py trả về thông báo thành công cho DocAgentService
+13. DocAgentService trả về kết quả cho SessionShareDialog.tsx
+14. SessionShareDialog.tsx hiển thị thông báo cho User
 
 ---
 
-## Kịch bản 6: Từ chối yêu cầu truy cập
+## 4. Quản lý liên kết chia sẻ
 
-1. User mở SessionShareDialog và xem tab "Request"
-2. User xem danh sách request (đã load như kịch bản 5, bước 1-7)
-3. User click "Deny" trên một request
-4. SessionShareDialog gọi `DocAgentService.rejectRequest()`
-5. DocAgentService gửi POST request tới `/session-access/request/reject/{requestId}`
-6. Backend route nhận request, SessionAccessService được gọi `reject_session_access_request()`, lấy request từ cơ sở dữ liệu, cập nhật status = REJECTED và commit transaction
-7. SessionAccessService gọi WSSessionAccessManager để broadcast event REQUEST_DELETED
-8. WSSessionAccessManager gửi WebSocket message
-9. SessionAccessService trả MessageResponse
-10. session_access_routes.py trả về MessageResponse JSON
-11. DocAgentService nhận response, đóng gói với ServiceResult và SessionShareDialog xóa request khỏi danh sách
-12. Component re-render và Toast success notification hiển thị "Đã từ chối yêu cầu"
-
----
-
-## Kịch bản 7: Hủy yêu cầu truy cập
-
-1. User đang xem RequestAccessState với trạng thái "Đang chờ"
-2. User click "Hủy yêu cầu"
-3. RequestAccessState gọi `DocAgentService.deleteRequest()`
-4. DocAgentService gửi DELETE request tới `/session-access/request/{requestId}`
-5. Backend route nhận request, SessionAccessService được gọi `delete_session_access_request()`, lấy request từ cơ sở dữ liệu, xóa request và commit transaction
-6. SessionAccessService gọi WSSessionAccessManager để broadcast event REQUEST_DELETED
-7. WSSessionAccessManager gửi WebSocket message đến User có quyền Manager
-8. SessionAccessService trả MessageResponse
-9. session_access_routes.py trả về MessageResponse JSON
-10. DocAgentService nhận response, đóng gói với ServiceResult và RequestAccessState set existingRequest = null
-11. Component re-render, hiển thị nút "Yêu cầu truy cập" và Toast success notification hiển thị "Đã hủy yêu cầu"
-12. User có quyền Manager (có WebSocket connection) nhận event REQUEST_DELETED, DocAgentPage xử lý event trong handler `onRequestDeleted`, increment requestTabReloadKey và SessionShareDialog (nếu đang mở) tự động reload request list, xóa request khỏi danh sách
+1. User chọn "Bật kỳ ai có liên kết" trong dropdown
+2. SessionShareDialog.tsx gọi hàm handleLinkUpdate()
+3. SessionShareDialog.tsx gọi DocAgentService
+4. DocAgentService gọi hàm updateSessionLink()
+5. DocAgentService gửi yêu cầu PUT "/session-access/link/{link_id}" đến session_access_routes.py
+6. session_access_routes.py gọi SessionAccessService.update_session_access_link()
+7. SessionAccessService xử lý yêu cầu và gọi chính nó
+8. SessionAccessService gọi SessionAccessLink
+9. SessionAccessLink khởi tạo đối tượng SessionAccessLink()
+10. SessionAccessLink trả về dữ liệu cho SessionAccessService
+11. SessionAccessService trả về link đã cập nhật cho session_access_routes.py
+12. session_access_routes.py trả về kết quả cho DocAgentService
+13. DocAgentService hiển thị thông báo cho User
+14. User chọn quyền liên kết dropdown
+15. SessionShareDialog.tsx gọi hàm handleLinkUpdate()
+16. SessionShareDialog.tsx gọi DocAgentService
+17. DocAgentService gọi hàm updateSessionLink()
+18. DocAgentService gửi yêu cầu PUT "/session-access/link/{link_id}" đến session_access_routes.py
+19. session_access_routes.py gọi SessionAccessService.update_session_access_link()
+20. SessionAccessService xử lý yêu cầu và gọi chính nó
+21. SessionAccessService gọi SessionAccessLink
+22. SessionAccessLink khởi tạo đối tượng SessionAccessLink()
+23. SessionAccessLink trả về dữ liệu cho SessionAccessService
+24. SessionAccessService trả về link đã cập nhật cho session_access_routes.py
+25. session_access_routes.py trả về kết quả cho DocAgentService
+26. DocAgentService trả về kết quả cho SessionShareDialog.tsx
+27. SessionShareDialog.tsx hiển thị thông báo cho User
 
 ---
 
-## Kịch bản 8: Bật/tắt liên kết chia sẻ công khai
+## 5. Chấp nhận yêu cầu truy cập
 
-1. User mở SessionShareDialog
-2. useEffect hook trigger khi modal open và Component gọi `DocAgentService.getSessionLink()`
-3. DocAgentService gửi GET request tới `/session-access/link/by-session/{sessionId}`
-4. Backend route nhận request, SessionAccessService được gọi `get_session_access_link_by_session()`, truy vấn SessionAccessLink (nếu không tồn tại, tạo link mới với is_active=false) và trả SessionAccessLink
-5. session_access_routes.py trả về SessionAccessLinkResponse JSON
-6. DocAgentService nhận response, đóng gói với ServiceResult và SessionShareDialog set state generalAccess, hiển thị toggle switch và dropdown quyền
-7. User toggle switch để bật/tắt link
-8. SessionShareDialog gọi `DocAgentService.updateSessionLink()`
-9. DocAgentService gửi PUT request tới `/session-access/link/{linkId}`
-10. Backend route nhận request, SessionAccessService được gọi `update_session_access_link()`, lấy link từ cơ sở dữ liệu, cập nhật is_active và commit transaction
-11. SessionAccessService gọi WSSessionAccessManager để broadcast event LINK_UPDATED
-12. WSSessionAccessManager gửi WebSocket message
-13. SessionAccessService trả SessionAccessLink đã cập nhật
-14. session_access_routes.py trả về SessionAccessLinkResponse JSON
-15. DocAgentService nhận response, đóng gói với ServiceResult và SessionShareDialog cập nhật state generalAccess
-16. Component re-render và Toast success notification hiển thị "Đã cập nhật cấu hình liên kết"
-23. session_access_routes.py trả về SessionAccessLinkResponse JSON
-24. DocAgentService nhận response và đóng gói với ServiceResult
-25. SessionShareDialog cập nhật generalAccess state
-26. Component re-render với toggle switch cập nhật
-27. Toast success notification hiển thị "Link đã được bật" hoặc "Link đã được tắt"
-28. Các User có WebSocket connection nhận event LINK_UPDATED
-29. Component có thể reload link config nếu cần
+1. User chọn quyền từ dropdown và click "Cấp quyền"
+2. SessionShareDialog.tsx gọi hàm handleAcceptRequest()
+3. SessionShareDialog.tsx gọi DocAgentService
+4. DocAgentService gọi hàm acceptSessionRequest()
+5. DocAgentService gửi yêu cầu POST "/session-access/request/accept/{request_id}" đến session_access_routes.py
+6. session_access_routes.py gọi SessionAccessService.accept_session_access_request()
+7. SessionAccessService xử lý yêu cầu và gọi chính nó
+8. SessionAccessService gọi SessionAccessRequest
+9. SessionAccessRequest khởi tạo đối tượng SessionAccessRequest()
+10. SessionAccessRequest trả về dữ liệu cho SessionAccessService
+11. SessionAccessService trả về request đã accept cho session_access_routes.py
+12. session_access_routes.py trả về kết quả cho DocAgentService
+13. DocAgentService trả về kết quả cho SessionShareDialog.tsx
+14. SessionShareDialog.tsx hiển thị thông báo cho User
 
 ---
 
-## Kịch bản 9: Thay đổi quyền mặc định của liên kết chia sẻ
+## 6. Từ chối yêu cầu truy cập
 
-1. User mở SessionShareDialog (đã load link config)
-2. User click dropdown quyền của General Access
-3. User chọn quyền mới (Reader/Contributor/Manager)
-4. SessionShareDialog gọi `DocAgentService.updateSessionLink()`
-5. DocAgentService gửi PUT request tới `/session-access/link/{linkId}`
-6. Backend route nhận request và SessionAccessService được gọi `update_session_access_link()`
-7. SessionAccessService lấy link từ cơ sở dữ liệu
-8. SessionAccessService cập nhật access_level
-9. SessionAccessService commit transaction
-10. SessionAccessService gọi WSSessionAccessManager để broadcast event LINK_UPDATED
-11. WSSessionAccessManager gửi WebSocket message
-12. SessionAccessService trả SessionAccessLink đã cập nhật
-13. session_access_routes.py trả về SessionAccessLinkResponse JSON
-14. DocAgentService nhận response và đóng gói với ServiceResult
-15. SessionShareDialog cập nhật generalAccess state
-16. Component re-render với dropdown hiển thị quyền mới
-17. Toast success notification hiển thị "Quyền mặc định đã được cập nhật"
+1. User click "Từ chối" request to User
+2. SessionShareDialog.tsx gọi hàm handleRejectRequest()
+3. SessionShareDialog.tsx gọi DocAgentService
+4. DocAgentService gọi hàm rejectSessionRequest()
+5. DocAgentService gửi yêu cầu DELETE "/session-access/request/reject/{request_id}" đến session_access_routes.py
+6. session_access_routes.py gọi SessionAccessService.reject_session_access_request()
+7. SessionAccessService xử lý yêu cầu và gọi chính nó
+8. SessionAccessService gọi SessionAccessRequest
+9. SessionAccessRequest khởi tạo đối tượng SessionAccessRequest()
+10. SessionAccessRequest trả về dữ liệu cho SessionAccessService
+11. SessionAccessService trả về kết quả cho session_access_routes.py
+12. session_access_routes.py trả về thông báo cho DocAgentService
+13. DocAgentService trả về kết quả cho SessionShareDialog.tsx
+14. SessionShareDialog.tsx hiển thị thông báo cho User
 
 ---
 
-## Kịch bản 10: Copy liên kết chia sẻ
+## 7. Yêu cầu truy cập Session
 
-1. Manager mở SessionShareDialog
-2. Manager click "Copy link"
-3. SessionShareDialog gọi `handleCopyLink()`
-4. Component lấy URL hiện tại của Session
-5. Component sử dụng navigator.clipboard.writeText() để copy URL
-6. Toast success notification hiển thị "Đã copy link"
-7. Manager có thể paste link và chia sẻ cho User khác
+1. User xem chi tiết Session
+2. DocAgentPage.tsx gọi RequestAccessState.tsx
+3. RequestAccessState.tsx gọi hàm loadUserSessionRequest()
+4. RequestAccessState.tsx gọi DocAgentService
+5. DocAgentService gọi hàm getUserSessionRequest()
+6. DocAgentService gửi yêu cầu GET "/session-access/request/by-user-session/{user_id}/{session_id}" đến session_access_routes.py
+7. session_access_routes.py gọi SessionAccessService.get_user_session_access_request()
+8. SessionAccessService xử lý yêu cầu và gọi chính nó
+9. SessionAccessService gọi SessionAccessRequest
+10. SessionAccessRequest khởi tạo đối tượng SessionAccessRequest()
+11. SessionAccessRequest trả về dữ liệu cho SessionAccessService
+12. SessionAccessService trả về request cho session_access_routes.py
+13. session_access_routes.py trả về kết quả cho DocAgentService
+14. DocAgentService hiển thị dữ liệu cho User
+15. Nếu danh sách session access không null, User gọi RequestAccessState.tsx
+16. RequestAccessState.tsx trả về cho User
+17. User click "Tạo" hoặc "Yêu cầu"
+18. RequestAccessState.tsx gọi hàm handleCreateRequest()
+19. RequestAccessState.tsx gọi DocAgentService
+20. DocAgentService gọi hàm createSessionRequest()
+21. DocAgentService gửi yêu cầu POST "/session-access/request" đến session_access_routes.py
+22. session_access_routes.py gọi SessionAccessService.create_session_access_request()
+23. SessionAccessService xử lý yêu cầu và gọi chính nó
+24. SessionAccessService gọi SessionAccessRequest
+25. SessionAccessRequest khởi tạo đối tượng SessionAccessRequest()
+26. SessionAccessRequest trả về dữ liệu cho SessionAccessService
+27. SessionAccessService trả về request mới cho session_access_routes.py
+28. session_access_routes.py trả về kết quả cho DocAgentService
+29. DocAgentService trả về kết quả cho DocAgentPage.tsx
+30. DocAgentPage.tsx hiển thị thông báo cho User
 
 ---
 
-## Kịch bản 11: Nhận cập nhật quyền realtime qua WebSocket
+## 8. Hủy yêu cầu truy cập
 
-1. User/Manager truy cập Session
-2. DocAgentPage component mount
-3. useEffect hook trigger khi sessionConfirmed thay đổi
-4. Component gọi `DocSocketService.connectSessionSocket(sessionId, userId, handlers)`
-5. DocSocketService tạo WebSocket connection tới ws://...session/ws/{sessionId}?user_id={userId}
-6. WebSocket connection established
-7. Server (session_routes.py) nhận connection
-8. Server gọi `ws_session_access_manager.connect(session_id, websocket, user_id)`
-9. WSSessionAccessManager lưu connection vào active_connections dict
-10. DocSocketService gửi message {"action": "subscribe"} qua WebSocket
-11. Server nhận message và log
-12. DocSocketService trả WebSocket instance cho component
-13. Component lưu WebSocket vào state sessionSocket
-14. Component gọi `DocSocketService.startSessionKeepAlive(ws, 30000)`
-15. Interval bắt đầu gửi ping message mỗi 30 giây
-16. User/Manager đang xem Session
-17. **Khi có sự kiện từ Manager khác:**
-    - Manager thực hiện thao tác (share, update, revoke, etc.)
-    - SessionAccessService gọi WSSessionAccessManager.broadcast_xxx()
-    - WSSessionAccessManager lấy danh sách connections của session
-    - WSSessionAccessManager loop qua các connections
-    - WSSessionAccessManager skip connection của actor (exclude_user_id)
-    - WSSessionAccessManager gửi WsSessionAccessEnvelope qua mỗi WebSocket
-    - User nhận message trong DocAgentPage
-18. **Component xử lý message theo event type:**
-    - **PERMISSION_GRANTED:**
-      - Handler `onPermissionGranted` được gọi
-      - Toast hiển thị "Bạn đã được cấp quyền truy cập"
-      - set permissionLoading(true) để trigger reload
-      - Permission hook reload grant từ API
-      - Component reload Session data
-    - **PERMISSION_CHANGED:**
-      - Handler `onPermissionChanged` được gọi
-      - Toast hiển thị "Quyền của bạn đã được cập nhật"
-      - set permissionLoading(true)
-      - Permission hook reload grant
-    - **PERMISSION_REVOKED:**
-      - Handler `onPermissionRevoked` được gọi
-      - Toast hiển thị "Quyền truy cập của bạn đã bị thu hồi"
-      - set permissionLoading(true)
-      - Permission hook phát hiện không còn grant
-      - Component chuyển sang RequestAccessState
-    - **REQUEST_CREATED:** (chỉ Manager nhận)
-      - Handler `onRequestCreated` được gọi
-      - Toast hiển thị "Có yêu cầu truy cập mới"
-      - increment requestTabReloadKey
-      - SessionShareDialog reload request list
-    - **REQUEST_DELETED:**
-      - increment requestTabReloadKey
-      - SessionShareDialog reload request list
-    - **LINK_UPDATED:**
-      - Handler `onLinkUpdated` được gọi
-      - SessionShareDialog reload link config (nếu đang mở)
-19. User/Manager rời khỏi Session (navigate away)
-20. Component unmount, useEffect cleanup trigger
-21. Component gọi `DocSocketService.closeSessionSocket(ws)`
-22. DocSocketService gọi ws.close()
-23. WebSocket connection closed
-24. Server nhận close event
-25. Server gọi `ws_session_access_manager.disconnect(websocket)`
-26. WSSessionAccessManager xóa connection khỏi active_connections
-27. Interval keep-alive bị clear
+1. User xem chi tiết Session
+2. DocAgentPage.tsx gọi RequestAccessState.tsx
+3. RequestAccessState.tsx gọi hàm loadUserSessionRequest()
+4. RequestAccessState.tsx gọi DocAgentService
+5. DocAgentService gọi hàm getUserSessionRequest()
+6. DocAgentService gửi yêu cầu GET "/session-access/request/by-user-session/{user_id}/{session_id}" đến session_access_routes.py
+7. session_access_routes.py gọi SessionAccessService.get_user_session_access_request()
+8. SessionAccessService xử lý yêu cầu và gọi chính nó
+9. SessionAccessService gọi SessionAccessRequest
+10. SessionAccessRequest khởi tạo đối tượng SessionAccessRequest()
+11. SessionAccessRequest trả về dữ liệu cho SessionAccessService
+12. SessionAccessService trả về request cho session_access_routes.py
+13. session_access_routes.py trả về kết quả cho DocAgentService
+14. DocAgentService hiển thị dữ liệu cho User
+15. Nếu danh sách session access không null, User gọi RequestAccessState.tsx
+16. RequestAccessState.tsx trả về cho User
+17. User click "Từ chối"
+18. RequestAccessState.tsx gọi hàm handleDeleteRequest()
+19. RequestAccessState.tsx gọi DocAgentService
+20. DocAgentService gọi hàm deleteRequest()
+21. DocAgentService gửi yêu cầu DELETE "/session-access/request/{request_id}" đến session_access_routes.py
+22. session_access_routes.py gọi SessionAccessService.delete_session_access_request()
+23. SessionAccessService xử lý yêu cầu và gọi chính nó
+24. SessionAccessService gọi SessionAccessRequest
+25. SessionAccessRequest khởi tạo đối tượng SessionAccessRequest()
+26. SessionAccessRequest trả về dữ liệu cho SessionAccessService
+27. SessionAccessService trả về kết quả cho session_access_routes.py
+28. session_access_routes.py trả về thông báo cho DocAgentService
+29. DocAgentService trả về kết quả cho DocAgentPage.tsx
+30. DocAgentPage.tsx hiển thị thông báo cho User
+
+---
+
+## 9. Xem danh sách yêu cầu truy cập
+
+1. User click "Chia sẻ" tại Header
+2. Header.tsx gọi SessionShareDialog.tsx
+3. SessionShareDialog.tsx hiển thị dialog cho User
+4. User click tab "Yêu cầu"
+5. SessionShareDialog.tsx gọi hàm loadSessionRequests()
+6. SessionShareDialog.tsx gọi DocAgentService
+7. DocAgentService gọi hàm getSessionRequestsBySession()
+8. DocAgentService gửi yêu cầu GET "/session-access/grant/by-session/{session_id}" đến session_access_routes.py
+9. session_access_routes.py gọi SessionAccessService.get_session_access_requests_by_session()
+10. SessionAccessService xử lý yêu cầu và gọi chính nó
+11. SessionAccessService gọi SessionAccessRequest
+12. SessionAccessRequest khởi tạo đối tượng SessionAccessRequest()
+13. SessionAccessRequest trả về dữ liệu cho SessionAccessService
+14. SessionAccessService trả về danh sách request cho session_access_routes.py
+15. session_access_routes.py trả về kết quả cho DocAgentService
+16. DocAgentService gọi AuthApi trong loop để lấy thông tin User
+17. AuthApi gọi hàm getUserById()
+18. AuthApi trả về thông tin User cho DocAgentService
+19. DocAgentService hiển thị danh sách yêu cầu cho User

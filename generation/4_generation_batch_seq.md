@@ -1,772 +1,6 @@
 # Sequence Diagram - Generation với Batch
 
-## 1. Tạo yêu cầu generation
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant DocAgentPage as DocAgentPage.js
-    participant QuestionGenDialog as QuestionGenDialog.tsx
-    participant DocAgentService as DocAgentService
-    participant GenRoutes as gen_routes
-    participant GenProcessService as GenerationProcessService
-    participant QuestionGenService as QuestionGenerationService
-    participant FlashcardGenService as FlashcardGenerationService
-    participant DB as Database
-
-    User->>DocAgentPage: Click "Tạo"
-    activate DocAgentPage
-    DocAgentPage->>QuestionGenDialog: Hiển thị dialog
-    activate QuestionGenDialog
-    
-    QuestionGenDialog->>DocAgentService: getUserGenerationProcess()
-    activate DocAgentService
-    DocAgentService->>GenRoutes: GET /gen/process/running?user_id&type
-    activate GenRoutes
-    GenRoutes->>GenProcessService: get_user_generation_process()
-    activate GenProcessService
-    GenProcessService->>DB: Query active GenerationProcess
-    activate DB
-    Note over DB: Filter: user_id, result_type, finished_at IS NULL,<br/>canceled_at IS NULL, status IS NULL,<br/>no FAILED steps
-    DB-->>GenProcessService: null (no active process)
-    deactivate DB
-    GenProcessService-->>GenRoutes: null
-    deactivate GenProcessService
-    GenRoutes-->>DocAgentService: null
-    deactivate GenRoutes
-    DocAgentService-->>QuestionGenDialog: ServiceResult(null)
-    deactivate DocAgentService
-    
-    QuestionGenDialog-->>User: Hiển thị form generation
-    
-    User->>QuestionGenDialog: Chọn documents, điền parameters, click "Generate"
-    QuestionGenDialog->>QuestionGenDialog: Validate form data
-    
-    QuestionGenDialog->>DocAgentService: batchGenerate()
-    activate DocAgentService
-    DocAgentService->>GenRoutes: POST /gen/process/question
-    activate GenRoutes
-    
-    GenRoutes->>QuestionGenService: Create service instance
-    activate QuestionGenService
-    QuestionGenService->>GenProcessService: _validate_no_active_process()
-    activate GenProcessService
-    GenProcessService->>DB: Query active process for user
-    activate DB
-    DB-->>GenProcessService: null (no conflict)
-    deactivate DB
-    GenProcessService-->>QuestionGenService: validation passed
-    deactivate GenProcessService
-    
-    QuestionGenService->>DB: Create GenerationProcess(QUESTION, PENDING)
-    activate DB
-    DB-->>QuestionGenService: question_process
-    deactivate DB
-    
-    QuestionGenService->>DB: Create GenerationBatch(question_process_id)
-    activate DB
-    DB-->>QuestionGenService: question_batch
-    deactivate DB
-    QuestionGenService-->>GenRoutes: question_process
-    deactivate QuestionGenService
-    
-    GenRoutes-->>DocAgentService: GenerationProcessResponse
-    deactivate GenRoutes
-    
-    DocAgentService->>GenRoutes: POST /gen/process/flashcard
-    activate GenRoutes
-    
-    GenRoutes->>FlashcardGenService: Create service instance
-    activate FlashcardGenService
-    FlashcardGenService->>GenProcessService: _validate_no_active_process()
-    activate GenProcessService
-    GenProcessService->>DB: Query active process for user
-    activate DB
-    DB-->>GenProcessService: null (no conflict)
-    deactivate DB
-    GenProcessService-->>FlashcardGenService: validation passed
-    deactivate GenProcessService
-    
-    FlashcardGenService->>DB: Create GenerationProcess(FLASHCARD, PENDING)
-    activate DB
-    DB-->>FlashcardGenService: flashcard_process
-    deactivate DB
-    
-    FlashcardGenService->>DB: Create GenerationBatch(flashcard_process_id)
-    activate DB
-    DB-->>FlashcardGenService: flashcard_batch
-    deactivate DB
-    FlashcardGenService-->>GenRoutes: flashcard_process
-    deactivate FlashcardGenService
-    
-    GenRoutes-->>DocAgentService: GenerationProcessResponse
-    deactivate GenRoutes
-    
-    DocAgentService-->>QuestionGenDialog: ServiceResult(BatchGenerateResponse)
-    deactivate DocAgentService
-    
-    QuestionGenDialog->>DocAgentPage: onContentGenerated()
-    deactivate QuestionGenDialog
-    
-    DocAgentPage->>DocAgentPage: handleContentGenerated()
-    DocAgentPage->>DocAgentPage: Connect WebSocket for Question
-    DocAgentPage->>DocAgentPage: Connect WebSocket for Flashcard
-    DocAgentPage-->>User: Hiển thị LiveProgress
-    deactivate DocAgentPage
-```
-
----
-
-## 2. Theo dõi tiến trình generation qua WebSocket
-
-### 2.1. Khởi tạo pipeline
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant DocAgentPage as DocAgentPage.js
-    participant LiveProgress as LiveProgress.tsx
-    participant DocSocketService as DocSocketService
-    participant WebSocket as WebSocket
-    participant GenRoutes as gen_routes
-    participant WSManager as WSGenerationManager
-    participant QuestionGenService as QuestionGenerationService
-    participant GenProcessService as GenerationProcessService
-    participant DB as Database
-
-    Note over User,DB: User đang ở giao diện Session chi tiết, WebSocket đã kết nối
-    
-    User->>DocAgentPage: WebSocket connection established
-    activate DocAgentPage
-    
-    Note over GenRoutes,QuestionGenService: Backend bắt đầu thực hiện pipeline
-    GenRoutes->>QuestionGenService: execute_pipeline()
-    activate QuestionGenService
-    QuestionGenService->>GenProcessService: get_process()
-    activate GenProcessService
-    GenProcessService->>DB: Query GenerationProcess
-    activate DB
-    DB-->>GenProcessService: process
-    deactivate DB
-    GenProcessService-->>QuestionGenService: process
-    deactivate GenProcessService
-    
-    QuestionGenService->>QuestionGenService: Get ordered steps
-    QuestionGenService->>WSManager: send_snapshot()
-    activate WSManager
-    WSManager->>WebSocket: snapshot message
-    deactivate WSManager
-    
-    WebSocket->>DocSocketService: snapshot event
-    activate DocSocketService
-    DocSocketService->>DocAgentPage: onSnapshot callback
-    deactivate DocSocketService
-    
-    DocAgentPage->>LiveProgress: Initialize with steps
-    activate LiveProgress
-    LiveProgress-->>DocAgentPage: rendered
-    deactivate LiveProgress
-    
-    DocAgentPage-->>User: Display pipeline overview
-    deactivate DocAgentPage
-    deactivate QuestionGenService
-```
-
-### 2.2. Step 1: Query Processing
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant LiveProgress as LiveProgress.tsx
-    participant DocAgentPage as DocAgentPage.js
-    participant DocSocketService as DocSocketService
-    participant WebSocket as WebSocket
-    participant WSManager as WSGenerationManager
-    participant QuestionGenService as QuestionGenerationService
-    participant EmbeddingFactory as EmbeddingFactory
-    participant EmbeddingModel as EmbeddingModel<br/>(FastEmbed/OpenAI)
-    participant QueryRouter as QueryRouter
-    participant QueryConstructor as QueryConstructor
-    participant Generator as Generator<br/>(OpenAI/GenAI/etc)
-    participant DB as Database
-
-    Note over User,DB: Step 1: Query Processing
-    QuestionGenService->>QuestionGenService: step_query_processing()
-    QuestionGenService->>DB: Update step status to IN_PROGRESS
-    activate DB
-    DB-->>QuestionGenService: updated
-    deactivate DB
-    
-    QuestionGenService->>WSManager: send_state()
-    activate WSManager
-    WSManager->>WebSocket: state message
-    deactivate WSManager
-    
-    WebSocket->>DocSocketService: state event
-    activate DocSocketService
-    DocSocketService->>DocAgentPage: onState callback
-    deactivate DocSocketService
-    
-    activate DocAgentPage
-    DocAgentPage->>LiveProgress: Update step 1 progress
-    activate LiveProgress
-    LiveProgress-->>DocAgentPage: rendered
-    deactivate LiveProgress
-    DocAgentPage-->>User: Display "Processing query..."
-    deactivate DocAgentPage
-    
-    QuestionGenService->>EmbeddingFactory: create_embedding_model()
-    activate EmbeddingFactory
-    EmbeddingFactory->>EmbeddingModel: Create instance
-    activate EmbeddingModel
-    EmbeddingFactory-->>QuestionGenService: embedding_model
-    deactivate EmbeddingFactory
-    
-    QuestionGenService->>EmbeddingModel: create_embeddings()
-    EmbeddingModel-->>QuestionGenService: query_embedding
-    
-    QuestionGenService->>QueryRouter: route_query()
-    activate QueryRouter
-    QueryRouter->>Generator: analyze_query_complexity()
-    activate Generator
-    Generator-->>QueryRouter: complexity analysis
-    QueryRouter->>QueryRouter: Determine best strategy
-    QueryRouter-->>QuestionGenService: routing_result {strategy, params}
-    deactivate QueryRouter
-    
-    alt Strategy = MULTI_QUERY
-        QuestionGenService->>QueryConstructor: generate_multi_query()
-        activate QueryConstructor
-        QueryConstructor->>Generator: generate_text()
-        Generator-->>QueryConstructor: variations
-        QueryConstructor-->>QuestionGenService: query_variations
-        deactivate QueryConstructor
-    
-    else Strategy = DECOMPOSE
-        QuestionGenService->>QueryConstructor: decompose_query()
-        activate QueryConstructor
-        QueryConstructor->>Generator: generate_text()
-        Generator-->>QueryConstructor: sub_queries
-        QueryConstructor-->>QuestionGenService: query_variations
-        deactivate QueryConstructor
-    
-    else Strategy = HYBRID
-        QuestionGenService->>QueryConstructor: generate_multi_query()
-        activate QueryConstructor
-        QueryConstructor->>Generator: generate_text()
-        Generator-->>QueryConstructor: variations
-        QueryConstructor-->>QuestionGenService: query_variations
-        deactivate QueryConstructor
-    end
-    deactivate Generator
-    
-    QuestionGenService->>DB: Save query_embedding, strategy, variations
-    activate DB
-    DB-->>QuestionGenService: saved
-    deactivate DB
-    
-    QuestionGenService->>DB: Update step to DONE
-    activate DB
-    DB-->>QuestionGenService: updated
-    deactivate DB
-    
-    QuestionGenService->>WSManager: send_state()
-    activate WSManager
-    WSManager->>WebSocket: state message
-    deactivate WSManager
-    
-    WebSocket->>DocSocketService: state event
-    activate DocSocketService
-    DocSocketService->>DocAgentPage: onState callback
-    deactivate DocSocketService
-    
-    activate DocAgentPage
-    DocAgentPage->>LiveProgress: Update step 1 completed
-    activate LiveProgress
-    LiveProgress-->>DocAgentPage: rendered
-    deactivate LiveProgress
-    DocAgentPage-->>User: Display "Query processed ✓"
-    deactivate DocAgentPage
-    deactivate EmbeddingModel
-```
-
-### 2.3. Step 2: Retrieval
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant LiveProgress as LiveProgress.tsx
-    participant DocAgentPage as DocAgentPage.js
-    participant DocSocketService as DocSocketService
-    participant WebSocket as WebSocket
-    participant WSManager as WSGenerationManager
-    participant QuestionGenService as QuestionGenerationService
-    participant EmbeddingFactory as EmbeddingFactory
-    participant EmbeddingModel as EmbeddingModel<br/>(FastEmbed/OpenAI)
-    participant QueryTranslator as QueryTranslator
-    participant QuerySimilarProcessor as QuerySimilarProcessor
-    participant RAGFusion as RAGFusion
-    participant Reranker as Reranker
-    participant Generator as Generator<br/>(OpenAI/GenAI/etc)
-    participant StorageProvider as StorageProvider
-    participant DB as Database
-
-    Note over User,DB: Step 2: Retrieval
-    QuestionGenService->>QuestionGenService: step_retrieval()
-    QuestionGenService->>DB: Update step status to IN_PROGRESS
-    activate DB
-    DB-->>QuestionGenService: updated
-    deactivate DB
-    
-    QuestionGenService->>WSManager: send_state()
-    activate WSManager
-    WSManager->>WebSocket: state message
-    deactivate WSManager
-    
-    WebSocket->>DocSocketService: state event
-    activate DocSocketService
-    DocSocketService->>DocAgentPage: onState callback
-    deactivate DocSocketService
-    
-    activate DocAgentPage
-    DocAgentPage->>LiveProgress: Update step 2 progress
-    activate LiveProgress
-    LiveProgress-->>DocAgentPage: rendered
-    deactivate LiveProgress
-    DocAgentPage-->>User: Display "Retrieving context..."
-    deactivate DocAgentPage
-    
-    QuestionGenService->>EmbeddingFactory: create_embedding_model()
-    activate EmbeddingFactory
-    EmbeddingFactory->>EmbeddingModel: Create instance
-    activate EmbeddingModel
-    EmbeddingFactory-->>QuestionGenService: Return embedding_model
-    deactivate EmbeddingFactory
-    
-    alt Strategy = VECTOR_SEARCH
-        QuestionGenService->>QuerySimilarProcessor: similarity_search()
-        activate QuerySimilarProcessor
-        QuerySimilarProcessor->>DB: Query chunks with pgvector
-        DB-->>QuerySimilarProcessor: Return similar chunks
-        QuerySimilarProcessor-->>QuestionGenService: Return results
-        deactivate QuerySimilarProcessor
-    
-    else Strategy = HYDE
-        QuestionGenService->>QueryTranslator: generate_hypothetical_document()
-        activate QueryTranslator
-        QueryTranslator->>Generator: generate_text()
-        activate Generator
-        Generator-->>QueryTranslator: Return hyde_doc
-        deactivate Generator
-        QueryTranslator-->>QuestionGenService: Return hyde_doc
-        deactivate QueryTranslator
-        
-        QuestionGenService->>QuerySimilarProcessor: similarity_search()
-        activate QuerySimilarProcessor
-        QuerySimilarProcessor->>DB: Query chunks
-        DB-->>QuerySimilarProcessor: Return chunks
-        QuerySimilarProcessor-->>QuestionGenService: Return hyde_results
-        deactivate QuerySimilarProcessor
-    
-    else Strategy = MULTI_QUERY or DECOMPOSE
-        loop For each query variation
-            QuestionGenService->>QuerySimilarProcessor: similarity_search()
-            activate QuerySimilarProcessor
-            QuerySimilarProcessor->>DB: Query chunks
-            DB-->>QuerySimilarProcessor: Return chunks
-            QuerySimilarProcessor-->>QuestionGenService: Return variation_results
-            deactivate QuerySimilarProcessor
-        end
-    
-    else Strategy = HYBRID
-        QuestionGenService->>QuerySimilarProcessor: similarity_search()
-        activate QuerySimilarProcessor
-        QuerySimilarProcessor->>DB: Query chunks
-        QuerySimilarProcessor-->>QuestionGenService: Return vec_results
-        deactivate QuerySimilarProcessor
-        
-        QuestionGenService->>QueryTranslator: generate_hypothetical_document()
-        activate QueryTranslator
-        QueryTranslator->>Generator: generate_text()
-        activate Generator
-        Generator-->>QueryTranslator: Return hyde_doc
-        deactivate Generator
-        QueryTranslator-->>QuestionGenService: Return hyde_doc
-        deactivate QueryTranslator
-        
-        QuestionGenService->>QuerySimilarProcessor: similarity_search()
-        activate QuerySimilarProcessor
-        QuerySimilarProcessor->>DB: Query chunks
-        QuerySimilarProcessor-->>QuestionGenService: Return hyde_results
-        deactivate QuerySimilarProcessor
-        
-        loop For each query variation
-            QuestionGenService->>QuerySimilarProcessor: similarity_search()
-            activate QuerySimilarProcessor
-            QuerySimilarProcessor->>DB: Query chunks
-            QuerySimilarProcessor-->>QuestionGenService: Return multi_results
-            deactivate QuerySimilarProcessor
-        end
-    end
-    
-    alt Multiple result sets
-        QuestionGenService->>RAGFusion: fuse_multi_strategy_results()
-        activate RAGFusion
-        RAGFusion->>RAGFusion: reciprocal_rank_fusion(ranked_lists)
-        RAGFusion-->>QuestionGenService: Return fused_results
-        deactivate RAGFusion
-    end
-    
-    alt Reranking enabled
-        QuestionGenService->>Reranker: hybrid_rerank()
-        activate Reranker
-        Reranker->>Reranker: rerank_with_llm(query, candidates)
-        Reranker->>Generator: generate_text()
-        activate Generator
-        Generator-->>Reranker: Return relevance scores
-        deactivate Generator
-        Reranker->>Reranker: rerank_by_diversity(candidates)
-        Reranker-->>QuestionGenService: Return reranked_results
-        deactivate Reranker
-    end
-    
-    QuestionGenService->>QuestionGenService: Build context from top-k chunks
-    QuestionGenService->>DB: bulk_insert_document_chunk_used()
-    
-    QuestionGenService->>StorageProvider: save_context_used_file()
-    activate StorageProvider
-    StorageProvider-->>QuestionGenService: Return context_url
-    deactivate StorageProvider
-    
-    QuestionGenService->>EmbeddingModel: create_embeddings()
-    EmbeddingModel-->>QuestionGenService: Return context_embedding
-    deactivate EmbeddingModel
-    
-    QuestionGenService->>DB: Save context_url, context_embedding
-    QuestionGenService->>DB: Update step to DONE
-    QuestionGenService->>WSManager: send_state()
-    activate WSManager
-    WSManager->>WebSocket: Send state message
-    WebSocket-->>DocSocketService: Receive state
-    activate DocSocketService
-    DocSocketService->>DocAgentPage: onState callback
-    activate DocAgentPage
-    DocAgentPage->>LiveProgress: Update step 2 completed
-    activate LiveProgress
-    LiveProgress->>User: Display "Context retrieved ✓"
-    deactivate LiveProgress
-    deactivate DocAgentPage
-    deactivate DocSocketService
-    deactivate WSManager
-```
-
-### 2.4. Step 3: Duplicate Prevention
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant LiveProgress as LiveProgress.tsx
-    participant DocAgentPage as DocAgentPage.js
-    participant DocSocketService as DocSocketService
-    participant WebSocket as WebSocket
-    participant WSManager as WSGenerationManager
-    participant QuestionGenService as QuestionGenerationService
-    participant QuerySimilarProcessor as QuerySimilarProcessor
-    participant BatchService as BatchService
-    participant DB as Database
-
-    Note over User,DB: Step 3: Duplicate Prevention
-    QuestionGenService->>QuestionGenService: step_duplicate_prevention()
-    QuestionGenService->>DB: Update step status to IN_PROGRESS
-    activate DB
-    DB-->>QuestionGenService: updated
-    deactivate DB
-    
-    QuestionGenService->>WSManager: send_state()
-    activate WSManager
-    WSManager->>WebSocket: state message
-    deactivate WSManager
-    
-    WebSocket->>DocSocketService: state event
-    activate DocSocketService
-    DocSocketService->>DocAgentPage: onState callback
-    deactivate DocSocketService
-    
-    activate DocAgentPage
-    DocAgentPage->>LiveProgress: Update step 3 progress
-    activate LiveProgress
-    LiveProgress-->>DocAgentPage: rendered
-    deactivate LiveProgress
-    DocAgentPage-->>User: Display "Checking duplicates..."
-    deactivate DocAgentPage
-    
-    QuestionGenService->>QuerySimilarProcessor: find_similar_processes()
-    activate QuerySimilarProcessor
-    QuerySimilarProcessor->>QuerySimilarProcessor: find_similar_processes_by_query()
-    QuerySimilarProcessor->>DB: Query similar processes by query embedding
-    activate DB
-    DB-->>QuerySimilarProcessor: candidate_process_ids
-    deactivate DB
-    
-    QuerySimilarProcessor->>QuerySimilarProcessor: find_similar_processes_by_context()
-    QuerySimilarProcessor->>DB: Query similar processes by context embedding
-    activate DB
-    DB-->>QuerySimilarProcessor: filtered_process_ids
-    deactivate DB
-    QuerySimilarProcessor-->>QuestionGenService: similar_process_ids
-    deactivate QuerySimilarProcessor
-    
-    QuestionGenService->>BatchService: get_approved_items_by_processes()
-    activate BatchService
-    BatchService->>DB: Query approved BatchItems
-    activate DB
-    DB-->>BatchService: approved_items
-    deactivate DB
-    BatchService-->>QuestionGenService: approved_items
-    deactivate BatchService
-    
-    QuestionGenService->>DB: Update step to DONE with approved_item_ids
-    activate DB
-    DB-->>QuestionGenService: updated
-    deactivate DB
-    
-    QuestionGenService->>WSManager: send_state()
-    activate WSManager
-    WSManager->>WebSocket: state message
-    deactivate WSManager
-    
-    WebSocket->>DocSocketService: state event
-    activate DocSocketService
-    DocSocketService->>DocAgentPage: onState callback
-    deactivate DocSocketService
-    
-    activate DocAgentPage
-    DocAgentPage->>LiveProgress: Update step 3 completed
-    activate LiveProgress
-    LiveProgress-->>DocAgentPage: rendered
-    deactivate LiveProgress
-    DocAgentPage-->>User: Display "Duplicates checked ✓"
-    deactivate DocAgentPage
-```
-
-### 2.5. Step 4: Generation
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant LiveProgress as LiveProgress.tsx
-    participant DocAgentPage as DocAgentPage.js
-    participant DocSocketService as DocSocketService
-    participant WebSocket as WebSocket
-    participant WSManager as WSGenerationManager
-    participant QuestionGenService as QuestionGenerationService
-    participant PromptBuilder as PromptBuilder
-    participant StorageProvider as StorageProvider
-    participant GeneratorFactory as GeneratorFactory
-    participant Generator as Generator<br/>(OpenAI/GenAI/etc)
-    participant BatchService as BatchService
-    participant DB as Database
-
-    Note over User,DB: Step 4: Generation
-    QuestionGenService->>QuestionGenService: step_generation()
-    QuestionGenService->>DB: Update step status to IN_PROGRESS
-    activate DB
-    DB-->>QuestionGenService: updated
-    deactivate DB
-    
-    QuestionGenService->>WSManager: send_state()
-    activate WSManager
-    WSManager->>WebSocket: state message
-    deactivate WSManager
-    
-    WebSocket->>DocSocketService: state event
-    activate DocSocketService
-    DocSocketService->>DocAgentPage: onState callback
-    deactivate DocSocketService
-    
-    activate DocAgentPage
-    DocAgentPage->>LiveProgress: Update step 4 progress
-    activate LiveProgress
-    LiveProgress-->>DocAgentPage: rendered
-    deactivate LiveProgress
-    DocAgentPage-->>User: Display "Generating content..."
-    deactivate DocAgentPage
-    
-    QuestionGenService->>QuestionGenService: generate_items()
-    
-    QuestionGenService->>PromptBuilder: build_prompt_for_generation()
-    activate PromptBuilder
-    PromptBuilder->>StorageProvider: Load context from storage
-    activate StorageProvider
-    StorageProvider-->>PromptBuilder: context_content
-    deactivate StorageProvider
-    
-    PromptBuilder->>PromptBuilder: _build_existing_items_context()
-    PromptBuilder-->>QuestionGenService: complete_prompt
-    deactivate PromptBuilder
-    
-    QuestionGenService->>GeneratorFactory: create_generator()
-    activate GeneratorFactory
-    GeneratorFactory->>Generator: Create instance based on wrapper type
-    activate Generator
-    GeneratorFactory-->>QuestionGenService: generator
-    deactivate GeneratorFactory
-    
-    QuestionGenService->>Generator: generate_text()
-    Generator-->>QuestionGenService: response (JSON)
-    
-    QuestionGenService->>QuestionGenService: parse_response(response)
-    QuestionGenService->>QuestionGenService: _validate_item() for each item
-    
-    QuestionGenService->>BatchService: create_generation_batch()
-    activate BatchService
-    BatchService->>DB: Insert GenerationBatch
-    activate DB
-    DB-->>BatchService: batch
-    deactivate DB
-    
-    loop For each validated item
-        BatchService->>DB: Insert BatchItem with item data
-        activate DB
-        DB-->>BatchService: batch_item
-        deactivate DB
-    end
-    
-    BatchService-->>QuestionGenService: batch with items
-    deactivate BatchService
-    
-    QuestionGenService->>DB: Update result_generated_count
-    activate DB
-    DB-->>QuestionGenService: updated
-    deactivate DB
-    
-    QuestionGenService->>DB: Update step to DONE
-    activate DB
-    DB-->>QuestionGenService: updated
-    deactivate DB
-    
-    QuestionGenService->>WSManager: send_state()
-    activate WSManager
-    WSManager->>WebSocket: state message
-    deactivate WSManager
-    
-    WebSocket->>DocSocketService: state event
-    activate DocSocketService
-    DocSocketService->>DocAgentPage: onState callback
-    deactivate DocSocketService
-    
-    activate DocAgentPage
-    DocAgentPage->>LiveProgress: Update step 4 completed
-    activate LiveProgress
-    LiveProgress-->>DocAgentPage: rendered
-    deactivate LiveProgress
-    DocAgentPage-->>User: Display "Generation completed ✓"
-    deactivate DocAgentPage
-    deactivate Generator
-```
-
-### 2.6. Hoàn thành pipeline
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant LiveProgress as LiveProgress.tsx
-    participant DocAgentPage as DocAgentPage.js
-    participant DocSocketService as DocSocketService
-    participant WebSocket as WebSocket
-    participant WSManager as WSGenerationManager
-    participant QuestionGenService as QuestionGenerationService
-    participant DB as Database
-
-    Note over User,DB: Pipeline completed
-    QuestionGenService->>DB: Mark process as finished (status=SUCCESS)
-    activate DB
-    DB-->>QuestionGenService: updated
-    deactivate DB
-    
-    QuestionGenService->>WSManager: notify()
-    activate WSManager
-    WSManager->>WebSocket: finished message
-    deactivate WSManager
-    
-    WebSocket->>DocSocketService: finished event
-    activate DocSocketService
-    DocSocketService->>DocAgentPage: onFinished callback
-    deactivate DocSocketService
-    
-    activate DocAgentPage
-    DocAgentPage->>DocAgentPage: handleQuestionSocketFinished()
-    DocAgentPage->>WebSocket: close()
-    WebSocket-->>DocAgentPage: closed
-    DocAgentPage->>DocAgentPage: Clear socket state
-    DocAgentPage->>LiveProgress: Update to show completion
-    activate LiveProgress
-    LiveProgress->>LiveProgress: Display "Generation completed" message
-    LiveProgress-->>DocAgentPage: rendered with "View Results" button
-    deactivate LiveProgress
-    
-    DocAgentPage-->>User: Show completion with action button
-    DocAgentPage->>DocAgentPage: Trigger check for pending batch
-    deactivate DocAgentPage
-```
-
----
-
-## 3. Hủy tiến trình generation
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant LiveProgress as LiveProgress.tsx
-    participant DocAgentService as DocAgentService
-    participant GenRoutes as gen_routes
-    participant GenProcessService as GenerationProcessService
-    participant DB as Database
-    participant QuestionGenService as QuestionGenerationService
-    participant WSManager as WSGenerationManager
-
-    User->>LiveProgress: Click "Cancel Process"
-    activate LiveProgress
-    LiveProgress->>LiveProgress: Hiển thị confirm dialog
-    User->>LiveProgress: Xác nhận hủy
-    
-    LiveProgress->>DocAgentService: cancelProcess()
-    activate DocAgentService
-    DocAgentService->>GenRoutes: POST /gen/cancel/{processId}
-    activate GenRoutes
-    
-    GenRoutes->>GenProcessService: cancel_process()
-    activate GenProcessService
-    GenProcessService->>DB: Query process
-    DB-->>GenProcessService: process
-    GenProcessService->>GenProcessService: Validate user_id
-    GenProcessService->>DB: Update status to CANCELLED
-    DB-->>GenProcessService: Success
-    GenProcessService-->>GenRoutes: {status: "cancelled"}
-    deactivate GenProcessService
-    
-    GenRoutes-->>DocAgentService: MessageResponse
-    deactivate GenRoutes
-    DocAgentService-->>LiveProgress: ServiceResult(success)
-    deactivate DocAgentService
-    
-    LiveProgress->>LiveProgress: onCancelComplete()
-    LiveProgress-->>User: Hiển thị "Process cancelled successfully"
-    deactivate LiveProgress
-    
-    Note over QuestionGenService: Pipeline đang chạy
-    QuestionGenService->>DB: Check process status
-    DB-->>QuestionGenService: CANCELLED
-    QuestionGenService->>QuestionGenService: Throw ProcessCanceledException
-    QuestionGenService->>WSManager: send_notify()
-    activate WSManager
-    WSManager->>WSManager: Broadcast notify
-    deactivate WSManager
-```
-
----
-
-## 4. Xem kết quả batch
+## 1. Xem kết quả Batch
 
 ```mermaid
 sequenceDiagram
@@ -774,266 +8,797 @@ sequenceDiagram
     participant QuestionTab as QuestionTab.tsx
     participant QuestionApprovalTab as QuestionApprovalTab.tsx
     participant DocAgentService as DocAgentService
-    participant BatchRoutes as batch_routes
+    participant BatchRoutes as batch_routes.py
     participant BatchService as BatchService
-    participant DB as Database
+    participant GenerationBatch as GenerationBatch
+    participant BatchItem as BatchItem
 
-    Note over QuestionTab: Generation hoàn thành, onFinished() called
+    User->>QuestionTab: Click "Câu hỏi" tab
+    activate QuestionTab
     
-    QuestionTab->>QuestionTab: checkForPendingBatch()
-    QuestionTab->>DocAgentService: getPendingBatch()
+    QuestionTab->>QuestionApprovalTab: gọi
+    activate QuestionApprovalTab
+    
+    QuestionApprovalTab->>QuestionApprovalTab: loadUserPendingBatch()
+    QuestionApprovalTab->>DocAgentService: gọi
+    deactivate QuestionApprovalTab
     activate DocAgentService
-    DocAgentService->>BatchRoutes: GET /batch/pending-batch?user_id&session_id&result_type
+    
+    DocAgentService->>DocAgentService: getUserPendingBatch()
+    DocAgentService->>BatchRoutes: GET "/batch/pending-batch?user_id&session_id&result_type"
     activate BatchRoutes
     
-    BatchRoutes->>BatchService: get_pending_batch()
+    BatchRoutes->>BatchService: get_user_pending_batch()
     activate BatchService
-    BatchService->>DB: Query GenerationBatch<br/>(status=PENDING, result_type=QUESTION)
-    DB-->>BatchService: batch
-    BatchService-->>BatchRoutes: GenerationBatch
+    
+    BatchService->>BatchService: gọi
+    BatchService->>GenerationBatch: gọi
+    activate GenerationBatch
+    
+    GenerationBatch->>GenerationBatch: GenerationBatch()
+    GenerationBatch-->>BatchService: trả về
+    deactivate GenerationBatch
+    
+    BatchService-->>BatchRoutes: trả về
     deactivate BatchService
     
-    BatchRoutes-->>DocAgentService: GenerationBatchResponse
+    BatchRoutes-->>DocAgentService: trả về
     deactivate BatchRoutes
-    DocAgentService-->>QuestionTab: ServiceResult(batch)
-    deactivate DocAgentService
     
-    QuestionTab->>QuestionTab: Set pendingBatchProcessId
-    
-    QuestionTab->>DocAgentService: getBatchItems()
-    activate DocAgentService
-    DocAgentService->>BatchRoutes: GET /batch/batch-item/by-batch/{batchId}
+    DocAgentService->>DocAgentService: getBatchItemsByBatch()
+    DocAgentService->>BatchRoutes: GET "/batch/batch-items/by-batch/{batch_id}"
     activate BatchRoutes
     
     BatchRoutes->>BatchService: get_batch_items_by_batch()
     activate BatchService
-    BatchService->>DB: Query BatchItem<br/>JOIN Question
-    DB-->>BatchService: [BatchItem with Question data]
-    BatchService-->>BatchRoutes: [BatchItem]
+    
+    BatchService->>BatchService: gọi
+    BatchService->>BatchItem: gọi
+    activate BatchItem
+    
+    BatchItem->>BatchItem: BatchItem()
+    BatchItem-->>BatchService: trả về
+    deactivate BatchItem
+    
+    BatchService-->>BatchRoutes: trả về
     deactivate BatchService
     
-    BatchRoutes-->>DocAgentService: [BatchItemResponse]
+    BatchRoutes-->>DocAgentService: trả về
     deactivate BatchRoutes
-    DocAgentService-->>QuestionTab: ServiceResult([BatchItem])
+    
+    alt batch != null
+        DocAgentService-->>QuestionApprovalTab: trả về
+    end
     deactivate DocAgentService
     
-    QuestionTab->>QuestionTab: Extract Questions from items
-    QuestionTab->>QuestionTab: Set showApprovalTab = true
-    
-    QuestionTab->>QuestionApprovalTab: Render với batchId, items
-    activate QuestionApprovalTab
-    QuestionApprovalTab-->>User: Hiển thị approval tab với questions
-    deactivate QuestionApprovalTab
+    QuestionApprovalTab-->>User: Hiển thị
+    deactivate QuestionTab
 ```
 
 ---
 
-## 5. Duyệt kết quả batch
+## 2. Duyệt kết quả Batch
 
 ```mermaid
 sequenceDiagram
     actor User
-    participant QuestionApprovalTab as QuestionApprovalTab.tsx
-    participant QuestionTab as QuestionTab.tsx
+    participant FlashcardTab as FlashcardTab.tsx
+    participant FlashcardApprovalTab as FlashcardApprovalTab.tsx
     participant DocAgentService as DocAgentService
-    participant BatchRoutes as batch_routes
+    participant BatchRoutes as batch_routes.py
     participant BatchService as BatchService
-    participant BulkOpsService as BulkOperationsService
-    participant DB as Database
+    participant GenerationBatch as GenerationBatch
+    participant MessageResponse as MessageResponse
 
-    User->>QuestionApprovalTab: Chọn items, click "Approve Selected"
-    activate QuestionApprovalTab
+    User->>FlashcardTab: Click "Câu hỏi" tab
+    activate FlashcardTab
     
-    QuestionApprovalTab->>QuestionApprovalTab: Validate selected items
+    FlashcardTab->>FlashcardApprovalTab: gọi
+    activate FlashcardApprovalTab
     
-    QuestionApprovalTab->>DocAgentService: approve()
+    FlashcardApprovalTab->>FlashcardApprovalTab: loadUserPendingBatch()
+    FlashcardApprovalTab-->>User: Hiển thị
+    deactivate FlashcardApprovalTab
+    
+    User->>FlashcardApprovalTab: Chọn các bản ghi và click "Phê duyệt"
+    activate FlashcardApprovalTab
+    
+    FlashcardApprovalTab->>FlashcardApprovalTab: handleApprovalBatch()
+    FlashcardApprovalTab->>DocAgentService: gọi
+    deactivate FlashcardApprovalTab
     activate DocAgentService
-    DocAgentService->>BatchRoutes: POST /batch/approve
+    
+    DocAgentService->>DocAgentService: approvedBatch()
+    DocAgentService->>BatchRoutes: POST "/batch/approve"
     activate BatchRoutes
     
     BatchRoutes->>BatchService: approve_batch()
     activate BatchService
-    BatchService->>DB: BEGIN TRANSACTION
     
-    BatchService->>DB: Bulk update BatchItem<br/>status = APPROVED
-    DB-->>BatchService: Updated count
+    BatchService->>BatchService: gọi
+    BatchService->>MessageResponse: gọi
+    activate MessageResponse
     
-    BatchService->>BatchService: Extract question_ids from items
+    MessageResponse->>MessageResponse: MessageResponse()
+    MessageResponse-->>BatchService: trả về
+    deactivate MessageResponse
     
-    BatchService->>BulkOpsService: bulk_insert_questions()
-    activate BulkOpsService
-    BulkOpsService->>DB: Bulk INSERT into Question table
-    DB-->>BulkOpsService: Insert count
-    BulkOpsService-->>BatchService: Count
-    deactivate BulkOpsService
-    
-    BatchService->>DB: Update batch.approved_items_count
-    
-    BatchService->>BatchService: Check if all items processed
-    alt All items processed
-        BatchService->>DB: Update batch.status = COMPLETED
-    end
-    
-    BatchService->>DB: COMMIT TRANSACTION
-    
-    BatchService-->>BatchRoutes: MessageResponse
+    BatchService-->>BatchRoutes: trả về
     deactivate BatchService
     
-    BatchRoutes-->>DocAgentService: MessageResponse
+    BatchRoutes-->>DocAgentService: trả về
     deactivate BatchRoutes
-    DocAgentService-->>QuestionApprovalTab: ServiceResult(success)
+    
+    DocAgentService-->>FlashcardTab: trả về
     deactivate DocAgentService
     
-    QuestionApprovalTab->>QuestionApprovalTab: onApprovalComplete()
-    
-    QuestionApprovalTab->>QuestionTab: Reload tab data
-    activate QuestionTab
-    QuestionTab->>DocAgentService: getQuestionsBySession()
-    DocAgentService-->>QuestionTab: Questions (including approved)
-    QuestionTab-->>User: Hiển thị questions mới
-    deactivate QuestionTab
-    
-    QuestionApprovalTab->>QuestionApprovalTab: Check remaining items
-    
-    alt No remaining items
-        QuestionApprovalTab->>QuestionApprovalTab: Set showApprovalTab = false
-    else Has remaining items
-        QuestionApprovalTab-->>User: Hiển thị remaining items
-    end
-    
-    QuestionApprovalTab-->>User: Toast "Items approved successfully"
-    deactivate QuestionApprovalTab
+    FlashcardTab-->>User: Hiển thị
+    deactivate FlashcardTab
 ```
 
 ---
 
-## 6. Từ chối kết quả batch
+## 3. Từ chối kết quả Batch
 
 ```mermaid
 sequenceDiagram
     actor User
-    participant QuestionApprovalTab as QuestionApprovalTab.tsx
+    participant FlashcardTab as FlashcardTab.tsx
+    participant FlashcardApprovalTab as FlashcardApprovalTab.tsx
     participant DocAgentService as DocAgentService
-    participant BatchRoutes as batch_routes
+    participant BatchRoutes as batch_routes.py
     participant BatchService as BatchService
-    participant DB as Database
+    participant MessageResponse as MessageResponse
 
-    User->>QuestionApprovalTab: Chọn items, nhập feedback, click "Reject Selected"
-    activate QuestionApprovalTab
+    User->>FlashcardTab: Click "Câu hỏi" tab
+    activate FlashcardTab
     
-    QuestionApprovalTab->>QuestionApprovalTab: Validate selected items<br/>Validate feedback length
+    FlashcardTab->>FlashcardApprovalTab: gọi
+    activate FlashcardApprovalTab
     
-    QuestionApprovalTab->>DocAgentService: reject()
+    FlashcardApprovalTab->>FlashcardApprovalTab: loadUserPendingBatch()
+    FlashcardApprovalTab-->>User: Hiển thị
+    deactivate FlashcardApprovalTab
+    
+    User->>FlashcardApprovalTab: Chọn và click "Từ chối"
+    activate FlashcardApprovalTab
+    
+    FlashcardApprovalTab->>FlashcardApprovalTab: handleRejectBatch()
+    FlashcardApprovalTab->>DocAgentService: gọi
+    deactivate FlashcardApprovalTab
     activate DocAgentService
-    DocAgentService->>BatchRoutes: POST /batch/reject
+    
+    DocAgentService->>DocAgentService: rejectBatch()
+    DocAgentService->>BatchRoutes: POST "/batch/reject"
     activate BatchRoutes
     
     BatchRoutes->>BatchService: reject_batch()
     activate BatchService
-    BatchService->>DB: BEGIN TRANSACTION
     
-    BatchService->>DB: Bulk update BatchItem<br/>status = REJECTED
-    DB-->>BatchService: Updated count
+    BatchService->>BatchService: gọi
+    BatchService->>MessageResponse: gọi
+    activate MessageResponse
     
-    alt Has feedback
-        BatchService->>DB: INSERT BatchFeedback<br/>(feedback_type=REJECTION)
-        DB-->>BatchService: Feedback created
-    end
+    MessageResponse->>MessageResponse: MessageResponse()
+    MessageResponse-->>BatchService: trả về
+    deactivate MessageResponse
     
-    BatchService->>DB: Update batch.rejected_items_count
-    
-    BatchService->>BatchService: Check if all items processed
-    alt All items processed
-        BatchService->>DB: Update batch.status = COMPLETED
-    end
-    
-    BatchService->>DB: COMMIT TRANSACTION
-    
-    BatchService-->>BatchRoutes: MessageResponse
+    BatchService-->>BatchRoutes: trả về
     deactivate BatchService
     
-    BatchRoutes-->>DocAgentService: MessageResponse
+    BatchRoutes-->>DocAgentService: trả về
     deactivate BatchRoutes
-    DocAgentService-->>QuestionApprovalTab: ServiceResult(success)
+    
+    DocAgentService-->>FlashcardTab: trả về
     deactivate DocAgentService
     
-    QuestionApprovalTab->>QuestionApprovalTab: Reload batch items
-    
-    alt Has rejected items
-        QuestionApprovalTab-->>User: Hiển thị nút "Regenerate"
-    end
-    
-    alt Has remaining items
-        QuestionApprovalTab-->>User: Hiển thị remaining items
-    else No remaining items
-        QuestionApprovalTab->>QuestionApprovalTab: Set showApprovalTab = false
-    end
-    
-    QuestionApprovalTab-->>User: Toast "Items rejected successfully"
-    deactivate QuestionApprovalTab
+    FlashcardTab-->>User: Hiển thị
+    deactivate FlashcardTab
 ```
 
 ---
 
-## 7. Tạo yêu cầu regenerate
+## 4. Tạo yêu cầu regenerate
 
 ```mermaid
 sequenceDiagram
     actor User
-    participant QuestionApprovalTab as QuestionApprovalTab.tsx
-    participant DocAgentPage as DocAgentPage.js
+    participant FlashcardTab as FlashcardTab.tsx
+    participant FlashcardApprovalTab as FlashcardApprovalTab.tsx
     participant DocAgentService as DocAgentService
-    participant GenRoutes as gen_routes
-    participant QuestionGenService as QuestionGenerationService
-    participant DB as Database
+    participant BatchRoutes as batch_routes.py
+    participant GenerationProcessService as GenerationProcessService
+    participant GenerationProcess as GenerationProcess
+    participant ModelConfig as ModelConfig
+    participant ModelUsage as ModelUsage
+    participant QueryContext as QueryContext
+    participant GenerationProcessStep as GenerationProcessStep
 
-    User->>QuestionApprovalTab: Click "Regenerate"
-    activate QuestionApprovalTab
+    User->>FlashcardTab: Click "Câu hỏi" tab
+    activate FlashcardTab
     
-    QuestionApprovalTab->>DocAgentService: regenerate()
+    FlashcardTab->>FlashcardApprovalTab: gọi
+    activate FlashcardApprovalTab
+    
+    FlashcardApprovalTab->>FlashcardApprovalTab: loadUserPendingBatch()
+    FlashcardApprovalTab-->>User: Hiển thị
+    deactivate FlashcardApprovalTab
+    
+    User->>FlashcardApprovalTab: Nhập yêu cầu sau khi bị từ chối và click "Tạo lại"
+    activate FlashcardApprovalTab
+    
+    FlashcardApprovalTab->>FlashcardApprovalTab: handleRegenerate()
+    FlashcardApprovalTab->>FlashcardApprovalTab: validate()
+    FlashcardApprovalTab->>DocAgentService: gọi
+    deactivate FlashcardApprovalTab
     activate DocAgentService
-    DocAgentService->>GenRoutes: POST /gen/regenerate
-    activate GenRoutes
     
-    GenRoutes->>QuestionGenService: regenerate()
-    activate QuestionGenService
+    DocAgentService->>DocAgentService: createFlashcardProcess()
+    DocAgentService->>BatchRoutes: POST "/gen/process/flashcard?queryConfigId&Req=queryConfig&Req"
+    activate BatchRoutes
     
-    QuestionGenService->>DB: Query old batch
-    DB-->>QuestionGenService: old_batch
+    BatchRoutes->>GenerationProcessService: create_flashcard_process()
+    activate GenerationProcessService
     
-    QuestionGenService->>DB: Query rejected items
-    DB-->>QuestionGenService: rejected_items
+    GenerationProcessService->>GenerationProcessService: gọi
+    GenerationProcessService->>ModelConfig: gọi
+    activate ModelConfig
     
-    QuestionGenService->>DB: Query feedback
-    DB-->>QuestionGenService: feedback
+    ModelConfig->>ModelConfig: ModelConfig()
+    ModelConfig-->>GenerationProcessService: trả về
+    deactivate ModelConfig
     
-    QuestionGenService->>DB: Create new GenerationProcess<br/>(process_order + 1)
-    DB-->>QuestionGenService: new_process
+    GenerationProcessService->>GenerationProcessService: create_process()
+    GenerationProcessService->>GenerationProcess: gọi
+    activate GenerationProcess
     
-    QuestionGenService->>DB: Create new GenerationBatch<br/>(parent_batch_id = old_batch.id)
-    DB-->>QuestionGenService: new_batch
+    GenerationProcess->>GenerationProcess: GenerationProcess()
+    GenerationProcess-->>GenerationProcessService: trả về
+    deactivate GenerationProcess
     
-    QuestionGenService->>QuestionGenService: Build prompt with<br/>regeneration guidance
+    GenerationProcessService->>ModelUsage: gọi
+    activate ModelUsage
     
-    QuestionGenService->>QuestionGenService: Start execute_pipeline()<br/>in background
+    ModelUsage->>ModelUsage: ModelUsage()
+    ModelUsage-->>GenerationProcessService: trả về
+    deactivate ModelUsage
     
-    QuestionGenService-->>GenRoutes: new_batch
-    deactivate QuestionGenService
+    GenerationProcessService->>QueryContext: gọi
+    activate QueryContext
     
-    GenRoutes-->>DocAgentService: GenerationBatchResponse
-    deactivate GenRoutes
-    DocAgentService-->>QuestionApprovalTab: ServiceResult(new_batch)
+    QueryContext->>QueryContext: QueryContext()
+    QueryContext-->>GenerationProcessService: trả về
+    deactivate QueryContext
+    
+    GenerationProcessService->>GenerationProcessService: create_steps()
+    GenerationProcessService->>GenerationProcessStep: gọi
+    activate GenerationProcessStep
+    
+    GenerationProcessStep->>GenerationProcessStep: GenerationProcessStep()
+    GenerationProcessStep-->>GenerationProcessService: trả về
+    deactivate GenerationProcessStep
+    
+    GenerationProcessService-->>BatchRoutes: trả về
+    deactivate GenerationProcessService
+    
+    BatchRoutes-->>DocAgentService: trả về
+    deactivate BatchRoutes
+    
+    DocAgentService-->>FlashcardTab: trả về
     deactivate DocAgentService
     
-    QuestionApprovalTab->>QuestionApprovalTab: Set showApprovalTab = false
-    QuestionApprovalTab->>DocAgentPage: Trigger reconnect
-    deactivate QuestionApprovalTab
-    
-    activate DocAgentPage
-    DocAgentPage->>DocAgentPage: Connect WebSocket with new process
-    DocAgentPage-->>User: Hiển thị LiveProgress cho regeneration
-    deactivate DocAgentPage
+    FlashcardTab-->>User: Hiển thị
+    deactivate FlashcardTab
 ```
 
+---
 
+## 5. Hủy tiến trình Generation
 
+```mermaid
+sequenceDiagram
+    actor User
+    participant LiveProgress as LiveProgress.tsx
+    participant DocAgentService as DocAgentService
+    participant GenRoutes as gen_routes.py
+    participant GenerationProcessService as GenerationProcessService
+    participant MessageResponse as MessageResponse
+
+    User->>LiveProgress: Click "Hủy tiến trình" và xác nhận
+    activate LiveProgress
+    
+    LiveProgress->>LiveProgress: handleCancelProcess()
+    LiveProgress->>DocAgentService: gọi
+    deactivate LiveProgress
+    activate DocAgentService
+    
+    DocAgentService->>DocAgentService: cancelProcess()
+    DocAgentService->>GenRoutes: POST "/process/{process_id}/cancel"
+    activate GenRoutes
+    
+    GenRoutes->>GenerationProcessService: cancel_process()
+    activate GenerationProcessService
+    
+    GenerationProcessService->>GenerationProcessService: cancel_process()
+    GenerationProcessService->>GenerationProcessService: gọi
+    GenerationProcessService->>MessageResponse: gọi
+    activate MessageResponse
+    
+    MessageResponse->>MessageResponse: MessageResponse()
+    MessageResponse-->>GenerationProcessService: trả về
+    deactivate MessageResponse
+    
+    GenerationProcessService-->>GenRoutes: trả về
+    deactivate GenerationProcessService
+    
+    GenRoutes-->>DocAgentService: trả về
+    deactivate GenRoutes
+    
+    DocAgentService-->>LiveProgress: trả về
+    deactivate DocAgentService
+    
+    LiveProgress-->>User: Hiển thị
+```
+
+---
+
+## 6. Tạo yêu cầu Generation
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant QuestionGenDialog as QuestionGenDialog.tsx
+    participant DocAgentService as DocAgentService
+    participant GenRoutes as gen_routes.py
+    participant GenerationProcessService as GenerationProcessService
+    participant ModelConfigService as ModelConfigService
+    participant GenerationProcess as GenerationProcess
+    participant ModelConfig as ModelConfig
+    participant ModelUsage as ModelUsage
+    participant QueryContext as QueryContext
+    participant GenerationProcessStep as GenerationProcessStep
+
+    User->>QuestionGenDialog: Nhập thông tin và click "Tạo"
+    activate QuestionGenDialog
+    
+    QuestionGenDialog->>QuestionGenDialog: handleGenerate()
+    QuestionGenDialog->>QuestionGenDialog: validate()
+    QuestionGenDialog->>DocAgentService: gọi
+    deactivate QuestionGenDialog
+    activate DocAgentService
+    
+    DocAgentService->>DocAgentService: createFlashcardProcess()
+    DocAgentService->>GenRoutes: POST "/gen/process/flashcard?queryConfigId&Req=queryConfig&Req"
+    activate GenRoutes
+    
+    GenRoutes->>GenerationProcessService: create_flashcard_process()
+    activate GenerationProcessService
+    
+    GenerationProcessService->>GenerationProcessService: gọi
+    GenerationProcessService->>ModelConfigService: get_model_by_team()
+    activate ModelConfigService
+    
+    ModelConfigService->>ModelConfigService: gọi
+    ModelConfigService->>ModelConfig: gọi
+    activate ModelConfig
+    
+    ModelConfig->>ModelConfig: ModelConfig()
+    ModelConfig-->>ModelConfigService: trả về
+    deactivate ModelConfig
+    
+    ModelConfigService-->>GenerationProcessService: trả về
+    deactivate ModelConfigService
+    
+    GenerationProcessService->>GenerationProcessService: create_process()
+    GenerationProcessService->>GenerationProcess: gọi
+    activate GenerationProcess
+    
+    GenerationProcess->>GenerationProcess: GenerationProcess()
+    GenerationProcess-->>GenerationProcessService: trả về
+    deactivate GenerationProcess
+    
+    GenerationProcessService->>ModelUsage: gọi
+    activate ModelUsage
+    
+    ModelUsage->>ModelUsage: ModelUsage()
+    ModelUsage-->>GenerationProcessService: trả về
+    deactivate ModelUsage
+    
+    GenerationProcessService->>QueryContext: gọi
+    activate QueryContext
+    
+    QueryContext->>QueryContext: QueryContext()
+    QueryContext-->>GenerationProcessService: trả về
+    deactivate QueryContext
+    
+    GenerationProcessService->>GenerationProcessService: create_steps()
+    GenerationProcessService->>GenerationProcessStep: gọi
+    activate GenerationProcessStep
+    
+    GenerationProcessStep->>GenerationProcessStep: GenerationProcessStep()
+    GenerationProcessStep-->>GenerationProcessService: trả về
+    deactivate GenerationProcessStep
+    
+    GenerationProcessService-->>GenRoutes: trả về
+    deactivate GenerationProcessService
+    
+    GenRoutes-->>DocAgentService: trả về
+    deactivate GenRoutes
+    
+    DocAgentService-->>User: Hiển thị
+    deactivate DocAgentService
+```
+
+---
+
+## 7. Theo dõi tiến trình Generation - Khởi tạo
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant LiveProgress as LiveProgress.tsx
+    participant DocSocketService as DocSocketService
+    participant GenerationPipelineService as GenerationPipelineService
+    participant WsGenerationManager as WsGenerationManager
+    participant EmbeddingFactory as EmbeddingFactory
+    participant BaseEmbedding as BaseEmbedding
+    participant QueryDecoder as QueryDecoder
+    participant QueryConstructor as QueryConstructor
+    participant Retriever as Retriever
+    participant QuerySimilarProcessor as QuerySimilarProcessor
+    participant BatchItem as BatchItem
+    participant Generator as Generator
+    participant GenerationProcessStep as GenerationProcessStep
+    participant WsEnvelope as WsEnvelope
+
+    User->>LiveProgress: Theo dõi tiến trình
+    activate LiveProgress
+    
+    LiveProgress->>DocSocketService: gọi
+    activate DocSocketService
+    
+    DocSocketService->>GenerationPipelineService: gọi
+    activate GenerationPipelineService
+    
+    GenerationPipelineService->>GenerationPipelineService: execute_pipeline()
+    GenerationPipelineService->>GenerationPipelineService: step_query_preprocessing()
+    GenerationPipelineService->>WsGenerationManager: gọi
+    activate WsGenerationManager
+    
+    WsGenerationManager->>WsGenerationManager: create()
+    WsGenerationManager-->>GenerationPipelineService: trả về
+    deactivate WsGenerationManager
+    
+    GenerationPipelineService->>EmbeddingFactory: gọi
+    activate EmbeddingFactory
+    
+    EmbeddingFactory->>BaseEmbedding: gọi
+    activate BaseEmbedding
+    
+    BaseEmbedding->>BaseEmbedding: BaseEmbedding()
+    BaseEmbedding-->>EmbeddingFactory: trả về
+    deactivate BaseEmbedding
+    
+    EmbeddingFactory-->>GenerationPipelineService: trả về
+    deactivate EmbeddingFactory
+    
+    GenerationPipelineService->>QueryDecoder: gọi
+    activate QueryDecoder
+    
+    QueryDecoder->>QueryDecoder: route_query()
+    QueryDecoder-->>GenerationPipelineService: trả về
+    deactivate QueryDecoder
+    
+    GenerationPipelineService->>GenerationPipelineService: create_embeddings()
+    GenerationPipelineService->>QueryConstructor: gọi
+    activate QueryConstructor
+    
+    QueryConstructor->>QueryConstructor: generate_multi_query()
+    QueryConstructor-->>GenerationPipelineService: trả về
+    deactivate QueryConstructor
+    
+    alt DataMap=={database}
+        GenerationPipelineService->>GenerationPipelineService: do.composite_query()
+    end
+    
+    GenerationPipelineService->>GenerationPipelineService: update_step()
+    GenerationPipelineService->>GenerationProcessStep: gọi
+    activate GenerationProcessStep
+    
+    GenerationProcessStep->>GenerationProcessStep: GenerationProcessStep()
+    GenerationProcessStep-->>GenerationPipelineService: trả về
+    deactivate GenerationProcessStep
+    
+    GenerationPipelineService->>WsGenerationManager: gọi
+    activate WsGenerationManager
+    
+    WsGenerationManager->>WsGenerationManager: send_state()
+    WsGenerationManager->>WsEnvelope: gọi
+    activate WsEnvelope
+    
+    WsEnvelope->>WsEnvelope: WsEnvelope()
+    WsEnvelope-->>WsGenerationManager: trả về
+    deactivate WsEnvelope
+    
+    WsGenerationManager-->>LiveProgress: trả về
+    deactivate WsGenerationManager
+    
+    WsGenerationManager->>WsGenerationManager: broadcast
+    LiveProgress-->>User: Hiển thị
+    deactivate GenerationPipelineService
+    deactivate DocSocketService
+    deactivate LiveProgress
+```
+
+---
+
+## 8. Theo dõi tiến trình Generation - Retrieval
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant LiveProgress as LiveProgress.tsx
+    participant DocSocketService as DocSocketService
+    participant GenerationPipelineService as GenerationPipelineService
+    participant WsGenerationManager as WsGenerationManager
+    participant EmbeddingFactory as EmbeddingFactory
+    participant BaseEmbedding as BaseEmbedding
+    participant QueryConstructor as QueryConstructor
+    participant Retriever as Retriever
+    participant GenerationProcessStep as GenerationProcessStep
+    participant WsEnvelope as WsEnvelope
+
+    User->>LiveProgress: Theo dõi tiến trình
+    activate LiveProgress
+    
+    LiveProgress->>DocSocketService: gọi
+    activate DocSocketService
+    
+    DocSocketService->>GenerationPipelineService: gọi
+    activate GenerationPipelineService
+    
+    GenerationPipelineService->>GenerationPipelineService: execute_pipeline()
+    GenerationPipelineService->>GenerationPipelineService: step_query_preprocessing()
+    GenerationPipelineService->>WsGenerationManager: gọi
+    activate WsGenerationManager
+    
+    WsGenerationManager->>WsGenerationManager: create()
+    WsGenerationManager-->>GenerationPipelineService: trả về
+    deactivate WsGenerationManager
+    
+    GenerationPipelineService->>EmbeddingFactory: gọi
+    activate EmbeddingFactory
+    
+    EmbeddingFactory->>BaseEmbedding: gọi
+    activate BaseEmbedding
+    
+    BaseEmbedding->>BaseEmbedding: BaseEmbedding()
+    BaseEmbedding-->>EmbeddingFactory: trả về
+    deactivate BaseEmbedding
+    
+    EmbeddingFactory-->>GenerationPipelineService: trả về
+    deactivate EmbeddingFactory
+    
+    GenerationPipelineService->>QueryConstructor: gọi
+    activate QueryConstructor
+    
+    QueryConstructor->>QueryConstructor: create_embeddings()
+    QueryConstructor-->>GenerationPipelineService: trả về
+    deactivate QueryConstructor
+    
+    GenerationPipelineService->>GenerationPipelineService: route_query()
+    GenerationPipelineService->>GenerationPipelineService: create_embeddings()
+    GenerationPipelineService->>Retriever: gọi
+    activate Retriever
+    
+    Retriever->>Retriever: similarity_search()
+    Retriever-->>GenerationPipelineService: trả về
+    deactivate Retriever
+    
+    GenerationPipelineService->>GenerationPipelineService: re_hybrid_rerank()
+    GenerationPipelineService->>GenerationPipelineService: update_step()
+    GenerationPipelineService->>GenerationProcessStep: gọi
+    activate GenerationProcessStep
+    
+    GenerationProcessStep->>GenerationProcessStep: GenerationProcessStep()
+    GenerationProcessStep-->>GenerationPipelineService: trả về
+    deactivate GenerationProcessStep
+    
+    GenerationPipelineService->>WsGenerationManager: gọi
+    activate WsGenerationManager
+    
+    WsGenerationManager->>WsGenerationManager: send_state()
+    WsGenerationManager->>WsEnvelope: gọi
+    activate WsEnvelope
+    
+    WsEnvelope->>WsEnvelope: WsEnvelope()
+    WsEnvelope-->>WsGenerationManager: trả về
+    deactivate WsEnvelope
+    
+    WsGenerationManager-->>LiveProgress: trả về
+    deactivate WsGenerationManager
+    
+    WsGenerationManager->>WsGenerationManager: broadcast
+    LiveProgress-->>User: Hiển thị
+    deactivate GenerationPipelineService
+    deactivate DocSocketService
+    deactivate LiveProgress
+```
+
+---
+
+## 9. Theo dõi tiến trình Generation - Duplicate Prevention
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant LiveProgress as LiveProgress.tsx
+    participant DocSocketService as DocSocketService
+    participant GenerationPipelineService as GenerationPipelineService
+    participant WsGenerationManager as WsGenerationManager
+    participant BatchService as BatchService
+    participant QuerySimilarProcessor as QuerySimilarProcessor
+    participant GenerationProcessStep as GenerationProcessStep
+    participant WsEnvelope as WsEnvelope
+
+    User->>LiveProgress: Theo dõi tiến trình
+    activate LiveProgress
+    
+    LiveProgress->>DocSocketService: gọi
+    activate DocSocketService
+    
+    DocSocketService->>GenerationPipelineService: gọi
+    activate GenerationPipelineService
+    
+    GenerationPipelineService->>GenerationPipelineService: execute_pipeline()
+    GenerationPipelineService->>GenerationPipelineService: step_duplicate_preventation()
+    GenerationPipelineService->>WsGenerationManager: gọi
+    activate WsGenerationManager
+    
+    WsGenerationManager->>WsGenerationManager: find_similar_processed()
+    WsGenerationManager-->>GenerationPipelineService: trả về
+    deactivate WsGenerationManager
+    
+    GenerationPipelineService->>BatchService: gọi
+    activate BatchService
+    
+    BatchService->>BatchService: get_batch_items_by_processed()
+    BatchService-->>GenerationPipelineService: trả về
+    deactivate BatchService
+    
+    GenerationPipelineService->>QuerySimilarProcessor: gọi
+    activate QuerySimilarProcessor
+    
+    QuerySimilarProcessor->>QuerySimilarProcessor: find()
+    QuerySimilarProcessor-->>GenerationPipelineService: trả về
+    deactivate QuerySimilarProcessor
+    
+    alt (DataMap=={database})
+        GenerationPipelineService->>GenerationPipelineService: get_batch_items_by_processed()
+    end
+    
+    GenerationPipelineService->>GenerationPipelineService: update_step()
+    GenerationPipelineService->>GenerationProcessStep: gọi
+    activate GenerationProcessStep
+    
+    GenerationProcessStep->>GenerationProcessStep: GenerationProcessStep()
+    GenerationProcessStep-->>GenerationPipelineService: trả về
+    deactivate GenerationProcessStep
+    
+    GenerationPipelineService->>WsGenerationManager: gọi
+    activate WsGenerationManager
+    
+    WsGenerationManager->>WsGenerationManager: send_state()
+    WsGenerationManager->>WsEnvelope: gọi
+    activate WsEnvelope
+    
+    WsEnvelope->>WsEnvelope: WsEnvelope()
+    WsEnvelope-->>WsGenerationManager: trả về
+    deactivate WsEnvelope
+    
+    WsGenerationManager-->>LiveProgress: trả về
+    deactivate WsGenerationManager
+    
+    WsGenerationManager->>WsGenerationManager: broadcast
+    LiveProgress-->>User: Hiển thị
+    deactivate GenerationPipelineService
+    deactivate DocSocketService
+    deactivate LiveProgress
+```
+
+---
+
+## 10. Theo dõi tiến trình Generation - Generation
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant LiveProgress as LiveProgress.tsx
+    participant DocSocketService as DocSocketService
+    participant GenerationPipelineService as GenerationPipelineService
+    participant WsGenerationManager as WsGenerationManager
+    participant PromptBuilder as PromptBuilder
+    participant PromptInputor as PromptInputor
+    participant Generator as Generator
+    participant BulkItem as BulkItem
+    participant GenerationProcessStep as GenerationProcessStep
+    participant WsEnvelope as WsEnvelope
+
+    User->>LiveProgress: Theo dõi tiến trình
+    activate LiveProgress
+    
+    LiveProgress->>DocSocketService: gọi
+    activate DocSocketService
+    
+    DocSocketService->>GenerationPipelineService: gọi
+    activate GenerationPipelineService
+    
+    GenerationPipelineService->>GenerationPipelineService: execute_pipeline()
+    GenerationPipelineService->>GenerationPipelineService: step_generation()
+    GenerationPipelineService->>WsGenerationManager: gọi
+    activate WsGenerationManager
+    
+    WsGenerationManager->>WsGenerationManager: get_batch_items_by_data()
+    WsGenerationManager-->>GenerationPipelineService: trả về
+    deactivate WsGenerationManager
+    
+    GenerationPipelineService->>PromptBuilder: gọi
+    activate PromptBuilder
+    
+    PromptBuilder->>PromptBuilder: build_element_prompt()
+    PromptBuilder-->>GenerationPipelineService: trả về
+    deactivate PromptBuilder
+    
+    GenerationPipelineService->>PromptInputor: gọi
+    activate PromptInputor
+    
+    PromptInputor->>PromptInputor: build_element_prompt()
+    PromptInputor-->>GenerationPipelineService: trả về
+    deactivate PromptInputor
+    
+    GenerationPipelineService->>Generator: gọi
+    activate Generator
+    
+    Generator->>Generator: validate_for_generation()
+    Generator->>Generator: build_example_prompt()
+    Generator->>Generator: hybrid_rerank()
+    Generator->>Generator: generate_text()
+    Generator-->>GenerationPipelineService: trả về
+    deactivate Generator
+    
+    GenerationPipelineService->>GenerationPipelineService: regenerate_items()
+    GenerationPipelineService->>BulkItem: gọi
+    activate BulkItem
+    
+    BulkItem->>BulkItem: BulkItem()
+    BulkItem-->>GenerationPipelineService: trả về
+    deactivate BulkItem
+    
+    GenerationPipelineService->>GenerationPipelineService: update_step()
+    GenerationPipelineService->>GenerationProcessStep: gọi
+    activate GenerationProcessStep
+    
+    GenerationProcessStep->>GenerationProcessStep: GenerationProcessStep()
+    GenerationProcessStep-->>GenerationPipelineService: trả về
+    deactivate GenerationProcessStep
+    
+    GenerationPipelineService->>WsGenerationManager: gọi
+    activate WsGenerationManager
+    
+    WsGenerationManager->>WsGenerationManager: send_state()
+    WsGenerationManager->>WsEnvelope: gọi
+    activate WsEnvelope
+    
+    WsEnvelope->>WsEnvelope: WsEnvelope()
+    WsEnvelope-->>WsGenerationManager: trả về
+    deactivate WsEnvelope
+    
+    WsGenerationManager-->>LiveProgress: trả về
+    deactivate WsGenerationManager
+    
+    WsGenerationManager->>WsGenerationManager: broadcast
+    LiveProgress-->>User: Hiển thị
+    deactivate GenerationPipelineService
+    deactivate DocSocketService
+    deactivate LiveProgress
+```

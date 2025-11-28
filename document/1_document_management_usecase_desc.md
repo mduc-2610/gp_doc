@@ -1,6 +1,9 @@
 # Use Case Description - Quản lý Document
 
 Chức năng quản lý Document (Document Management) có các giao diện tương tác với User:
+- **Đăng nhập** → đề xuất UC đăng nhập
+- **Xem danh sách Session** → đề xuất UC xem danh sách Session
+- **Xem chi tiết Session** → đề xuất UC xem chi tiết Session
 - **Upload Document** → đề xuất UC upload Document
 - **Xem danh sách Document** → đề xuất UC xem danh sách Document
 - **Cập nhật Document** → đề xuất UC cập nhật Document
@@ -17,6 +20,9 @@ Chức năng quản lý Document (Document Management) có các giao diện tư�
 
 | **Use Case** | Mô tả |
 |----------|------|
+| **Đăng nhập** | UC này cho phép User xác thực danh tính để truy cập hệ thống. |
+| **Xem danh sách Session** | UC này cho phép User xem danh sách tất cả các Session đã tạo. |
+| **Xem chi tiết Session** | UC này cho phép User xem thông tin chi tiết của một Session và truy cập các chức năng quản lý Document. |
 | **Upload Document** | UC này cho phép User tải lên Document mới vào Session. User có thể upload file hoặc cung cấp URL. |
 | **Xem danh sách Document** | UC này cho phép User xem danh sách tất cả các Document trong Session. |
 | **Cập nhật Document** | UC này cho phép User cập nhật thông tin của một Document hiện có (cập nhật tên hiển thị). |

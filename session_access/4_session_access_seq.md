@@ -4,98 +4,137 @@
 
 ```mermaid
 sequenceDiagram
-    actor User1 as User
+    actor User
     participant Header as Header.tsx
-    participant ShareModal as SessionShareDialog.tsx
+    participant SessionShareDialog as SessionShareDialog.tsx
     participant SearchDialog as SearchDialog.tsx
+    participant AuthApi as AuthApi
     participant DocAgentService as DocAgentService
-    participant SessionAccessRoutes as session_access_routes
+    participant SessionAccessRoutes as session_access_routes.py
     participant SessionAccessService as SessionAccessService
-    participant WSManager as WSSessionAccessManager
-    participant WebSocket as WebSocket
-    actor User2 as User
+    participant SessionAccessLink as SessionAccessLink
+    participant SessionAccessGrant as SessionAccessGrant
 
-    User1->>Header: Click "Chia sẻ"
+    User->>Header: Click "Chia sẻ"
     activate Header
-    Header->>ShareModal: Mở modal
-    activate ShareModal
     
-    ShareModal->>DocAgentService: getSessionGrants()
+    Header->>SessionShareDialog: gọi
+    deactivate Header
+    activate SessionShareDialog
+    SessionShareDialog-->>User: Hiển thị
+    deactivate SessionShareDialog
+    
+    User->>SessionShareDialog: Click "Chia sẻ" tab
+    activate SessionShareDialog
+    
+    SessionShareDialog->>SessionShareDialog: loadShareData()
+    
+    alt Loop
+        SessionShareDialog->>AuthApi: gọi
+        activate AuthApi
+        AuthApi->>AuthApi: getUserById()
+        AuthApi-->>SessionShareDialog: trả về
+        deactivate AuthApi
+    end
+    
+    SessionShareDialog->>DocAgentService: gọi
+    deactivate SessionShareDialog
     activate DocAgentService
-    DocAgentService->>SessionAccessRoutes: GET /session-access/grant/by-session/{sessionId}
+    
+    DocAgentService->>DocAgentService: getSessionGrantsBySession()
+    DocAgentService->>SessionAccessRoutes: GET "/session-access/grant/by-session/{session_id}"
     activate SessionAccessRoutes
+    
     SessionAccessRoutes->>SessionAccessService: get_session_access_grants_by_session()
     activate SessionAccessService
-    SessionAccessService-->>SessionAccessRoutes: [SessionAccessGrant]
+    
+    SessionAccessService->>SessionAccessService: gọi
+    SessionAccessService->>SessionAccessGrant: gọi
+    activate SessionAccessGrant
+    
+    SessionAccessGrant->>SessionAccessGrant: SessionAccessGrant()
+    SessionAccessGrant-->>SessionAccessService: trả về
+    deactivate SessionAccessGrant
+    
+    SessionAccessService-->>SessionAccessRoutes: trả về
     deactivate SessionAccessService
-    SessionAccessRoutes-->>DocAgentService: [SessionAccessGrantResponse]
+    
+    SessionAccessRoutes-->>DocAgentService: trả về
     deactivate SessionAccessRoutes
-    DocAgentService-->>ShareModal: ServiceResult~SessionAccessGrant[]~
-    deactivate DocAgentService
     
-    ShareModal-->>User1: Hiển thị danh sách User đã được chia sẻ
-    
-    User1->>ShareModal: Click "Add people"
-    
-    ShareModal->>SearchDialog: Mở dialog
-    activate SearchDialog
-    
-    SearchDialog-->>User1: Hiển thị search input
-    
-    User1->>SearchDialog: Nhập từ khóa tìm kiếm
-    SearchDialog->>SearchDialog: Debounce 300ms
-    SearchDialog->>DocAgentService: searchUsersByName()
-    activate DocAgentService
-    DocAgentService->>SessionAccessRoutes: GET /api/users/search?name={searchTerm}
+    DocAgentService->>DocAgentService: getSessionLink()
+    DocAgentService->>SessionAccessRoutes: GET "/session-access/link/by-session/{session_id}"
     activate SessionAccessRoutes
-    SessionAccessRoutes-->>DocAgentService: [UserProfile]
-    deactivate SessionAccessRoutes
-    DocAgentService-->>SearchDialog: ServiceResult~UserProfile[]~
-    deactivate DocAgentService
     
-    SearchDialog->>SearchDialog: Filter excludeIds<br/>(loại bỏ User đã được chia sẻ)
-    SearchDialog-->>User1: Hiển thị kết quả tìm kiếm
-    
-    User1->>SearchDialog: Chọn User và click "Thêm"
-    
-    SearchDialog->>ShareModal: onAddUser(user, AccessLevel.READER)
-    deactivate SearchDialog
-    
-    ShareModal->>DocAgentService: createInvite()
-    activate DocAgentService
-    DocAgentService->>SessionAccessRoutes: POST /session-access/invite
-    activate SessionAccessRoutes
-    SessionAccessRoutes->>SessionAccessService: create_session_access_invite(auto_grant=true)
+    SessionAccessRoutes->>SessionAccessService: get_session_access_link_by_session()
     activate SessionAccessService
     
-    SessionAccessService->>SessionAccessService: Check existing grant/invite
-    SessionAccessService->>SessionAccessService: Create SessionAccessInvite
-    SessionAccessService->>SessionAccessService: Create SessionAccessGrant (auto_grant)
-    SessionAccessService->>SessionAccessService: Update invite.granted_access_id
-    SessionAccessService->>SessionAccessService: db.commit()
+    SessionAccessService->>SessionAccessService: gọi
+    SessionAccessService->>SessionAccessLink: gọi
+    activate SessionAccessLink
     
-    SessionAccessService->>WSManager: broadcast_permission_granted(payload)
-    activate WSManager
-    WSManager->>WebSocket: Send PERMISSION_GRANTED event
-    deactivate WSManager
+    SessionAccessLink->>SessionAccessLink: SessionAccessLink()
+    SessionAccessLink-->>SessionAccessService: trả về
+    deactivate SessionAccessLink
     
-    SessionAccessService-->>SessionAccessRoutes: SessionAccessInvite
+    SessionAccessService-->>SessionAccessRoutes: trả về
     deactivate SessionAccessService
-    SessionAccessRoutes-->>DocAgentService: SessionAccessInviteResponse
+    
+    SessionAccessRoutes-->>DocAgentService: trả về
     deactivate SessionAccessRoutes
-    DocAgentService-->>ShareModal: ServiceResult~SessionAccessInvite~
+    
+    DocAgentService-->>User: Hiển thị
     deactivate DocAgentService
     
-    ShareModal->>ShareModal: Reload grant list
-    ShareModal-->>User1: Hiển thị danh sách cập nhật + Toast "Chia sẻ thành công"
-    deactivate ShareModal
-    deactivate Header
+    User->>SessionShareDialog: Nhập keyword tìm kiếm User
+    activate SessionShareDialog
     
-    WebSocket-->>User2: Receive PERMISSION_GRANTED event
-    activate User2
-    User2->>User2: Toast "Bạn đã được cấp quyền"
-    User2->>User2: Reload permission & Session data
-    deactivate User2
+    SessionShareDialog->>SearchDialog: gọi
+    activate SearchDialog
+    
+    SearchDialog->>AuthApi: gọi
+    activate AuthApi
+    
+    AuthApi->>AuthApi: searchUsersByName()
+    AuthApi-->>SearchDialog: trả về
+    deactivate AuthApi
+    
+    SearchDialog-->>User: Hiển thị
+    deactivate SearchDialog
+    
+    User->>SessionShareDialog: Chọn User và click "Thêm"
+    
+    SessionShareDialog->>SessionShareDialog: validate()
+    SessionShareDialog->>SessionShareDialog: handleAddUser()
+    SessionShareDialog->>DocAgentService: gọi
+    deactivate SessionShareDialog
+    activate DocAgentService
+    
+    DocAgentService->>DocAgentService: createInvite()
+    DocAgentService->>SessionAccessRoutes: POST "/session-access/invite"
+    activate SessionAccessRoutes
+    
+    SessionAccessRoutes->>SessionAccessService: create_session_access_invite()
+    activate SessionAccessService
+    
+    SessionAccessService->>SessionAccessService: gọi
+    SessionAccessService->>SessionAccessGrant: gọi
+    activate SessionAccessGrant
+    
+    SessionAccessGrant->>SessionAccessGrant: SessionAccessGrant()
+    SessionAccessGrant-->>SessionAccessService: trả về
+    deactivate SessionAccessGrant
+    
+    SessionAccessService-->>SessionAccessRoutes: trả về
+    deactivate SessionAccessService
+    
+    SessionAccessRoutes-->>DocAgentService: trả về
+    deactivate SessionAccessRoutes
+    
+    DocAgentService-->>SessionShareDialog: trả về
+    deactivate DocAgentService
+    
+    SessionShareDialog-->>User: Hiển thị
 ```
 
 ---
@@ -104,50 +143,46 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor User1 as User
-    participant ShareModal as SessionShareDialog.tsx
+    actor User
+    participant SessionShareDialog as SessionShareDialog.tsx
     participant DocAgentService as DocAgentService
-    participant SessionAccessRoutes as session_access_routes
+    participant SessionAccessRoutes as session_access_routes.py
     participant SessionAccessService as SessionAccessService
-    participant WSManager as WSSessionAccessManager
-    participant WebSocket as WebSocket
-    actor User2 as User
+    participant SessionAccessGrant as SessionAccessGrant
 
-    User1->>ShareModal: Trong modal, chọn quyền mới từ dropdown
-    activate ShareModal
+    User->>SessionShareDialog: Chọn quyền từ dropdown của User
+    activate SessionShareDialog
     
-    ShareModal->>DocAgentService: updateGrant(grantId, {access_level})
+    SessionShareDialog->>SessionShareDialog: handleUpdateSessionGrant()
+    SessionShareDialog->>DocAgentService: gọi
+    deactivate SessionShareDialog
     activate DocAgentService
-    DocAgentService->>SessionAccessRoutes: PUT /session-access/grant/{grantId}
+    
+    DocAgentService->>DocAgentService: updateSessionGrant()
+    DocAgentService->>SessionAccessRoutes: PUT "/session-access/grant/{grant_id}"
     activate SessionAccessRoutes
+    
     SessionAccessRoutes->>SessionAccessService: update_session_access_grant()
     activate SessionAccessService
     
-    SessionAccessService->>SessionAccessService: Get grant from DB
-    SessionAccessService->>SessionAccessService: Update access_level
-    SessionAccessService->>SessionAccessService: db.commit()
+    SessionAccessService->>SessionAccessService: gọi
+    SessionAccessService->>SessionAccessGrant: gọi
+    activate SessionAccessGrant
     
-    SessionAccessService->>WSManager: broadcast_permission_changed(payload)
-    activate WSManager
-    WSManager->>WebSocket: Send PERMISSION_CHANGED event
-    deactivate WSManager
+    SessionAccessGrant->>SessionAccessGrant: SessionAccessGrant()
+    SessionAccessGrant-->>SessionAccessService: trả về
+    deactivate SessionAccessGrant
     
-    SessionAccessService-->>SessionAccessRoutes: SessionAccessGrant
+    SessionAccessService-->>SessionAccessRoutes: trả về
     deactivate SessionAccessService
-    SessionAccessRoutes-->>DocAgentService: SessionAccessGrantResponse
+    
+    SessionAccessRoutes-->>DocAgentService: trả về
     deactivate SessionAccessRoutes
-    DocAgentService-->>ShareModal: ServiceResult~SessionAccessGrant~
+    
+    DocAgentService-->>SessionShareDialog: trả về
     deactivate DocAgentService
     
-    ShareModal->>ShareModal: Update grant in list
-    ShareModal-->>User1: Toast "Cập nhật quyền thành công"
-    deactivate ShareModal
-    
-    WebSocket-->>User2: Receive PERMISSION_CHANGED event
-    activate User2
-    User2->>User2: Toast "Quyền của bạn đã được cập nhật"
-    User2->>User2: Reload permission
-    deactivate User2
+    SessionShareDialog-->>User: Hiển thị
 ```
 
 ---
@@ -156,132 +191,126 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor User1 as User
-    participant ShareModal as SessionShareDialog.tsx
+    actor User
+    participant SessionShareDialog as SessionShareDialog.tsx
     participant DocAgentService as DocAgentService
-    participant SessionAccessRoutes as session_access_routes
+    participant SessionAccessRoutes as session_access_routes.py
     participant SessionAccessService as SessionAccessService
-    participant WSManager as WSSessionAccessManager
-    participant WebSocket as WebSocket
-    actor User2 as User
-    participant RequestAccessState as RequestAccessState.tsx
+    participant MessageResponse as MessageResponse
 
-    User1->>ShareModal: Click icon "X" để xóa User
-    activate ShareModal
+    User->>SessionShareDialog: Click "Xóa" từ dropdown của User
+    activate SessionShareDialog
     
-    ShareModal->>DocAgentService: revokeGrant(grantId)
+    SessionShareDialog->>SessionShareDialog: handleRemoveUser()
+    SessionShareDialog->>DocAgentService: gọi
+    deactivate SessionShareDialog
     activate DocAgentService
-    DocAgentService->>SessionAccessRoutes: DELETE /session-access/grant/revoke/{grantId}
+    
+    DocAgentService->>DocAgentService: revokeSessionGrant()
+    DocAgentService->>SessionAccessRoutes: DELETE "/session-access/grant/{grant_id}"
     activate SessionAccessRoutes
+    
     SessionAccessRoutes->>SessionAccessService: revoke_session_access_grant()
     activate SessionAccessService
     
-    SessionAccessService->>SessionAccessService: Get grant from DB
-    SessionAccessService->>SessionAccessService: Set is_active = false
-    SessionAccessService->>SessionAccessService: db.commit()
+    SessionAccessService->>SessionAccessService: gọi
+    SessionAccessService->>MessageResponse: gọi
+    activate MessageResponse
     
-    SessionAccessService->>WSManager: broadcast_permission_revoked(payload)
-    activate WSManager
-    WSManager->>WebSocket: Send PERMISSION_REVOKED event
-    deactivate WSManager
+    MessageResponse->>MessageResponse: MessageResponse()
+    MessageResponse-->>SessionAccessService: trả về
+    deactivate MessageResponse
     
-    SessionAccessService-->>SessionAccessRoutes: SessionAccessGrant
+    SessionAccessService-->>SessionAccessRoutes: trả về
     deactivate SessionAccessService
-    SessionAccessRoutes-->>DocAgentService: MessageResponse
+    
+    SessionAccessRoutes-->>DocAgentService: trả về
     deactivate SessionAccessRoutes
-    DocAgentService-->>ShareModal: ServiceResult~MessageResponse~
+    
+    DocAgentService-->>SessionShareDialog: trả về
     deactivate DocAgentService
     
-    ShareModal->>ShareModal: Remove grant from list
-    ShareModal-->>User1: Toast "Thu hồi quyền thành công"
-    deactivate ShareModal
-    
-    WebSocket-->>User2: Receive PERMISSION_REVOKED event
-    activate User2
-    User2->>User2: Toast "Quyền truy cập của bạn đã bị thu hồi"
-    User2->>User2: Reload permission
-    User2->>RequestAccessState: Chuyển sang RequestAccessState
-    activate RequestAccessState
-    RequestAccessState-->>User2: Hiển thị UI yêu cầu truy cập
-    deactivate RequestAccessState
-    deactivate User2
+    SessionShareDialog-->>User: Hiển thị
 ```
 
 ---
 
-## 4. Yêu cầu truy cập Session
+## 4. Quản lý liên kết chia sẻ
 
 ```mermaid
 sequenceDiagram
-    actor User1 as User
-    participant DocAgentPage as DocAgentPage.tsx
-    participant RequestAccessState as RequestAccessState.tsx
+    actor User
+    participant SessionShareDialog as SessionShareDialog.tsx
     participant DocAgentService as DocAgentService
-    participant SessionAccessRoutes as session_access_routes
+    participant SessionAccessRoutes as session_access_routes.py
     participant SessionAccessService as SessionAccessService
-    participant WSManager as WSSessionAccessManager
-    participant WebSocket as WebSocket
-    actor User2 as User
-    participant ShareModal as SessionShareDialog.tsx
+    participant SessionAccessLink as SessionAccessLink
 
-    User1->>DocAgentPage: Truy cập Session URL
-    activate DocAgentPage
-    DocAgentPage->>DocAgentPage: Check permission
-    DocAgentPage->>RequestAccessState: Hiển thị RequestAccessState (no access)
-    activate RequestAccessState
+    User->>SessionShareDialog: Chọn "Bật kỳ ai có liên kết" trong dropdown
+    activate SessionShareDialog
     
-    RequestAccessState->>DocAgentService: getUserSessionRequest(sessionId, userId)
+    SessionShareDialog->>SessionShareDialog: handleLinkUpdate()
+    SessionShareDialog->>DocAgentService: gọi
+    deactivate SessionShareDialog
     activate DocAgentService
-    DocAgentService->>SessionAccessRoutes: GET /session-access/request/by-user-session/{sessionId}/{userId}
-    activate SessionAccessRoutes
-    SessionAccessRoutes->>SessionAccessService: get_session_access_request_by_user_session()
-    activate SessionAccessService
-    SessionAccessService-->>SessionAccessRoutes: SessionAccessRequest | null
-    deactivate SessionAccessService
-    SessionAccessRoutes-->>DocAgentService: SessionAccessRequestResponse | null
-    deactivate SessionAccessRoutes
-    DocAgentService-->>RequestAccessState: ServiceResult~SessionAccessRequest | null~
-    deactivate DocAgentService
     
-    RequestAccessState-->>User1: Hiển thị nút "Request Access"
-    
-    User1->>RequestAccessState: Click "Request Access"
-    RequestAccessState->>DocAgentService: createRequest({session_id, requested_by})
-    activate DocAgentService
-    DocAgentService->>SessionAccessRoutes: POST /session-access/request
+    DocAgentService->>DocAgentService: updateSessionLink()
+    DocAgentService->>SessionAccessRoutes: PUT "/session-access/link/{link_id}"
     activate SessionAccessRoutes
-    SessionAccessRoutes->>SessionAccessService: create_session_access_request()
+    
+    SessionAccessRoutes->>SessionAccessService: update_session_access_link()
     activate SessionAccessService
     
-    SessionAccessService->>SessionAccessService: Check existing request/grant
-    SessionAccessService->>SessionAccessService: Create SessionAccessRequest (status=PENDING)
-    SessionAccessService->>SessionAccessService: db.commit()
+    SessionAccessService->>SessionAccessService: gọi
+    SessionAccessService->>SessionAccessLink: gọi
+    activate SessionAccessLink
     
-    SessionAccessService->>WSManager: broadcast_request_created(payload)
-    activate WSManager
-    WSManager->>WebSocket: Send REQUEST_CREATED event
-    deactivate WSManager
+    SessionAccessLink->>SessionAccessLink: SessionAccessLink()
+    SessionAccessLink-->>SessionAccessService: trả về
+    deactivate SessionAccessLink
     
-    SessionAccessService-->>SessionAccessRoutes: SessionAccessRequest
+    SessionAccessService-->>SessionAccessRoutes: trả về
     deactivate SessionAccessService
-    SessionAccessRoutes-->>DocAgentService: SessionAccessRequestResponse
+    
+    SessionAccessRoutes-->>DocAgentService: trả về
     deactivate SessionAccessRoutes
-    DocAgentService-->>RequestAccessState: ServiceResult~SessionAccessRequest~
+    
+    DocAgentService-->>User: Hiển thị
     deactivate DocAgentService
     
-    RequestAccessState->>RequestAccessState: Update existingRequest
-    RequestAccessState-->>User1: Hiển thị trạng thái "Pending" + Toast "Yêu cầu đã được gửi"
-    deactivate RequestAccessState
-    deactivate DocAgentPage
+    User->>SessionShareDialog: Chọn quyền liên kết dropdown
+    activate SessionShareDialog
     
-    WebSocket-->>User2: Receive REQUEST_CREATED event
-    activate User2
-    User2->>User2: Toast "Có yêu cầu truy cập mới"
-    User2->>ShareModal: Increment requestTabReloadKey
-    activate ShareModal
-    ShareModal->>ShareModal: Reload request list
-    deactivate ShareModal
-    deactivate User2
+    SessionShareDialog->>SessionShareDialog: handleLinkUpdate()
+    SessionShareDialog->>DocAgentService: gọi
+    deactivate SessionShareDialog
+    activate DocAgentService
+    
+    DocAgentService->>DocAgentService: updateSessionLink()
+    DocAgentService->>SessionAccessRoutes: PUT "/session-access/link/{link_id}"
+    activate SessionAccessRoutes
+    
+    SessionAccessRoutes->>SessionAccessService: update_session_access_link()
+    activate SessionAccessService
+    
+    SessionAccessService->>SessionAccessService: gọi
+    SessionAccessService->>SessionAccessLink: gọi
+    activate SessionAccessLink
+    
+    SessionAccessLink->>SessionAccessLink: SessionAccessLink()
+    SessionAccessLink-->>SessionAccessService: trả về
+    deactivate SessionAccessLink
+    
+    SessionAccessService-->>SessionAccessRoutes: trả về
+    deactivate SessionAccessService
+    
+    SessionAccessRoutes-->>DocAgentService: trả về
+    deactivate SessionAccessRoutes
+    
+    DocAgentService-->>SessionShareDialog: trả về
+    deactivate DocAgentService
+    
+    SessionShareDialog-->>User: Hiển thị
 ```
 
 ---
@@ -290,75 +319,46 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor ManagerUser as User (Manager)
-    participant ShareModal as SessionShareDialog.tsx
+    actor User
+    participant SessionShareDialog as SessionShareDialog.tsx
     participant DocAgentService as DocAgentService
-    participant SessionAccessRoutes as session_access_routes
+    participant SessionAccessRoutes as session_access_routes.py
     participant SessionAccessService as SessionAccessService
-    participant WSManager as WSSessionAccessManager
-    participant WebSocket as WebSocket
-    actor RequestUser as User
-    participant DocAgentPage as DocAgentPage.tsx
+    participant SessionAccessRequest as SessionAccessRequest
 
-    ManagerUser->>ShareModal: Open modal và click tab "Request"
-    activate ShareModal
+    User->>SessionShareDialog: Chọn quyền từ dropdown và click "Cấp quyền"
+    activate SessionShareDialog
     
-    ShareModal->>DocAgentService: getSessionRequests(sessionId)
+    SessionShareDialog->>SessionShareDialog: handleAcceptRequest()
+    SessionShareDialog->>DocAgentService: gọi
+    deactivate SessionShareDialog
     activate DocAgentService
-    DocAgentService->>SessionAccessRoutes: GET /session-access/request/by-session/{sessionId}
+    
+    DocAgentService->>DocAgentService: acceptSessionRequest()
+    DocAgentService->>SessionAccessRoutes: POST "/session-access/request/accept/{request_id}"
     activate SessionAccessRoutes
-    SessionAccessRoutes->>SessionAccessService: get_session_access_requests_by_session()
-    activate SessionAccessService
-    SessionAccessService-->>SessionAccessRoutes: [SessionAccessRequest]
-    deactivate SessionAccessService
-    SessionAccessRoutes-->>DocAgentService: [SessionAccessRequestResponse]
-    deactivate SessionAccessRoutes
-    DocAgentService-->>ShareModal: ServiceResult~SessionAccessRequest[]~
-    deactivate DocAgentService
     
-    ShareModal-->>ManagerUser: Hiển thị danh sách yêu cầu
-    
-    ManagerUser->>ShareModal: Chọn access level và click "Approve"
-    
-    ShareModal->>DocAgentService: acceptRequest(requestId, {requested_level})
-    activate DocAgentService
-    DocAgentService->>SessionAccessRoutes: POST /session-access/request/accept/{requestId}
-    activate SessionAccessRoutes
     SessionAccessRoutes->>SessionAccessService: accept_session_access_request()
     activate SessionAccessService
     
-    SessionAccessService->>SessionAccessService: Get request from DB
-    SessionAccessService->>SessionAccessService: Update status = APPROVED
-    SessionAccessService->>SessionAccessService: Create SessionAccessGrant
-    SessionAccessService->>SessionAccessService: Update request.granted_access_id
-    SessionAccessService->>SessionAccessService: db.commit()
+    SessionAccessService->>SessionAccessService: gọi
+    SessionAccessService->>SessionAccessRequest: gọi
+    activate SessionAccessRequest
     
-    SessionAccessService->>WSManager: broadcast_permission_granted(payload)
-    activate WSManager
-    WSManager->>WebSocket: Send PERMISSION_GRANTED event
-    deactivate WSManager
+    SessionAccessRequest->>SessionAccessRequest: SessionAccessRequest()
+    SessionAccessRequest-->>SessionAccessService: trả về
+    deactivate SessionAccessRequest
     
-    SessionAccessService-->>SessionAccessRoutes: SessionAccessRequest
+    SessionAccessService-->>SessionAccessRoutes: trả về
     deactivate SessionAccessService
-    SessionAccessRoutes-->>DocAgentService: SessionAccessRequestResponse
+    
+    SessionAccessRoutes-->>DocAgentService: trả về
     deactivate SessionAccessRoutes
-    DocAgentService-->>ShareModal: ServiceResult~SessionAccessRequest~
+    
+    DocAgentService-->>SessionShareDialog: trả về
     deactivate DocAgentService
     
-    ShareModal->>ShareModal: Remove request from list
-    ShareModal-->>ManagerUser: Toast "Đã chấp nhận yêu cầu"
-    deactivate ShareModal
-    
-    WebSocket-->>RequestUser: Receive PERMISSION_GRANTED event
-    activate RequestUser
-    RequestUser->>DocAgentPage: Handle onPermissionGranted
-    activate DocAgentPage
-    DocAgentPage->>DocAgentPage: Toast "Bạn đã được cấp quyền truy cập"
-    DocAgentPage->>DocAgentPage: setPermissionLoading(true)
-    DocAgentPage->>DocAgentPage: Reload permission & Session data
-    DocAgentPage-->>RequestUser: Hiển thị Session với quyền mới
-    deactivate DocAgentPage
-    deactivate RequestUser
+    SessionShareDialog-->>User: Hiển thị
 ```
 
 ---
@@ -367,306 +367,295 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor User1 as User
-    participant ShareModal as SessionShareDialog.tsx
+    actor User
+    participant SessionShareDialog as SessionShareDialog.tsx
     participant DocAgentService as DocAgentService
-    participant SessionAccessRoutes as session_access_routes
+    participant SessionAccessRoutes as session_access_routes.py
     participant SessionAccessService as SessionAccessService
-    participant WSManager as WSSessionAccessManager
-    participant WebSocket as WebSocket
-    actor User2 as User
-    participant RequestAccessState as RequestAccessState.tsx
+    participant SessionAccessRequest as SessionAccessRequest
 
-    User1->>ShareModal: Trong tab "Request", click "Deny"
-    activate ShareModal
+    User->>SessionShareDialog: Click "Từ chối" request to User
+    activate SessionShareDialog
     
-    ShareModal->>DocAgentService: rejectRequest(requestId)
+    SessionShareDialog->>SessionShareDialog: handleRejectRequest()
+    SessionShareDialog->>DocAgentService: gọi
+    deactivate SessionShareDialog
     activate DocAgentService
-    DocAgentService->>SessionAccessRoutes: POST /session-access/request/reject/{requestId}
+    
+    DocAgentService->>DocAgentService: rejectSessionRequest()
+    DocAgentService->>SessionAccessRoutes: DELETE "/session-access/request/reject/{request_id}"
     activate SessionAccessRoutes
+    
     SessionAccessRoutes->>SessionAccessService: reject_session_access_request()
     activate SessionAccessService
     
-    SessionAccessService->>SessionAccessService: Get request from DB
-    SessionAccessService->>SessionAccessService: Update status = REJECTED
-    SessionAccessService->>SessionAccessService: db.commit()
+    SessionAccessService->>SessionAccessService: gọi
+    SessionAccessService->>SessionAccessRequest: gọi
+    activate SessionAccessRequest
     
-    SessionAccessService->>WSManager: broadcast_request_deleted(payload)
-    activate WSManager
-    WSManager->>WebSocket: Send REQUEST_DELETED event
-    deactivate WSManager
+    SessionAccessRequest->>SessionAccessRequest: SessionAccessRequest()
+    SessionAccessRequest-->>SessionAccessService: trả về
+    deactivate SessionAccessRequest
     
-    SessionAccessService-->>SessionAccessRoutes: MessageResponse
+    SessionAccessService-->>SessionAccessRoutes: trả về
     deactivate SessionAccessService
-    SessionAccessRoutes-->>DocAgentService: MessageResponse
+    
+    SessionAccessRoutes-->>DocAgentService: trả về
     deactivate SessionAccessRoutes
-    DocAgentService-->>ShareModal: ServiceResult~MessageResponse~
+    
+    DocAgentService-->>SessionShareDialog: trả về
     deactivate DocAgentService
     
-    ShareModal->>ShareModal: Remove request from list
-    ShareModal-->>User1: Toast "Đã từ chối yêu cầu"
-    deactivate ShareModal
-    
-    WebSocket-->>User2: Receive REQUEST_DELETED event
-    activate User2
-    User2->>RequestAccessState: Handle event
-    activate RequestAccessState
-    RequestAccessState->>RequestAccessState: Clear existingRequest
-    RequestAccessState-->>User2: Hiển thị lại nút "Request Access"
-    deactivate RequestAccessState
-    deactivate User2
+    SessionShareDialog-->>User: Hiển thị
 ```
 
 ---
 
-## 7. Hủy yêu cầu truy cập
-
-```mermaid
-sequenceDiagram
-    actor User1 as User
-    participant RequestAccessState as RequestAccessState.tsx
-    participant DocAgentService as DocAgentService
-    participant SessionAccessRoutes as session_access_routes
-    participant SessionAccessService as SessionAccessService
-    participant WSManager as WSSessionAccessManager
-    participant WebSocket as WebSocket
-    actor User2 as User
-    participant ShareModal as SessionShareDialog.tsx
-
-    User1->>RequestAccessState: Trong trạng thái "Pending", click "Cancel Request"
-    activate RequestAccessState
-    
-    RequestAccessState->>DocAgentService: deleteRequest(requestId, sessionId)
-    activate DocAgentService
-    DocAgentService->>SessionAccessRoutes: DELETE /session-access/request/{requestId}
-    activate SessionAccessRoutes
-    SessionAccessRoutes->>SessionAccessService: delete_session_access_request()
-    activate SessionAccessService
-    
-    SessionAccessService->>SessionAccessService: Get request from DB
-    SessionAccessService->>SessionAccessService: Delete request
-    SessionAccessService->>SessionAccessService: db.commit()
-    
-    SessionAccessService->>WSManager: broadcast_request_deleted(payload)
-    activate WSManager
-    WSManager->>WebSocket: Send REQUEST_DELETED event
-    deactivate WSManager
-    
-    SessionAccessService-->>SessionAccessRoutes: MessageResponse
-    deactivate SessionAccessService
-    SessionAccessRoutes-->>DocAgentService: MessageResponse
-    deactivate SessionAccessRoutes
-    DocAgentService-->>RequestAccessState: ServiceResult~MessageResponse~
-    deactivate DocAgentService
-    
-    RequestAccessState->>RequestAccessState: Clear existingRequest
-    RequestAccessState-->>User1: Hiển thị nút "Request Access" + Toast "Đã hủy yêu cầu"
-    deactivate RequestAccessState
-    
-    WebSocket-->>User2: Receive REQUEST_DELETED event
-    activate User2
-    User2->>ShareModal: Increment requestTabReloadKey
-    activate ShareModal
-    ShareModal->>ShareModal: Reload request list
-    ShareModal-->>User2: Cập nhật danh sách yêu cầu
-    deactivate ShareModal
-    deactivate User2
-```
-
----
-
-## 8. Quản lý liên kết chia sẻ công khai
-
-```mermaid
-sequenceDiagram
-    actor User1 as User
-    participant ShareModal as SessionShareDialog.tsx
-    participant DocAgentService as DocAgentService
-    participant SessionAccessRoutes as session_access_routes
-    participant SessionAccessService as SessionAccessService
-    participant WSManager as WSSessionAccessManager
-    participant WebSocket as WebSocket
-
-    User1->>ShareModal: Open modal
-    activate ShareModal
-    
-    ShareModal->>DocAgentService: getSessionLink(sessionId)
-    activate DocAgentService
-    DocAgentService->>SessionAccessRoutes: GET /session-access/link/by-session/{sessionId}
-    activate SessionAccessRoutes
-    SessionAccessRoutes->>SessionAccessService: get_session_access_link_by_session()
-    activate SessionAccessService
-    SessionAccessService-->>SessionAccessRoutes: SessionAccessLink
-    deactivate SessionAccessService
-    SessionAccessRoutes-->>DocAgentService: SessionAccessLinkResponse
-    deactivate SessionAccessRoutes
-    DocAgentService-->>ShareModal: ServiceResult~SessionAccessLink~
-    deactivate DocAgentService
-    
-    ShareModal-->>User1: Hiển thị toggle và dropdown quyền
-    
-    alt Bật/tắt link
-        User1->>ShareModal: Toggle switch on/off
-        ShareModal->>DocAgentService: updateSessionLink(linkId, {is_active})
-        activate DocAgentService
-        DocAgentService->>SessionAccessRoutes: PUT /session-access/link/{linkId}
-        activate SessionAccessRoutes
-        SessionAccessRoutes->>SessionAccessService: update_session_access_link()
-        activate SessionAccessService
-        
-        SessionAccessService->>SessionAccessService: Update is_active
-        SessionAccessService->>SessionAccessService: db.commit()
-        
-        SessionAccessService->>WSManager: broadcast_link_updated(payload)
-        activate WSManager
-        WSManager->>WebSocket: Send LINK_UPDATED event
-        deactivate WSManager
-        
-        SessionAccessService-->>SessionAccessRoutes: SessionAccessLink
-        deactivate SessionAccessService
-        SessionAccessRoutes-->>DocAgentService: SessionAccessLinkResponse
-        deactivate SessionAccessRoutes
-        DocAgentService-->>ShareModal: ServiceResult~SessionAccessLink~
-        deactivate DocAgentService
-        
-        ShareModal-->>User1: Toast "Link đã được bật/tắt"
-    else Thay đổi quyền mặc định
-        User1->>ShareModal: Chọn quyền mới từ dropdown
-        ShareModal->>DocAgentService: updateSessionLink(linkId, {access_level})
-        activate DocAgentService
-        DocAgentService->>SessionAccessRoutes: PUT /session-access/link/{linkId}
-        activate SessionAccessRoutes
-        SessionAccessRoutes->>SessionAccessService: update_session_access_link()
-        activate SessionAccessService
-        
-        SessionAccessService->>SessionAccessService: Update access_level
-        SessionAccessService->>SessionAccessService: db.commit()
-        
-        SessionAccessService->>WSManager: broadcast_link_updated(payload)
-        activate WSManager
-        WSManager->>WebSocket: Send LINK_UPDATED event
-        deactivate WSManager
-        
-        SessionAccessService-->>SessionAccessRoutes: SessionAccessLink
-        deactivate SessionAccessService
-        SessionAccessRoutes-->>DocAgentService: SessionAccessLinkResponse
-        deactivate SessionAccessRoutes
-        DocAgentService-->>ShareModal: ServiceResult~SessionAccessLink~
-        deactivate DocAgentService
-        
-        ShareModal-->>User1: Toast "Quyền mặc định đã được cập nhật"
-    end
-    
-    User1->>ShareModal: Click "Copy link"
-    ShareModal->>ShareModal: Copy Session URL to clipboard
-    ShareModal-->>User1: Toast "Đã copy link"
-    deactivate ShareModal
-```
-
----
-
-## 9. Nhận cập nhật quyền realtime qua WebSocket
+## 7. Yêu cầu truy cập Session
 
 ```mermaid
 sequenceDiagram
     actor User
     participant DocAgentPage as DocAgentPage.tsx
-    participant DocSocketService as DocSocketService
-    participant WebSocket as WebSocket Server
-    participant WSManager as WSSessionAccessManager
+    participant RequestAccessState as RequestAccessState.tsx
+    participant DocAgentService as DocAgentService
+    participant SessionAccessRoutes as session_access_routes.py
     participant SessionAccessService as SessionAccessService
+    participant SessionAccessRequest as SessionAccessRequest
 
-    User->>DocAgentPage: Truy cập Session
+    User->>DocAgentPage: Xem chi tiết Session
     activate DocAgentPage
     
-    DocAgentPage->>DocSocketService: connectSessionSocket(sessionId, userId)
-    activate DocSocketService
-    DocSocketService->>WebSocket: Connect to ws://...session/ws/{sessionId}?user_id={userId}
-    activate WebSocket
-    WebSocket-->>DocSocketService: Connection established
+    DocAgentPage->>RequestAccessState: gọi
+    activate RequestAccessState
     
-    DocSocketService->>WSManager: connect(session_id, websocket, user_id)
-    activate WSManager
-    WSManager->>WSManager: Store connection in active_connections
-    WSManager-->>DocSocketService: Connected
-    deactivate WSManager
+    RequestAccessState->>RequestAccessState: loadUserSessionRequest()
+    RequestAccessState->>DocAgentService: gọi
+    deactivate RequestAccessState
+    activate DocAgentService
     
-    DocSocketService->>WebSocket: Send {"action": "subscribe"}
-    WebSocket-->>DocSocketService: WebSocket instance
-    deactivate WebSocket
-    DocSocketService-->>DocAgentPage: WebSocket instance
-    deactivate DocSocketService
+    DocAgentService->>DocAgentService: getUserSessionRequest()
+    DocAgentService->>SessionAccessRoutes: GET "/session-access/request/by-user-session/{user_id}/{session_id}"
+    activate SessionAccessRoutes
     
-    DocAgentPage->>DocAgentPage: Start keep-alive ping (every 30s)
-    DocAgentPage-->>User: Session loaded
+    SessionAccessRoutes->>SessionAccessService: get_user_session_access_request()
+    activate SessionAccessService
     
-    loop While User is on Session
-        Note over DocAgentPage,WebSocket: User đang xem Session
+    SessionAccessService->>SessionAccessService: gọi
+    SessionAccessService->>SessionAccessRequest: gọi
+    activate SessionAccessRequest
+    
+    SessionAccessRequest->>SessionAccessRequest: SessionAccessRequest()
+    SessionAccessRequest-->>SessionAccessService: trả về
+    deactivate SessionAccessRequest
+    
+    SessionAccessService-->>SessionAccessRoutes: trả về
+    deactivate SessionAccessService
+    
+    SessionAccessRoutes-->>DocAgentService: trả về
+    deactivate SessionAccessRoutes
+    
+    DocAgentService-->>User: Hiển thị
+    deactivate DocAgentService
+    
+    alt Nếu danh sách session access != null
+        User->>RequestAccessState: gọi
+        activate RequestAccessState
+        RequestAccessState-->>User: trả về
+        deactivate RequestAccessState
         
-        alt Permission Event từ Manager
-            SessionAccessService->>WSManager: broadcast_permission_granted/changed/revoked()
-            activate WSManager
-            WSManager->>WebSocket: Send WsSessionAccessEnvelope
-            deactivate WSManager
-            activate WebSocket
-            WebSocket-->>DocAgentPage: Receive event
-            deactivate WebSocket
-            
-            alt Event = PERMISSION_GRANTED
-                DocAgentPage->>DocAgentPage: Toast "Bạn đã được cấp quyền truy cập"
-                DocAgentPage->>DocAgentPage: setPermissionLoading(true)
-                DocAgentPage->>DocAgentPage: Reload permission & Session
-            else Event = PERMISSION_CHANGED
-                DocAgentPage->>DocAgentPage: Toast "Quyền của bạn đã được cập nhật"
-                DocAgentPage->>DocAgentPage: setPermissionLoading(true)
-            else Event = PERMISSION_REVOKED
-                DocAgentPage->>DocAgentPage: Toast "Quyền truy cập của bạn đã bị thu hồi"
-                DocAgentPage->>DocAgentPage: setPermissionLoading(true)
-                DocAgentPage->>DocAgentPage: Show RequestAccessState
-            end
-            
-        else Request Event từ User khác
-            SessionAccessService->>WSManager: broadcast_request_created/deleted()
-            activate WSManager
-            WSManager->>WebSocket: Send WsSessionAccessEnvelope
-            deactivate WSManager
-            activate WebSocket
-            WebSocket-->>DocAgentPage: Receive event (only if Manager)
-            deactivate WebSocket
-            
-            alt Event = REQUEST_CREATED
-                DocAgentPage->>DocAgentPage: Toast "Có yêu cầu truy cập mới"
-                DocAgentPage->>DocAgentPage: Increment requestTabReloadKey
-            else Event = REQUEST_DELETED
-                DocAgentPage->>DocAgentPage: Increment requestTabReloadKey
-            end
-            
-        else Link Update Event
-            SessionAccessService->>WSManager: broadcast_link_updated()
-            activate WSManager
-            WSManager->>WebSocket: Send WsSessionAccessEnvelope
-            deactivate WSManager
-            activate WebSocket
-            WebSocket-->>DocAgentPage: Receive event
-            deactivate WebSocket
-            
-            DocAgentPage->>DocAgentPage: Reload link config (if modal open)
-        end
+        User->>RequestAccessState: Click "Tạo" hoặc "Yêu cầu"
+        activate RequestAccessState
+        
+        RequestAccessState->>RequestAccessState: handleCreateRequest()
+        RequestAccessState->>DocAgentService: gọi
+        deactivate RequestAccessState
+        activate DocAgentService
+        
+        DocAgentService->>DocAgentService: createSessionRequest()
+        DocAgentService->>SessionAccessRoutes: POST "/session-access/request"
+        activate SessionAccessRoutes
+        
+        SessionAccessRoutes->>SessionAccessService: create_session_access_request()
+        activate SessionAccessService
+        
+        SessionAccessService->>SessionAccessService: gọi
+        SessionAccessService->>SessionAccessRequest: gọi
+        activate SessionAccessRequest
+        
+        SessionAccessRequest->>SessionAccessRequest: SessionAccessRequest()
+        SessionAccessRequest-->>SessionAccessService: trả về
+        deactivate SessionAccessRequest
+        
+        SessionAccessService-->>SessionAccessRoutes: trả về
+        deactivate SessionAccessService
+        
+        SessionAccessRoutes-->>DocAgentService: trả về
+        deactivate SessionAccessRoutes
+        
+        DocAgentService-->>DocAgentPage: trả về
+        deactivate DocAgentService
+        
+        DocAgentPage-->>User: Hiển thị
     end
     
-    User->>DocAgentPage: Rời khỏi Session (unmount)
-    DocAgentPage->>DocSocketService: closeSessionSocket(ws)
-    activate DocSocketService
-    DocSocketService->>WebSocket: Close connection
-    activate WebSocket
-    WebSocket->>WSManager: disconnect(websocket)
-    activate WSManager
-    WSManager->>WSManager: Remove from active_connections
-    deactivate WSManager
-    WebSocket-->>DocSocketService: Closed
-    deactivate WebSocket
-    DocSocketService-->>DocAgentPage: Socket closed
-    deactivate DocSocketService
     deactivate DocAgentPage
 ```
 
+---
+
+## 8. Hủy yêu cầu truy cập
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant DocAgentPage as DocAgentPage.tsx
+    participant RequestAccessState as RequestAccessState.tsx
+    participant DocAgentService as DocAgentService
+    participant SessionAccessRoutes as session_access_routes.py
+    participant SessionAccessService as SessionAccessService
+    participant SessionAccessRequest as SessionAccessRequest
+
+    User->>DocAgentPage: Xem chi tiết Session
+    activate DocAgentPage
+    
+    DocAgentPage->>RequestAccessState: gọi
+    activate RequestAccessState
+    
+    RequestAccessState->>RequestAccessState: loadUserSessionRequest()
+    RequestAccessState->>DocAgentService: gọi
+    deactivate RequestAccessState
+    activate DocAgentService
+    
+    DocAgentService->>DocAgentService: getUserSessionRequest()
+    DocAgentService->>SessionAccessRoutes: GET "/session-access/request/by-user-session/{user_id}/{session_id}"
+    activate SessionAccessRoutes
+    
+    SessionAccessRoutes->>SessionAccessService: get_user_session_access_request()
+    activate SessionAccessService
+    
+    SessionAccessService->>SessionAccessService: gọi
+    SessionAccessService->>SessionAccessRequest: gọi
+    activate SessionAccessRequest
+    
+    SessionAccessRequest->>SessionAccessRequest: SessionAccessRequest()
+    SessionAccessRequest-->>SessionAccessService: trả về
+    deactivate SessionAccessRequest
+    
+    SessionAccessService-->>SessionAccessRoutes: trả về
+    deactivate SessionAccessService
+    
+    SessionAccessRoutes-->>DocAgentService: trả về
+    deactivate SessionAccessRoutes
+    
+    DocAgentService-->>User: Hiển thị
+    deactivate DocAgentService
+    
+    alt Nếu danh sách session access != null
+        User->>RequestAccessState: gọi
+        activate RequestAccessState
+        RequestAccessState-->>User: trả về
+        deactivate RequestAccessState
+        
+        User->>RequestAccessState: Click "Từ chối"
+        activate RequestAccessState
+        
+        RequestAccessState->>RequestAccessState: handleDeleteRequest()
+        RequestAccessState->>DocAgentService: gọi
+        deactivate RequestAccessState
+        activate DocAgentService
+        
+        DocAgentService->>DocAgentService: deleteRequest()
+        DocAgentService->>SessionAccessRoutes: DELETE "/session-access/request/{request_id}"
+        activate SessionAccessRoutes
+        
+        SessionAccessRoutes->>SessionAccessService: delete_session_access_request()
+        activate SessionAccessService
+        
+        SessionAccessService->>SessionAccessService: gọi
+        SessionAccessService->>SessionAccessRequest: gọi
+        activate SessionAccessRequest
+        
+        SessionAccessRequest->>SessionAccessRequest: SessionAccessRequest()
+        SessionAccessRequest-->>SessionAccessService: trả về
+        deactivate SessionAccessRequest
+        
+        SessionAccessService-->>SessionAccessRoutes: trả về
+        deactivate SessionAccessService
+        
+        SessionAccessRoutes-->>DocAgentService: trả về
+        deactivate SessionAccessRoutes
+        
+        DocAgentService-->>DocAgentPage: trả về
+        deactivate DocAgentService
+        
+        DocAgentPage-->>User: Hiển thị
+    end
+    
+    deactivate DocAgentPage
+```
+
+---
+
+## 9. Xem danh sách yêu cầu truy cập
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Header as Header.tsx
+    participant SessionShareDialog as SessionShareDialog.tsx
+    participant AuthApi as AuthApi
+    participant DocAgentService as DocAgentService
+    participant SessionAccessRoutes as session_access_routes.py
+    participant SessionAccessService as SessionAccessService
+    participant SessionAccessRequest as SessionAccessRequest
+
+    User->>Header: Click "Chia sẻ"
+    activate Header
+    
+    Header->>SessionShareDialog: gọi
+    deactivate Header
+    activate SessionShareDialog
+    SessionShareDialog-->>User: Hiển thị
+    deactivate SessionShareDialog
+    
+    User->>SessionShareDialog: Click "Yêu cầu" tab
+    activate SessionShareDialog
+    
+    SessionShareDialog->>SessionShareDialog: loadSessionRequests()
+    SessionShareDialog->>DocAgentService: gọi
+    deactivate SessionShareDialog
+    activate DocAgentService
+    
+    DocAgentService->>DocAgentService: getSessionRequestsBySession()
+    DocAgentService->>SessionAccessRoutes: GET "/session-access/grant/by-session/{session_id}"
+    activate SessionAccessRoutes
+    
+    SessionAccessRoutes->>SessionAccessService: get_session_access_requests_by_session()
+    activate SessionAccessService
+    
+    SessionAccessService->>SessionAccessService: gọi
+    SessionAccessService->>SessionAccessRequest: gọi
+    activate SessionAccessRequest
+    
+    SessionAccessRequest->>SessionAccessRequest: SessionAccessRequest()
+    SessionAccessRequest-->>SessionAccessService: trả về
+    deactivate SessionAccessRequest
+    
+    SessionAccessService-->>SessionAccessRoutes: trả về
+    deactivate SessionAccessService
+    
+    SessionAccessRoutes-->>DocAgentService: trả về
+    deactivate SessionAccessRoutes
+    
+    alt Loop
+        DocAgentService->>AuthApi: gọi
+        activate AuthApi
+        AuthApi->>AuthApi: getUserById()
+        AuthApi-->>DocAgentService: trả về
+        deactivate AuthApi
+    end
+    
+    DocAgentService-->>User: Hiển thị
+    deactivate DocAgentService
+```

@@ -1,6 +1,11 @@
 # Use Case Description - Quản lý Session Access
 
 Chức năng quản lý Session Access (Session Access Management) có các giao diện tương tác với User:
+- **Đăng nhập** → đề xuất UC đăng nhập
+- **Xem danh sách Session** → đề xuất UC xem danh sách Session
+- **Xem chi tiết Session** → đề xuất UC xem chi tiết Session
+- **Xem danh sách yêu cầu truy cập** → đề xuất UC xem danh sách yêu cầu truy cập
+- **Xem các thông tin về quyền truy cập** → đề xuất UC xem thông tin quyền truy cập
 - **Chia sẻ Session với User cụ thể** → đề xuất UC chia sẻ Session
 - **Cập nhật quyền của User được chia sẻ** → đề xuất UC cập nhật quyền truy cập
 - **Thu hồi quyền truy cập** → đề xuất UC thu hồi quyền
@@ -27,6 +32,9 @@ Chức năng quản lý Session Access (Session Access Management) có các giao
 
 | **Use Case** | Mô tả |
 |----------|------|
+| **Đăng nhập** | UC này cho phép User đăng nhập vào hệ thống. |
+| **Xem danh sách Session** | UC này cho phép User xem danh sách các Session. |
+| **Xem chi tiết Session** | UC này cho phép User xem chi tiết một Session. |
 | **Xem danh sách yêu cầu truy cập** | UC này cho phép User xem tất cả các yêu cầu truy cập đang chờ xử lý cho Session. |
 | **Chấp nhận yêu cầu truy cập** | UC này cho phép User chấp nhận yêu cầu truy cập từ User khác. |
 | **Từ chối yêu cầu truy cập** | UC này cho phép User từ chối yêu cầu truy cập từ User khác. |

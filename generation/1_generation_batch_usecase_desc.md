@@ -1,6 +1,9 @@
 # Use Case Description - Generation với Batch
 
 Chức năng Generation với Batch (Generation & Batch Management) có các giao diện tương tác với User:
+- **Đăng nhập** → đề xuất UC đăng nhập
+- **Xem danh sách Session** → đề xuất UC xem danh sách Session
+- **Xem chi tiết Session** → đề xuất UC xem chi tiết Session
 - **Tạo yêu cầu Generation** → đề xuất UC tạo yêu cầu Generation
 - **Theo dõi tiến trình Generation** → đề xuất UC theo dõi tiến trình Generation
 - **Hủy tiến trình Generation** → đề xuất UC hủy tiến trình Generation
@@ -21,6 +24,9 @@ Chức năng Generation với Batch (Generation & Batch Management) có các gia
 
 | **Use Case** | Mô tả |
 |----------|------|
+| **Đăng nhập** | UC này cho phép User đăng nhập vào hệ thống. |
+| **Xem danh sách Session** | UC này cho phép User xem danh sách các Session. |
+| **Xem chi tiết Session** | UC này cho phép User xem chi tiết một Session. |
 | **Tạo yêu cầu Generation** | UC này cho phép User tạo yêu cầu generation Question và Flashcard từ các Document trong Session. |
 | **Theo dõi tiến trình Generation** | UC này cho phép User theo dõi tiến trình Generation. |
 | **Hủy tiến trình Generation** | UC này cho phép User hủy bỏ tiến trình Generation đang chạy. |

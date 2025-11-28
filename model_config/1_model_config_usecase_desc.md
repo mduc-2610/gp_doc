@@ -1,6 +1,8 @@
 # Use Case Description - Quản lý ModelConfig và ModelWrapper
 
 Chức năng quản lý ModelConfig và ModelWrapper (ModelConfig & ModelWrapper Management) có các giao diện tương tác với User:
+- **Đăng nhập** → đề xuất UC đăng nhập
+- **Xem trang Model** → đề xuất UC xem trang Model
 - **Xem danh sách ModelConfig** → đề xuất UC xem danh sách ModelConfig
 - **Xem danh sách ModelWrapper** → đề xuất UC xem danh sách ModelWrapper
 - **Chỉnh sửa ModelConfig** → đề xuất UC chỉnh sửa ModelConfig
@@ -23,6 +25,8 @@ Chức năng quản lý ModelConfig và ModelWrapper (ModelConfig & ModelWrapper
 
 | **Use Case** | Mô tả |
 |----------|------|
+| **Đăng nhập** | UC này cho phép User đăng nhập vào hệ thống. |
+| **Xem trang Model** | UC này cho phép User truy cập trang cấu hình Model. |
 | **Xem danh sách ModelConfig** | UC này cho phép User xem tất cả các ModelConfig của mình được tổ chức theo task type. |
 | **Xem danh sách ModelWrapper** | UC này cho phép User xem tất cả các ModelWrapper có sẵn trong hệ thống. |
 | **Chỉnh sửa ModelConfig** | UC này cho phép User cập nhật thông tin của một ModelConfig hiện có. Trong quá trình chỉnh sửa, User có thể chọn Wrapper từ danh sách hiển thị. |

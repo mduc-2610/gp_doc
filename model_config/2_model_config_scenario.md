@@ -1,15 +1,38 @@
 # Scenario - Quản lý ModelConfig và ModelWrapper
 
+## Use Case: Đăng nhập
+
+| Thành phần | Chi tiết |
+|-----------|----------|
+| **Use Case** | Đăng nhập |
+| **Actor** | User |
+| **Tiền điều kiện** | - User chưa đăng nhập |
+| **Hậu điều kiện** | - User đăng nhập thành công và có quyền truy cập hệ thống |
+| **Kịch bản chính** | 1. User truy cập trang đăng nhập<br>2. Hệ thống hiển thị form đăng nhập<br>3. User nhập thông tin đăng nhập<br>4. Hệ thống xác thực và chuyển đến trang chính |
+
+---
+
+## Use Case: Xem trang Model
+
+| Thành phần | Chi tiết |
+|-----------|----------|
+| **Use Case** | Xem trang Model |
+| **Actor** | User |
+| **Tiền điều kiện** | - UC "Đăng nhập" đã hoàn thành |
+| **Hậu điều kiện** | - Trang cấu hình Model được hiển thị |
+| **Kịch bản chính** | 1. User click "Mô hình" tại sidebar<br>2. Hệ thống hiển thị trang Model với các tab |
+
+---
+
 ## Use Case: Xem danh sách ModelConfig
 
 | Thành phần | Chi tiết |
 |-----------|----------|
 | **Use Case** | Xem danh sách ModelConfig |
 | **Actor** | User |
-| **Tiền điều kiện** | - User đã đăng nhập thành công |
-| **Hậu điều kiện** | - Danh sách các ModelConfig của User được hiển thị trên giao diện |
-| **Kịch bản chính** | 1. Tại giao diện chính, User click vào nút "Mô hình" tại sidebar <br>2. Hệ thống hiển thị giao diện cấu hình Model với tab "Cấu Hình Mô Hình" <br>3. Hệ thống load và hiển thị danh sách tất cả các ModelConfig của User |
-| **Ngoại lệ** | - User không có ModelConfig nào: hiển thị thông báo "Chưa Có Mô Hình Nào Được Cấu Hình" với nút "Tải Mô Hình Mẫu"<br>- Lỗi load ModelConfig: hiển thị thông báo "Lỗi tải mô hình" |
+| **Tiền điều kiện** | - UC "Xem trang Model" đã hoàn thành |
+| **Hậu điều kiện** | - Danh sách ModelConfig được hiển thị |
+| **Kịch bản chính** | 1. User click tab "Cấu Hình Mô Hình"<br>2. Hệ thống load và hiển thị danh sách ModelConfig theo task type |
 
 ---
 
@@ -19,10 +42,11 @@
 |-----------|----------|
 | **Use Case** | Tạo ModelConfig mới |
 | **Actor** | User |
-| **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang ở giao diện cấu hình Model |
-| **Hậu điều kiện** | - ModelConfig mới được tạo trong hệ thống<br>- ModelConfig được thêm vào danh sách |
-| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, User click vào tab "Cấu Hình Mô Hình"<br>2. Hệ thống hiển thị giao diện của tab "Cấu Hình Mô Hình" với danh sách ModelConfig theo task type<br>3. User chọn task type cần tạo model<br>4. Hệ thống hiển thị danh sách ModelConfig cho task type đó<br>5. User click "Tạo Mô Hình"<br>6. Hệ thống mở dialog tạo ModelConfig mới và gọi API để lấy danh sách Wrapper<br>7. Backend trả về danh sách Wrapper theo task type<br>8. Hệ thống hiển thị bảng Wrapper trong dialog<br>9. User chọn một Wrapper từ bảng<br>10. User nhập các thông tin và click "Lưu Thay Đổi":<br>&nbsp;&nbsp;&nbsp;&nbsp;- Tên ModelConfig<br>&nbsp;&nbsp;&nbsp;&nbsp;- Wrapper (đã chọn)<br>&nbsp;&nbsp;&nbsp;&nbsp;- Model Type (Remote/Local)<br>&nbsp;&nbsp;&nbsp;&nbsp;- Language<br>&nbsp;&nbsp;&nbsp;&nbsp;- Extra Config (JSON, optional)<br>11. Hệ thống gửi yêu cầu tạo ModelConfig đến backend<br>12. Backend tạo ModelConfig và trả về ModelConfig mới<br>13. Hệ thống cập nhật danh sách và hiển thị thông báo "Mô hình đã được tạo thành công" |
-| **Ngoại lệ** | - Không chọn Wrapper: hiển thị lỗi validation<br>- Dữ liệu không hợp lệ: hiển thị lỗi validation<br>- Lỗi tạo ModelConfig: hiển thị thông báo "Tạo mô hình thất bại" |
+| **Tiền điều kiện** | - UC "Xem danh sách ModelConfig" đã hoàn thành |
+| **Hậu điều kiện** | - ModelConfig mới được tạo và thêm vào danh sách |
+| **Kịch bản chính** | 1. User click "Tạo Mô Hình"<br>2. Hệ thống hiển thị dialog và load danh sách Wrapper<br>3. User chọn Wrapper và nhập thông tin<br>4. User click "Lưu Thay Đổi"<br>5. Hệ thống tạo ModelConfig và cập nhật danh sách |
+
+---
 
 ## Use Case: Chỉnh sửa ModelConfig
 
@@ -30,10 +54,11 @@
 |-----------|----------|
 | **Use Case** | Chỉnh sửa ModelConfig |
 | **Actor** | User |
-| **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang ở giao diện cấu hình Model |
-| **Hậu điều kiện** | - Thông tin ModelConfig được cập nhật trong hệ thống |
-| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, User click vào tab "Cấu Hình Mô Hình"<br>2. Hệ thống hiển thị giao diện của tab "Cấu Hình Mô Hình"<br>3. User chọn task type<br>4. Hệ thống hiển thị danh sách ModelConfig cho task type đó<br>5. User click "Chỉnh Sửa" trên ModelConfig muốn chỉnh sửa<br>6. Hệ thống mở dialog chỉnh sửa với thông tin hiện tại và gọi API để lấy danh sách Wrapper<br>7. Backend trả về danh sách Wrapper theo task type<br>8. Hệ thống hiển thị bảng Wrapper với Wrapper hiện tại được chọn<br>9. User có thể thay đổi Wrapper từ bảng<br>10. User cập nhật thông tin và click "Lưu Thay Đổi"<br>11. Hệ thống gửi yêu cầu cập nhật đến backend<br>12. Backend cập nhật ModelConfig và trả về ModelConfig đã cập nhật<br>13. Hệ thống cập nhật danh sách và hiển thị thông báo "Mô hình đã được cập nhật thành công" |
-| **Ngoại lệ** | - ModelConfig không tồn tại: hiển thị lỗi "Không tìm thấy mô hình"<br>- Dữ liệu không hợp lệ: hiển thị lỗi validation<br>- Lỗi cập nhật: hiển thị thông báo "Cập nhật mô hình thất bại" |
+| **Tiền điều kiện** | - UC "Xem danh sách ModelConfig" đã hoàn thành |
+| **Hậu điều kiện** | - ModelConfig được cập nhật |
+| **Kịch bản chính** | 1. User click icon update trên ModelConfig<br>2. Hệ thống hiển thị dialog với thông tin hiện tại<br>3. User chỉnh sửa thông tin và click "Lưu Thay Đổi"<br>4. Hệ thống cập nhật ModelConfig |
+
+---
 
 ## Use Case: Xóa ModelConfig
 
@@ -41,10 +66,11 @@
 |-----------|----------|
 | **Use Case** | Xóa ModelConfig |
 | **Actor** | User |
-| **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang ở giao diện cấu hình Model |
-| **Hậu điều kiện** | - ModelConfig được xóa khỏi hệ thống |
-| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, User click vào tab "Cấu Hình Mô Hình"<br>2. Hệ thống hiển thị giao diện của tab "Cấu Hình Mô Hình"<br>3. User chọn task type<br>4. Hệ thống hiển thị danh sách ModelConfig<br>5. User click "Xóa" trên ModelConfig muốn xóa<br>6. Hệ thống hiển thị dialog xác nhận xóa<br>7. User xác nhận xóa<br>8. Hệ thống gửi yêu cầu xóa đến backend<br>9. Backend xóa ModelConfig khỏi database và trả về trạng thái thành công<br>10. Hệ thống cập nhật danh sách và hiển thị thông báo "Mô hình đã được xóa thành công" |
-| **Ngoại lệ** | - ModelConfig không tồn tại: hiển thị lỗi "Không tìm thấy mô hình"<br>- ModelConfig đang được sử dụng: hiển thị lỗi "Mô hình đang được sử dụng"<br>- Lỗi xóa: hiển thị thông báo "Xóa mô hình thất bại" |
+| **Tiền điều kiện** | - UC "Xem danh sách ModelConfig" đã hoàn thành |
+| **Hậu điều kiện** | - ModelConfig bị xóa khỏi hệ thống |
+| **Kịch bản chính** | 1. User click icon delete trên ModelConfig<br>2. Hệ thống hiển thị dialog xác nhận<br>3. User click "Xác nhận"<br>4. Hệ thống xóa ModelConfig |
+
+---
 
 ## Use Case: Toggle trạng thái sử dụng ModelConfig
 
@@ -52,10 +78,11 @@
 |-----------|----------|
 | **Use Case** | Toggle trạng thái sử dụng ModelConfig |
 | **Actor** | User |
-| **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang ở giao diện cấu hình Model |
-| **Hậu điều kiện** | - Trạng thái sử dụng của ModelConfig được cập nhật trong hệ thống |
-| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, User click vào tab "Cấu Hình Mô Hình"<br>2. Hệ thống hiển thị giao diện của tab "Cấu Hình Mô Hình"<br>3. User chọn task type<br>4. Hệ thống hiển thị danh sách ModelConfig<br>5. User toggle switch trạng thái "Is Used" của ModelConfig<br>6. Hệ thống gửi yêu cầu cập nhật trạng thái đến backend<br>7. Backend cập nhật trạng thái is_used của ModelConfig và tự động set is_used=false cho các ModelConfig khác cùng task type<br>8. Hệ thống cập nhật danh sách và hiển thị thông báo cập nhật thành công |
-| **Ngoại lệ** | - ModelConfig không tồn tại: hiển thị lỗi "Không tìm thấy mô hình"<br>- Lỗi cập nhật: hiển thị thông báo "Cập nhật mô hình thất bại" |
+| **Tiền điều kiện** | - UC "Xem danh sách ModelConfig" đã hoàn thành |
+| **Hậu điều kiện** | - Trạng thái sử dụng ModelConfig được cập nhật |
+| **Kịch bản chính** | 1. User click Switch toggle trên ModelConfig<br>2. Hệ thống cập nhật trạng thái is_in_use |
+
+---
 
 ## Use Case: Preload ModelConfig
 
@@ -63,10 +90,9 @@
 |-----------|----------|
 | **Use Case** | Preload ModelConfig |
 | **Actor** | User |
-| **Tiền điều kiện** | - User đã đăng nhập thành công<br>- User đang ở giao diện cấu hình Model |
-| **Hậu điều kiện** | - Các ModelConfig mặc định được tạo trong hệ thống |
-| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, User click vào tab "Model Configurations"<br>2. Hệ thống hiển thị giao diện của tab "Model Configurations"<br>3. User chọn task type<br>4. Hệ thống hiển thị danh sách ModelConfig (có thể rỗng)<br>5. User click "Preload Models"<br>6. Hệ thống hiển thị dialog xác nhận preload<br>7. User xác nhận<br>8. Hệ thống gửi yêu cầu preload đến backend<br>9. Backend tạo các ModelConfig mặc định từ template và trả về danh sách ModelConfig mới<br>10. Hệ thống cập nhật danh sách và hiển thị thông báo "Models preloaded successfully" |
-| **Ngoại lệ** | - Lỗi preload: hiển thị thông báo lỗi từ server |
+| **Tiền điều kiện** | - UC "Xem danh sách ModelConfig" đã hoàn thành<br>- User chưa có ModelConfig nào |
+| **Hậu điều kiện** | - ModelConfig mặc định được tải vào hệ thống |
+| **Kịch bản chính** | 1. User click "Tải Mô Hình Mẫu"<br>2. Hệ thống gửi yêu cầu preload<br>3. Backend tạo ModelConfig mặc định<br>4. Hệ thống load lại danh sách ModelConfig |
 
 ---
 
@@ -76,42 +102,42 @@
 |-----------|----------|
 | **Use Case** | Xem danh sách ModelWrapper |
 | **Actor** | User |
-| **Tiền điều kiện** | - User đã đăng nhập thành công |
-| **Hậu điều kiện** | - Danh sách các ModelWrapper được hiển thị trên giao diện |
-| **Kịch bản chính** | 1. Tại giao diện chính, User click vào nút "Mô hình" tại sidebar <br>2. Hệ thống hiển thị giao diện cấu hình Model, User click vào tab "Model Wrappers" <br>3. Hệ thống load và hiển thị danh sách tất cả các ModelWrapper |
-| **Ngoại lệ** | - Không có ModelWrapper nào: hiển thị thông báo "Không có ModelWrapper nào"<br>- Lỗi load ModelWrapper: hiển thị thông báo lỗi từ server |
+| **Tiền điều kiện** | - UC "Xem trang Model" đã hoàn thành |
+| **Hậu điều kiện** | - Danh sách ModelWrapper được hiển thị |
+| **Kịch bản chính** | 1. User click tab "Cấu hình Wrapper"<br>2. Hệ thống load và hiển thị danh sách ModelWrapper |
 
 ---
 
-## Use Case: Tạo ModelWrapper mới
+## Use Case: Tạo ModelWrapper mới (Admin only)
 
 | Thành phần | Chi tiết |
 |-----------|----------|
 | **Use Case** | Tạo ModelWrapper mới |
 | **Actor** | Admin |
-| **Tiền điều kiện** | - Admin đã đăng nhập thành công<br>- Admin đang ở giao diện cấu hình Model |
-| **Hậu điều kiện** | - ModelWrapper mới được tạo trong hệ thống |
-| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, Admin click vào tab "Model Wrappers"<br>2. Hệ thống hiển thị giao diện của tab "Model Wrappers" với danh sách Wrapper<br>3. Admin click "Add Wrapper"<br>4. Hệ thống mở dialog tạo Wrapper mới<br>5. Admin nhập các thông tin và click "Save":<br>&nbsp;&nbsp;&nbsp;&nbsp;- Tên Wrapper<br>&nbsp;&nbsp;&nbsp;&nbsp;- Task Type<br>&nbsp;&nbsp;&nbsp;&nbsp;- Instruction (hướng dẫn cấu hình)<br>6. Hệ thống gửi yêu cầu tạo Wrapper đến backend<br>7. Backend tạo Wrapper và trả về Wrapper mới<br>8. Hệ thống cập nhật danh sách và hiển thị thông báo "Wrapper created successfully" |
-| **Ngoại lệ** | - User Role không phải Admin: không hiển thị nút tạo<br>- Dữ liệu không hợp lệ: hiển thị lỗi validation<br>- Wrapper đã tồn tại (duplicate name + task_type): hiển thị lỗi<br>- Lỗi tạo Wrapper: hiển thị thông báo lỗi từ server |
+| **Tiền điều kiện** | - UC "Xem danh sách ModelWrapper" đã hoàn thành<br>- User có role Admin |
+| **Hậu điều kiện** | - ModelWrapper mới được tạo |
+| **Kịch bản chính** | 1. Admin click "Tạo Wrapper"<br>2. Hệ thống hiển thị dialog tạo Wrapper<br>3. Admin nhập thông tin và click "Tạo"<br>4. Hệ thống tạo ModelWrapper và cập nhật danh sách |
 
-## Use Case: Chỉnh sửa ModelWrapper
+---
+
+## Use Case: Chỉnh sửa ModelWrapper (Admin only)
 
 | Thành phần | Chi tiết |
 |-----------|----------|
 | **Use Case** | Chỉnh sửa ModelWrapper |
 | **Actor** | Admin |
-| **Tiền điều kiện** | - Admin đã đăng nhập thành công<br>- Admin đang ở giao diện cấu hình Model |
-| **Hậu điều kiện** | - Thông tin ModelWrapper được cập nhật trong hệ thống |
-| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, Admin click vào tab "Model Wrappers"<br>2. Hệ thống hiển thị giao diện của tab "Model Wrappers"<br>3. Admin click "Edit" trên Wrapper muốn chỉnh sửa<br>4. Hệ thống mở dialog chỉnh sửa với thông tin hiện tại<br>5. Admin cập nhật thông tin và click "Save"<br>6. Hệ thống gửi yêu cầu cập nhật đến backend<br>7. Backend cập nhật Wrapper và trả về Wrapper đã cập nhật<br>8. Hệ thống cập nhật danh sách và hiển thị thông báo "Wrapper updated successfully" |
-| **Ngoại lệ** | - User Role không phải Admin: không hiển thị nút edit<br>- Wrapper không tồn tại: hiển thị lỗi<br>- Dữ liệu không hợp lệ: hiển thị lỗi validation<br>- Lỗi cập nhật: hiển thị thông báo lỗi từ server |
+| **Tiền điều kiện** | - UC "Xem danh sách ModelWrapper" đã hoàn thành<br>- User có role Admin |
+| **Hậu điều kiện** | - ModelWrapper được cập nhật |
+| **Kịch bản chính** | 1. Admin click icon update trên ModelWrapper<br>2. Hệ thống hiển thị dialog với thông tin hiện tại<br>3. Admin chỉnh sửa và click "Cập nhật"<br>4. Hệ thống cập nhật ModelWrapper |
 
-## Use Case: Xóa ModelWrapper
+---
+
+## Use Case: Xóa ModelWrapper (Admin only)
 
 | Thành phần | Chi tiết |
 |-----------|----------|
 | **Use Case** | Xóa ModelWrapper |
 | **Actor** | Admin |
-| **Tiền điều kiện** | - Admin đã đăng nhập thành công<br>- Admin đang ở giao diện cấu hình Model |
-| **Hậu điều kiện** | - ModelWrapper được xóa khỏi hệ thống |
-| **Kịch bản chính** | 1. Tại giao diện cấu hình Model, Admin click vào tab "Model Wrappers"<br>2. Hệ thống hiển thị giao diện của tab "Model Wrappers"<br>3. Admin click "Delete" trên Wrapper muốn xóa<br>4. Hệ thống hiển thị dialog xác nhận xóa<br>5. Admin xác nhận xóa<br>6. Hệ thống gửi yêu cầu xóa đến backend<br>7. Backend xóa Wrapper và các ModelConfig liên quan (cascade delete) và trả về trạng thái thành công<br>8. Hệ thống cập nhật danh sách và hiển thị thông báo "Wrapper deleted successfully" |
-| **Ngoại lệ** | - User Role không phải Admin: không hiển thị nút delete<br>- Wrapper không tồn tại: hiển thị lỗi<br>- Lỗi xóa: hiển thị thông báo lỗi từ server |
+| **Tiền điều kiện** | - UC "Xem danh sách ModelWrapper" đã hoàn thành<br>- User có role Admin |
+| **Hậu điều kiện** | - ModelWrapper bị xóa khỏi hệ thống |
+| **Kịch bản chính** | 1. Admin click icon delete trên ModelWrapper<br>2. Hệ thống hiển thị dialog xác nhận<br>3. Admin click "Cập nhật"<br>4. Hệ thống xóa ModelWrapper |
