@@ -1,4 +1,4 @@
-# Sequence Scenario - Quản lý Document
+# Sequence Scenario - Quản lý Session
 
 ## Kịch bản 1: Xem danh sách Session
 

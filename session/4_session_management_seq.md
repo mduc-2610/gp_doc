@@ -1,4 +1,4 @@
-# Sequence Diagram - Quản lý Document
+# Sequence Diagram - Quản lý Session
 
 ## 1. Tạo Session mới
 
