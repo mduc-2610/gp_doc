@@ -197,8 +197,8 @@
 ## Kịch bản 9: Luyện tập với Question (Practice Tab)
 
 1. User click tab "Câu hỏi"
-2. EditTab.tsx gọi tới QuestionEditTab.tsx
-3. QuestionEditTab.tsx gọi tới lớp DocAgentService
+2. EditTab.tsx gọi tới QuestionTab.tsx
+3. QuestionTab.tsx gọi tới lớp DocAgentService
 4. Lớp DocAgentService gọi tới hàm getQuestionsBySession()
 5. Hàm getQuestionsBySession() gửi yêu cầu với phương thức GET đến endpoint "/question/question/by-session/{session_id}" tới question_routes.py phía backend thông qua RESTFul API
 6. Lớp question_routes.py gọi hàm get_questions_by_session()
@@ -209,44 +209,105 @@
 11. Lớp Question trả kết quả về cho hàm get_questions_by_session()
 12. Hàm get_questions_by_session() trả kết quả về cho lớp question_routes.py
 13. Lớp question_routes.py trả về dữ liệu cho hàm getQuestionsBySession() phía Frontend
-14. Hàm getQuestionsBySession() trả kết quả cho QuestionEditTab.tsx
-15. QuestionEditTab.tsx hiển thị Question đầu tiên cho User
+14. Hàm getQuestionsBySession() trả kết quả cho QuestionTab.tsx
+15. QuestionTab.tsx hiển thị Question đầu tiên cho User
 16. User nhấn key left, right, enter
-17. QuestionEditTab.tsx gọi tới hàm handleKeyPress()
-18. Nếu key == "ArrowLeft" thì QuestionEditTab.tsx gọi tới hàm goToPrevious()
-19. Nếu key == "ArrowRight" thì QuestionEditTab.tsx gọi tới hàm goToNext()
-20. Nếu key == "Enter" và needResults == true thì QuestionEditTab.tsx gọi tới hàm redoPractice() sau đó gọi tới hàm goToNext()
-21. QuestionEditTab.tsx hiển thị kết quả cho User
+17. QuestionTab.tsx gọi tới hàm handleKeyPress()
+18. Nếu key == "ArrowLeft" thì QuestionTab.tsx gọi tới hàm goToPrevious()
+19. Nếu key == "ArrowRight" thì QuestionTab.tsx gọi tới hàm goToNext()
+20. Nếu key == "Enter" và needResults == true thì QuestionTab.tsx gọi tới hàm redoPractice() sau đó gọi tới hàm goToNext()
+21. QuestionTab.tsx hiển thị kết quả cho User
 22. User click "Hoàn thành" hoặc nhấn key enter
-23. QuestionEditTab.tsx gọi tới hàm calculateScore()
+23. QuestionTab.tsx gọi tới hàm calculateScore()
 24. Hàm calculateScore() tính toán điểm số
-25. QuestionEditTab.tsx hiển thị kết quả điểm số cho User
+25. QuestionTab.tsx hiển thị kết quả điểm số cho User
 
 ---
 
 ## Kịch bản 10: Chỉnh sửa Question
 
 1. User click vào 1 Question item
-2. EditTab.tsx gọi tới hàm handleEdit()
-3. Hàm handleEdit() gọi tới QuestionEditTab.tsx
-4. QuestionEditTab.tsx gọi tới QuestionEditItem.tsx
-5. QuestionEditItem.tsx hiển thị dialog với thông tin hiện tại cho User
-6. User nhập thông tin cập nhật và click "Lưu"
-7. QuestionEditItem.tsx gọi tới hàm validate()
-8. Hàm validate() kiểm tra dữ liệu hợp lệ
-9. QuestionEditItem.tsx gọi tới hàm onSave()
-10. Hàm onSave() gọi tới QuestionEditTab.tsx
-11. QuestionEditTab.tsx gọi tới hàm handleUpdateQuestion()
-12. Hàm handleUpdateQuestion() gọi tới lớp DocAgentService
-13. Lớp DocAgentService gọi tới hàm updateQuestion()
-14. Hàm updateQuestion() gửi yêu cầu với phương thức PUT đến endpoint "/question/question/{question_id}" tới question_routes.py phía backend thông qua RESTFul API
-15. Lớp question_routes.py gọi hàm update_question()
-16. Hàm update_question() gọi đến lớp QuestionService để xử lý logic nghiệp vụ
-17. Lớp QuestionService sẽ gọi đến hàm update_question()
-18. Hàm update_question() gọi tới lớp Question để cập nhật thực thể
-19. Lớp Question đóng gói thông tin thực thể đã cập nhật
-20. Lớp Question trả kết quả về cho hàm update_question()
-21. Hàm update_question() trả kết quả về cho lớp question_routes.py
-22. Lớp question_routes.py trả về dữ liệu cho hàm updateQuestion() phía Frontend
-23. Hàm updateQuestion() trả kết quả cho EditTab.tsx
-24. EditTab.tsx hiển thị thông báo cập nhật thành công cho User
+2. QuestionEditTab.tsx gọi tới hàm handleEdit()
+3. Hàm handleEdit() gọi tới QuestionEditItem.tsx
+4. QuestionEditItem.tsx hiển thị dialog với thông tin hiện tại cho User
+5. User nhập thông tin cập nhật và click "Lưu"
+6. QuestionEditItem.tsx gọi tới hàm validate()
+7. Hàm validate() kiểm tra dữ liệu hợp lệ
+8. QuestionEditItem.tsx gọi tới hàm onSave()
+9. Hàm onSave() gọi tới QuestionEditTab.tsx
+10. QuestionEditTab.tsx gọi tới hàm handleUpdateQuestion()
+11. Hàm handleUpdateQuestion() gọi tới lớp DocAgentService
+12. Lớp DocAgentService gọi tới hàm updateQuestion()
+13. Hàm updateQuestion() gửi yêu cầu với phương thức PUT đến endpoint "/question/question/{question_id}" tới question_routes.py phía backend thông qua RESTFul API
+14. Lớp question_routes.py gọi hàm update_question()
+15. Hàm update_question() gọi đến lớp QuestionService để xử lý logic nghiệp vụ
+16. Lớp QuestionService sẽ gọi đến hàm update_question()
+17. Hàm update_question() gọi tới lớp Question để cập nhật thực thể
+18. Lớp Question đóng gói thông tin thực thể đã cập nhật
+19. Lớp Question trả kết quả về cho hàm update_question()
+20. Hàm update_question() trả kết quả về cho lớp question_routes.py
+21. Lớp question_routes.py trả về dữ liệu cho hàm updateQuestion() phía Frontend
+22. Hàm updateQuestion() trả kết quả cho QuestionEditTab.tsx
+23. QuestionEditTab.tsx hiển thị thông báo cập nhật thành công cho User
+
+---
+
+## Kịch bản 11: Trích xuất Question (Export Question)
+
+1. User click tab "Trích xuất"
+2. ExportTab.tsx hiển thị giao diện cho User
+3. User click tab con "Câu hỏi"
+4. ExportTab.tsx gọi tới QuestionExportTab.tsx
+5. QuestionExportTab.tsx gọi tới hàm loadQuestionsFromSession()
+6. Hàm loadQuestionsFromSession() gọi tới lớp QuestionCategoryService
+7. Lớp QuestionCategoryService gọi tới hàm getQuestionsBySession()
+8. Hàm getQuestionsBySession() gửi yêu cầu với phương thức GET đến endpoint "/question/question/by-session/{session_id}" tới question_routes.py phía backend thông qua RESTFul API
+9. Lớp question_routes.py gọi hàm get_questions_by_session()
+10. Hàm get_questions_by_session() gọi đến lớp QuestionService để truy vấn trong cơ sở dữ liệu
+11. Lớp QuestionService sẽ gọi đến hàm get_questions_by_session()
+12. Hàm get_questions_by_session() gọi tới lớp Question để đóng gói thông tin thực thể
+13. Lớp Question đóng gói thông tin thực thể
+14. Lớp Question trả kết quả về cho hàm get_questions_by_session()
+15. Hàm get_questions_by_session() trả kết quả về cho lớp question_routes.py
+16. Lớp question_routes.py trả về dữ liệu cho hàm getQuestionsBySession() phía Frontend
+17. Hàm getQuestionsBySession() trả kết quả cho QuestionExportTab.tsx
+18. QuestionExportTab.tsx gọi tới hàm loadCategories()
+19. Hàm loadCategories() gọi tới lớp QuestionCategoryService
+20. Lớp QuestionCategoryService gọi tới hàm getAllCategories()
+21. Hàm getAllCategories() trả kết quả về cho QuestionExportTab.tsx
+22. QuestionExportTab.tsx hiển thị danh sách Question cho User
+23. User chọn Question, category và dropdown và click "Xuất câu hỏi"
+24. QuestionExportTab.tsx gọi tới hàm exportToExcel()
+25. Hàm exportToExcel() gọi tới hàm mapQuestionsToExportData()
+26. Hàm mapQuestionsToExportData() gọi tới hàm writeFile()
+27. Hàm writeFile() tạo file Excel và tải xuống cho User
+28. QuestionExportTab.tsx hiển thị thông báo thành công cho User
+
+---
+
+## Kịch bản 12: Trích xuất Flashcard (Export Flashcard)
+
+1. User click tab "Trích xuất"
+2. ExportTab.tsx hiển thị giao diện cho User
+3. User click tab con "Thẻ ghi nhớ"
+4. ExportTab.tsx gọi tới FlashcardExportTab.tsx
+5. FlashcardExportTab.tsx gọi tới hàm loadFlashcardsFromSession()
+6. Hàm loadFlashcardsFromSession() gọi tới lớp DocAgentService
+7. Lớp DocAgentService gọi tới hàm getFlashcardsBySession()
+8. Hàm getFlashcardsBySession() gửi yêu cầu với phương thức GET đến endpoint "/question/flashcard/by-session/{session_id}" tới question_routes.py phía backend thông qua RESTFul API
+9. Lớp question_routes.py gọi hàm get_flashcards_by_session()
+10. Hàm get_flashcards_by_session() gọi đến lớp QuestionService để truy vấn trong cơ sở dữ liệu
+11. Lớp QuestionService sẽ gọi đến hàm get_flashcards_by_session()
+12. Hàm get_flashcards_by_session() gọi tới lớp Flashcard để đóng gói thông tin thực thể
+13. Lớp Flashcard đóng gói thông tin thực thể
+14. Lớp Flashcard trả kết quả về cho hàm get_flashcards_by_session()
+15. Hàm get_flashcards_by_session() trả kết quả về cho lớp question_routes.py
+16. Lớp question_routes.py trả về dữ liệu cho hàm getFlashcardsBySession() phía Frontend
+17. Hàm getFlashcardsBySession() trả kết quả cho FlashcardExportTab.tsx
+18. FlashcardExportTab.tsx hiển thị danh sách Flashcard cho User
+19. User chọn Flashcard và click "Xuất thẻ ghi nhớ"
+20. FlashcardExportTab.tsx gọi tới hàm exportToExcel()
+21. Hàm exportToExcel() gọi tới hàm mapFlashcardsToExportData()
+22. Hàm mapFlashcardsToExportData() gọi tới hàm writeFile()
+23. Hàm writeFile() tạo file Excel và tải xuống cho User
+24. FlashcardExportTab.tsx hiển thị thông báo thành công cho User

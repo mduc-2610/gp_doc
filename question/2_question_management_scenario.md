@@ -65,6 +65,19 @@
 
 ---
 
+## Use Case: Trích xuất Question
+
+| Thành phần | Chi tiết |
+|-----------|----------|
+| **Use Case** | Trích xuất Question |
+| **Actor** | User |
+| **Tiền điều kiện** | - UC "Xem chi tiết Session" đã hoàn thành<br>- Session có ít nhất một Question |
+| **Hậu điều kiện** | - File Excel chứa danh sách Question được tạo và tải xuống |
+| **Kịch bản chính** | 1. User click tab "Trích xuất"<br>2. User click tab con "Câu hỏi"<br>3. Hệ thống load danh sách Question và Category<br>4. User chọn category từ dropdown, các Question và click "Xuất câu hỏi"<br>5. Hệ thống tạo file Excel với thông tin các Question đã chọn<br>6. Hệ thống tải file Excel xuống máy User |
+| **Ngoại lệ** | - Không có Question: hiển thị thông báo "Chưa có câu hỏi để xuất"<br>- Lỗi tạo file: hiển thị thông báo "Không thể xuất file" |
+
+---
+
 ## Use Case: Xem danh sách Flashcard
 
 | Thành phần | Chi tiết |
@@ -127,3 +140,16 @@
 | **Hậu điều kiện** | - User hoàn thành luyện tập với Flashcard |
 | **Kịch bản chính** | 1. User click tab "Thẻ ghi nhớ"<br>2. Hệ thống load và hiển thị Flashcard đầu tiên<br>3. User xem câu hỏi và click Flashcard để xem đáp án<br>4. Hệ thống hiển thị đáp án<br>5. User click icon mũi tên hoặc dùng phím mũi tên để điều hướng<br>6. Hệ thống chuyển đến Flashcard trước/sau |
 | **Ngoại lệ** | - Không có Flashcard: hiển thị thông báo "Chưa có thẻ ghi nhớ"<br>- Lỗi load: hiển thị thông báo "Đang tải thẻ ghi nhớ..." |
+
+---
+
+## Use Case: Trích xuất Flashcard
+
+| Thành phần | Chi tiết |
+|-----------|----------|
+| **Use Case** | Trích xuất Flashcard |
+| **Actor** | User |
+| **Tiền điều kiện** | - UC "Xem chi tiết Session" đã hoàn thành<br>- Session có ít nhất một Flashcard |
+| **Hậu điều kiện** | - File Excel chứa danh sách Flashcard được tạo và tải xuống |
+| **Kịch bản chính** | 1. User click tab "Trích xuất"<br>2. User click tab con "Thẻ ghi nhớ"<br>3. Hệ thống load danh sách Flashcard từ Session<br>4. User chọn các Flashcard và click "Xuất thẻ ghi nhớ"<br>5. Hệ thống tạo file Excel với thông tin các Flashcard đã chọn<br>6. Hệ thống tải file Excel xuống máy User |
+| **Ngoại lệ** | - Không có Flashcard: hiển thị thông báo "Chưa có thẻ ghi nhớ để xuất"<br>- Lỗi tạo file: hiển thị thông báo "Không thể xuất file" |

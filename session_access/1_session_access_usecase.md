@@ -6,9 +6,7 @@ graph TB
     
     Login["Đăng nhập"]
     ListSessions["Xem danh sách Session<br/><b>extension points</b><br/>Xem chi tiết Session"]
-    ViewSessionDetail["Xem chi tiết Session<br/><b>extension points</b><br/>Cập nhật quyền realtime<br/>Xem danh sách yêu cầu truy cập<br/>Xem các thông tin về quyền truy cập"]
-    
-    ReceiveUpdate["Cập nhật quyền realtime"]
+    ViewSessionDetail["Xem chi tiết Session<br/><b>extension points</b><br/>Xem danh sách yêu cầu truy cập<br/>Xem các thông tin về quyền truy cập"]
     ViewRequestList["Xem danh sách yêu cầu truy cập<br/><b>extension points</b><br/>Chấp nhận yêu cầu truy cập<br/>Từ chối yêu cầu truy cập"]
     ViewPermissionInfo["Xem các thông tin về quyền truy cập<br/><b>extension points</b><br/>Chia sẻ Session với User<br/>Cập nhật quyền truy cập<br/>Thu hồi quyền truy cập<br/>Quản lý liên kết chia sẻ"]
     
@@ -29,9 +27,6 @@ graph TB
     
     ListSessions -.->|<<Extend>>| ViewSessionDetail
     ViewSessionDetail -->|Thực hiện| User
-    
-    ViewSessionDetail -.->|<<Extend>>| ReceiveUpdate
-    ReceiveUpdate -->|Nhận| User
     
     ViewSessionDetail -.->|<<Extend>>| ViewRequestList
     ViewRequestList -->|Thực hiện| User
@@ -64,7 +59,6 @@ graph TB
     style Login fill:#fff3e0
     style ListSessions fill:#f3e5f5
     style ViewSessionDetail fill:#fce4ec
-    style ReceiveUpdate fill:#f3e5f5
     style ViewRequestList fill:#e0f2f1
     style ViewPermissionInfo fill:#e0f2f1
     style AcceptRequest fill:#e8f5e9
@@ -80,8 +74,7 @@ graph TB
 **Ghi chú:**
 - Đăng nhập là điều kiện tiên quyết để truy cập hệ thống.
 - Xem danh sách Session là bước cần thiết để có thể xem chi tiết Session.
-- Xem chi tiết Session có ba extension points chính:
-  - Cập nhật quyền realtime (tự động qua WebSocket)
+- Xem chi tiết Session có hai extension points:
   - Xem danh sách yêu cầu truy cập (với extension points: Chấp nhận và Từ chối yêu cầu)
   - Xem các thông tin về quyền truy cập (với extension points: Chia sẻ, Cập nhật, Thu hồi quyền và Quản lý liên kết)
 - User có thể yêu cầu và hủy yêu cầu truy cập khi chưa có quyền.

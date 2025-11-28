@@ -14,12 +14,14 @@ Chức năng quản lý Question và flashcard (Question & Flashcard Management)
 - **Xóa Flashcard** → đề xuất UC xóa flashcard
 - **Luyện tập với Question** → đề xuất UC luyện tập với Question
 - **Luyện tập với Flashcard** → đề xuất UC luyện tập với Flashcard
+- **Trích xuất Question** → đề xuất UC trích xuất Question
+- **Trích xuất Flashcard** → đề xuất UC trích xuất Flashcard
 
 **Quan hệ giữa các Use Case:**
 Đăng nhập và xem danh sách Session là bắt buộc để có thể xem chi tiết Session và sử dụng các tab Question và flashcard. Do đó:
 - UC "Xem danh sách Session" include UC "Đăng nhập"
 - UC "Xem danh sách Session" có extension point: Xem chi tiết Session
-- UC "Xem chi tiết Session" có các extension points: Xem danh sách Question, Xem danh sách Flashcard, Luyện tập với Question, Luyện tập với Flashcard
+- UC "Xem chi tiết Session" có các extension points: Xem danh sách Question, Xem danh sách Flashcard, Luyện tập với Question, Luyện tập với Flashcard, Trích xuất Question, Trích xuất Flashcard
 - UC "Xem danh sách Question" có các extension points: Thêm Question, Chỉnh sửa Question, Xóa Question
 - UC "Xem danh sách Flashcard" có các extension points: Thêm Flashcard, Chỉnh sửa Flashcard, Xóa Flashcard
 
@@ -40,4 +42,6 @@ Chức năng quản lý Question và flashcard (Question & Flashcard Management)
 | **Xóa Flashcard** | UC này cho phép User xóa một Flashcard khỏi Session. |
 | **Luyện tập với Question** | UC này cho phép User luyện tập với các Question của một Session. |
 | **Luyện tập với Flashcard** | UC này cho phép User luyện tập với các Flashcard của một Session. |
+| **Trích xuất Question** | UC này cho phép User xuất danh sách Question ra file Excel theo category đã chọn. |
+| **Trích xuất Flashcard** | UC này cho phép User xuất danh sách Flashcard ra file Excel. |
 
