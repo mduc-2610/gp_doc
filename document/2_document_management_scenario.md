@@ -6,7 +6,7 @@
 |-----------|----------|
 | **Use Case** | Xem danh sách Document |
 | **Actor** | User |
-| **Tiền điều kiện** | - UC "Xem chi tiết Session" đã hoàn thành |
+| **Tiền điều kiện** | - User đang xem chi tiết Session |
 | **Hậu điều kiện** | - Danh sách Document được hiển thị trên giao diện |
 | **Kịch bản chính** | 1. Hệ thống tự động gửi yêu cầu lấy danh sách Document đến backend<br>2. Backend trả về danh sách Document<br>3. Hệ thống hiển thị danh sách Document trong sidebar |
 | **Ngoại lệ** | - Không có Document: hiển thị thông báo "Chưa có tài liệu nào"<br>- Lỗi load: hiển thị thông báo "Không thể tải nội dung tài liệu" |
@@ -19,7 +19,7 @@
 |-----------|----------|
 | **Use Case** | Upload Document |
 | **Actor** | User |
-| **Tiền điều kiện** | - UC "Xem chi tiết Session" đã hoàn thành |
+| **Tiền điều kiện** | - UC "Xem danh sách Document" đã hoàn thành |
 | **Hậu điều kiện** | - Document mới được upload và xử lý<br>- Danh sách Document được cập nhật |
 | **Kịch bản chính** | 1. User click icon plus để thêm Document<br>2. Hệ thống mở dialog upload với 2 tab: "Tệp" và "Liên kết"<br>3. User chọn file hoặc nhập URL và click "Tải lên"<br>4. Hệ thống gửi yêu cầu upload đến backend<br>5. Backend xử lý upload, parse document, tạo embedding và lưu vào database<br>6. Backend trả về thông tin Document đã xử lý<br>7. Hệ thống cập nhật danh sách Document |
 | **Ngoại lệ** | - File vượt quá kích thước: hiển thị lỗi validation<br>- Định dạng không hỗ trợ: hiển thị thông báo "Loại tệp này không được hỗ trợ"<br>- URL không hợp lệ: hiển thị lỗi validation<br>- Lỗi xử lý: hiển thị thông báo "Xử lý tài liệu thất bại" |

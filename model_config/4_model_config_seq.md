@@ -5,45 +5,56 @@
 ```mermaid
 sequenceDiagram
     actor User
+    participant ModelConfigPage as ModelConfigPage.tsx
     participant ModelConfigTab as ModelConfigTab.tsx
     participant ModelConfigService as ModelConfigService
     participant ModelConfigRoutes as model_config_routes.py
-    participant ModelConfigService as ModelConfigService
+    participant ModelConfigServiceBackend as ModelConfigService
     participant ModelConfig as ModelConfig
 
-    User->>ModelConfigTab: Click "Cấu hình mô hình" tab
+    User->>ModelConfigPage: 1: Click "Mô hình" từ sidebar
+    activate ModelConfigPage
+    
+    ModelConfigPage->>ModelConfigTab: 2: gọi
+    ModelConfigPage-->>User: 3: hiển thị
+    deactivate ModelConfigPage
+    
+    User->>ModelConfigTab: 4: Click "Cấu hình mô hình" tab
     activate ModelConfigTab
     
-    ModelConfigTab->>ModelConfigTab: loadModelsFromUser()
-    ModelConfigTab->>ModelConfigService: gọi
+    ModelConfigTab->>ModelConfigTab: 5: loadModelsFromUser()
+    ModelConfigTab->>ModelConfigService: 6: gọi
     deactivate ModelConfigTab
     activate ModelConfigService
     
-    ModelConfigService->>ModelConfigService: getModelsByUser()
-    ModelConfigService->>ModelConfigRoutes: GET "/model-config/by-user/{user_id}"
+    ModelConfigService->>ModelConfigService: 7: getModelsByUser()
+    ModelConfigService->>ModelConfigRoutes: 8: GET "/model-config/by-user/{user_id}"
     activate ModelConfigRoutes
     
-    ModelConfigRoutes->>ModelConfigService: get_models_by_user()
-    activate ModelConfigService
+    ModelConfigRoutes->>ModelConfigServiceBackend: 9: get_models_by_user()
+    activate ModelConfigServiceBackend
     
-    ModelConfigService->>ModelConfigService: gọi
-    ModelConfigService->>ModelConfig: gọi
+    ModelConfigServiceBackend->>ModelConfigServiceBackend: 10: gọi
+    ModelConfigServiceBackend->>ModelConfig: 11: get_models_by_user()
     activate ModelConfig
     
-    ModelConfig->>ModelConfig: ModelConfig()
-    ModelConfig-->>ModelConfigService: trả về
+    ModelConfig->>ModelConfig: 12: gọi
+    ModelConfig->>ModelConfig: 13: ModelConfig()
+    ModelConfig-->>ModelConfigServiceBackend: 14: trả về
     deactivate ModelConfig
     
-    ModelConfigService-->>ModelConfigRoutes: trả về
-    deactivate ModelConfigService
+    ModelConfigServiceBackend-->>ModelConfigRoutes: 15: trả về
+    deactivate ModelConfigServiceBackend
     
-    ModelConfigRoutes-->>ModelConfigService: trả về
+    ModelConfigRoutes-->>ModelConfigService: 16: trả về
     deactivate ModelConfigRoutes
     
-    ModelConfigService-->>ModelConfigTab: trả về
+    ModelConfigService-->>ModelConfigTab: 17: trả về
     deactivate ModelConfigService
     
-    ModelConfigTab-->>User: Hiển thị
+    activate ModelConfigTab
+    ModelConfigTab-->>User: 18: hiển thị
+    deactivate ModelConfigTab
 ```
 
 ---
@@ -362,42 +373,57 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
+    participant ModelConfigPage as ModelConfigPage.tsx
     participant ModelWrapperTab as ModelWrapperTab.tsx
     participant ModelConfigService as ModelConfigService
     participant ModelConfigRoutes as model_config_routes.py
-    participant ModelConfigService as ModelConfigService
+    participant ModelConfigServiceBackend as ModelConfigService
     participant ModelWrapper as ModelWrapper
 
-    User->>ModelWrapperTab: Click "Cấu hình Wrapper" tab
+    User->>ModelConfigPage: 1: Click "Mô hình" từ sidebar
+    activate ModelConfigPage
+    
+    ModelConfigPage->>ModelWrapperTab: 2: gọi
+    ModelConfigPage-->>User: 3: hiển thị
+    deactivate ModelConfigPage
+    
+    User->>ModelWrapperTab: 4: Click "Cấu hình Wrapper" tab
     activate ModelWrapperTab
     
-    ModelWrapperTab->>ModelWrapperTab: loadWrappers()
-    ModelWrapperTab->>ModelConfigService: gọi
+    ModelWrapperTab->>ModelWrapperTab: 5: loadWrappers()
+    ModelWrapperTab->>ModelConfigService: 6: gọi
     deactivate ModelWrapperTab
     activate ModelConfigService
     
-    ModelConfigService->>ModelConfigService: getWrappers()
-    ModelConfigService->>ModelConfigRoutes: GET "/model-config/wrapper"
+    ModelConfigService->>ModelConfigService: 7: getWrappers()
+    ModelConfigService->>ModelConfigRoutes: 8: GET "/model-config/wrapper"
     activate ModelConfigRoutes
     
-    ModelConfigRoutes->>ModelConfigService: get_wrappers()
-    activate ModelConfigService
+    ModelConfigRoutes->>ModelConfigServiceBackend: 9: get_wrappers()
+    activate ModelConfigServiceBackend
     
-    ModelConfigService->>ModelConfigService: gọi
-    ModelConfigService->>ModelWrapper: gọi
+    ModelConfigServiceBackend->>ModelConfigServiceBackend: 10: gọi
+    ModelConfigServiceBackend->>ModelWrapper: 11: get_wrappers()
     activate ModelWrapper
     
-    ModelWrapper->>ModelWrapper: ModelWrapper()
-    ModelWrapper-->>ModelConfigService: trả về
+    ModelWrapper->>ModelWrapper: 12: gọi
+    ModelWrapper->>ModelWrapper: 13: ModelWrapper()
+    ModelWrapper-->>ModelConfigServiceBackend: 14: trả về
     deactivate ModelWrapper
     
-    ModelConfigService-->>ModelConfigRoutes: trả về
-    deactivate ModelConfigService
+    ModelConfigServiceBackend-->>ModelConfigRoutes: 15: trả về
+    deactivate ModelConfigServiceBackend
     
-    ModelConfigRoutes-->>ModelConfigService: trả về
+    ModelConfigRoutes-->>ModelConfigService: 16: trả về
     deactivate ModelConfigRoutes
     
-    ModelConfigService-->>ModelWrapperTab: trả về
+    ModelConfigService-->>ModelWrapperTab: 17: trả về
+    deactivate ModelConfigService
+    
+    activate ModelWrapperTab
+    ModelWrapperTab-->>User: 18: hiển thị
+    deactivate ModelWrapperTab
+```
     deactivate ModelConfigService
     
     ModelWrapperTab-->>User: Hiển thị

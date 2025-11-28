@@ -1,38 +1,14 @@
 # Scenario - Quản lý ModelConfig và ModelWrapper
 
-## Use Case: Đăng nhập
-
-| Thành phần | Chi tiết |
-|-----------|----------|
-| **Use Case** | Đăng nhập |
-| **Actor** | User |
-| **Tiền điều kiện** | - User chưa đăng nhập |
-| **Hậu điều kiện** | - User đăng nhập thành công và có quyền truy cập hệ thống |
-| **Kịch bản chính** | 1. User truy cập trang đăng nhập<br>2. Hệ thống hiển thị form đăng nhập<br>3. User nhập thông tin đăng nhập<br>4. Hệ thống xác thực và chuyển đến trang chính |
-
----
-
-## Use Case: Xem trang Model
-
-| Thành phần | Chi tiết |
-|-----------|----------|
-| **Use Case** | Xem trang Model |
-| **Actor** | User |
-| **Tiền điều kiện** | - UC "Đăng nhập" đã hoàn thành |
-| **Hậu điều kiện** | - Trang cấu hình Model được hiển thị |
-| **Kịch bản chính** | 1. User click "Mô hình" tại sidebar<br>2. Hệ thống hiển thị trang Model với các tab |
-
----
-
 ## Use Case: Xem danh sách ModelConfig
 
 | Thành phần | Chi tiết |
 |-----------|----------|
 | **Use Case** | Xem danh sách ModelConfig |
 | **Actor** | User |
-| **Tiền điều kiện** | - UC "Xem trang Model" đã hoàn thành |
+| **Tiền điều kiện** | - User đã đăng nhập<br>- User click "Mô hình" từ sidebar |
 | **Hậu điều kiện** | - Danh sách ModelConfig được hiển thị |
-| **Kịch bản chính** | 1. User click tab "Cấu Hình Mô Hình"<br>2. Hệ thống load và hiển thị danh sách ModelConfig theo task type |
+| **Kịch bản chính** | 1. User click "Mô hình" từ sidebar<br>2. Hệ thống hiển thị ModelConfigPage.tsx<br>3. User click tab "Cấu hình mô hình"<br>4. Hệ thống gọi ModelConfigTab.tsx<br>5. ModelConfigTab.tsx gọi loadModelsFromUser()<br>6. Hệ thống gọi ModelConfigService.getModelsByUser()<br>7. Hệ thống gửi GET request đến backend<br>8. Backend trả về danh sách ModelConfig<br>9. Hệ thống hiển thị danh sách ModelConfig cho User |
 
 ---
 
@@ -102,9 +78,9 @@
 |-----------|----------|
 | **Use Case** | Xem danh sách ModelWrapper |
 | **Actor** | User |
-| **Tiền điều kiện** | - UC "Xem trang Model" đã hoàn thành |
+| **Tiền điều kiện** | - User đã đăng nhập<br>- User click "Mô hình" từ sidebar |
 | **Hậu điều kiện** | - Danh sách ModelWrapper được hiển thị |
-| **Kịch bản chính** | 1. User click tab "Cấu hình Wrapper"<br>2. Hệ thống load và hiển thị danh sách ModelWrapper |
+| **Kịch bản chính** | 1. User click "Mô hình" từ sidebar<br>2. Hệ thống hiển thị ModelConfigPage.tsx<br>3. User click tab "Cấu hình Wrapper"<br>4. Hệ thống gọi ModelWrapperTab.tsx<br>5. ModelWrapperTab.tsx gọi loadWrappers()<br>6. Hệ thống gọi ModelConfigService.getWrappers()<br>7. Hệ thống gửi GET request đến backend<br>8. Backend trả về danh sách ModelWrapper<br>9. Hệ thống hiển thị danh sách ModelWrapper cho User |
 
 ---
 

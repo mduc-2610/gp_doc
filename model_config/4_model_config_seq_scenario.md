@@ -2,20 +2,24 @@
 
 ## 1. Xem danh sách ModelConfig
 
-1. User click tab "Cấu hình mô hình"
-2. ModelConfigTab.tsx gọi hàm loadModelsFromUser()
-3. ModelConfigTab.tsx gọi ModelConfigService
-4. ModelConfigService gọi hàm getModelsByUser()
-5. ModelConfigService gửi yêu cầu GET "/model-config/by-user/{user_id}" đến model_config_routes.py
-6. model_config_routes.py gọi ModelConfigService.get_models_by_user()
-7. ModelConfigService xử lý yêu cầu và gọi chính nó
-8. ModelConfigService gọi ModelConfig
-9. ModelConfig khởi tạo đối tượng ModelConfig()
-10. ModelConfig trả về dữ liệu cho ModelConfigService
-11. ModelConfigService trả về danh sách ModelConfig cho model_config_routes.py
-12. model_config_routes.py trả về kết quả cho ModelConfigService
-13. ModelConfigService trả về danh sách ModelConfig cho ModelConfigTab.tsx
-14. ModelConfigTab.tsx hiển thị danh sách ModelConfig cho User
+1. User click "Mô hình" từ sidebar
+2. ModelConfigPage.tsx được gọi
+3. ModelConfigPage.tsx hiển thị cho User
+4. User click tab "Cấu hình mô hình"
+5. ModelConfigTab.tsx gọi hàm loadModelsFromUser()
+6. ModelConfigTab.tsx gọi ModelConfigService
+7. ModelConfigService gọi hàm getModelsByUser()
+8. ModelConfigService gửi yêu cầu GET "/model-config/by-user/{user_id}" đến model_config_routes.py
+9. model_config_routes.py gọi ModelConfigService.get_models_by_user()
+10. ModelConfigService xử lý yêu cầu và gọi chính nó
+11. ModelConfigService gọi ModelConfig.get_models_by_user()
+12. ModelConfig gọi chính nó
+13. ModelConfig khởi tạo đối tượng ModelConfig()
+14. ModelConfig trả về dữ liệu cho ModelConfigService
+15. ModelConfigService trả về danh sách ModelConfig cho model_config_routes.py
+16. model_config_routes.py trả về kết quả cho ModelConfigService
+17. ModelConfigService trả về danh sách ModelConfig cho ModelConfigTab.tsx
+18. ModelConfigTab.tsx hiển thị danh sách ModelConfig cho User
 
 ---
 
@@ -142,20 +146,24 @@
 
 ## 6. Xem danh sách ModelWrapper
 
-1. User click tab "Cấu hình Wrapper"
-2. ModelWrapperTab.tsx gọi hàm loadWrappers()
-3. ModelWrapperTab.tsx gọi ModelConfigService
-4. ModelConfigService gọi hàm getWrappers()
-5. ModelConfigService gửi yêu cầu GET "/model-config/wrapper" đến model_config_routes.py
-6. model_config_routes.py gọi ModelConfigService.get_wrappers()
-7. ModelConfigService xử lý yêu cầu và gọi chính nó
-8. ModelConfigService gọi ModelWrapper
-9. ModelWrapper khởi tạo đối tượng ModelWrapper()
-10. ModelWrapper trả về dữ liệu cho ModelConfigService
-11. ModelConfigService trả về danh sách ModelWrapper cho model_config_routes.py
-12. model_config_routes.py trả về kết quả cho ModelConfigService
-13. ModelConfigService trả về danh sách ModelWrapper cho ModelWrapperTab.tsx
-14. ModelWrapperTab.tsx hiển thị danh sách ModelWrapper cho User
+1. User click "Mô hình" từ sidebar
+2. ModelConfigPage.tsx được gọi
+3. ModelConfigPage.tsx hiển thị cho User
+4. User click tab "Cấu hình Wrapper"
+5. ModelWrapperTab.tsx gọi hàm loadWrappers()
+6. ModelWrapperTab.tsx gọi ModelConfigService
+7. ModelConfigService gọi hàm getWrappers()
+8. ModelConfigService gửi yêu cầu GET "/model-config/wrapper" đến model_config_routes.py
+9. model_config_routes.py gọi ModelConfigService.get_wrappers()
+10. ModelConfigService xử lý yêu cầu và gọi chính nó
+11. ModelConfigService gọi ModelWrapper.get_wrappers()
+12. ModelWrapper gọi chính nó
+13. ModelWrapper khởi tạo đối tượng ModelWrapper()
+14. ModelWrapper trả về dữ liệu cho ModelConfigService
+15. ModelConfigService trả về danh sách ModelWrapper cho model_config_routes.py
+16. model_config_routes.py trả về kết quả cho ModelConfigService
+17. ModelConfigService trả về danh sách ModelWrapper cho ModelWrapperTab.tsx
+18. ModelWrapperTab.tsx hiển thị danh sách ModelWrapper cho User
 
 ---
 

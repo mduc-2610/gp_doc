@@ -2,18 +2,19 @@
 
 ```mermaid
 graph TB
-    Actor["👤 Actor"]
+    Actor["👤 User"]
     AdminActor["👤 Admin"]
     
     Login["Đăng nhập"]
-    AccessModelPage["Xem trang Model<br/><b>extension points</b><br/>Xem danh sách ModelWrapper<br/>Xem danh sách ModelConfig"]
+    AccessModelPage["Xem trang Model<br/><b>extension points</b><br/>Xem danh sách ModelConfig<br/>Xem danh sách ModelWrapper"]
     
-    ViewModelConfigList["Xem danh sách ModelConfig<br/><b>extension points</b><br/>Xóa ModelConfig<br/>Chỉnh sửa ModelConfig<br/>Tạo ModelConfig"]
-    ViewWrapperList["Xem danh sách ModelWrapper<br/><b>extension points</b><br/>ExtensionPoint<br/>Chỉnh sửa ModelWrapper<br/>Xóa ModelWrapper"]
+    ViewModelConfigList["Xem danh sách ModelConfig<br/><b>extension points</b><br/>Tạo ModelConfig<br/>Chỉnh sửa ModelConfig<br/>Xóa ModelConfig<br/>Toggle trạng thái ModelConfig"]
+    ViewWrapperList["Xem danh sách ModelWrapper<br/><b>extension points</b><br/>Tạo ModelWrapper<br/>Chỉnh sửa ModelWrapper<br/>Xóa ModelWrapper"]
     
     CreateModelConfig["Tạo ModelConfig"]
     EditModelConfig["Chỉnh sửa ModelConfig"]
     DeleteModelConfig["Xóa ModelConfig"]
+    ToggleModelConfig["Toggle trạng thái ModelConfig"]
     
     CreateWrapper["Tạo ModelWrapper"]
     EditWrapper["Chỉnh sửa ModelWrapper"]
@@ -42,8 +43,11 @@ graph TB
     ViewModelConfigList -.->|<<Extend>>| DeleteModelConfig
     DeleteModelConfig -->|Thực hiện| Actor
     
+    ViewModelConfigList -.->|<<Extend>>| ToggleModelConfig
+    ToggleModelConfig -->|Thực hiện| Actor
+    
     ViewWrapperList -.->|<<Extend>>| CreateWrapper
-    CreateWrapper -->|Thỹc hiện| AdminActor
+    CreateWrapper -->|Thực hiện| AdminActor
     
     ViewWrapperList -.->|<<Extend>>| EditWrapper
     EditWrapper -->|Thực hiện| AdminActor

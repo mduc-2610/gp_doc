@@ -17,8 +17,10 @@ Chức năng quản lý ModelConfig và ModelWrapper (ModelConfig & ModelWrapper
 **Quan hệ giữa các Use Case:**
 Đăng nhập là bắt buộc để truy cập trang cấu hình Model và sử dụng các chức năng quản lý ModelConfig và Wrapper. Do đó:
 - UC "Xem trang Model" include UC "Đăng nhập"
-- UC "Xem trang Model" có các extension points: Xem danh sách ModelConfig, Xem danh sách ModelWrapper
-- UC "Xem danh sách ModelConfig" có các extension points: Tạo ModelConfig, Chỉnh sửa ModelConfig, Xóa ModelConfig
+- UC "Xem trang Model" hiển thị giao diện với 2 tab: "Cấu hình mô hình" và "Cấu hình Wrapper"
+- UC "Xem danh sách ModelConfig" được kích hoạt khi User click tab "Cấu hình mô hình"
+- UC "Xem danh sách ModelConfig" có các extension points: Tạo ModelConfig, Chỉnh sửa ModelConfig, Xóa ModelConfig, Toggle trạng thái ModelConfig
+- UC "Xem danh sách ModelWrapper" được kích hoạt khi User click tab "Cấu hình Wrapper"
 - UC "Xem danh sách ModelWrapper" có các extension points: Tạo ModelWrapper (Admin only), Chỉnh sửa ModelWrapper (Admin only), Xóa ModelWrapper (Admin only)
 
 **Mô tả chi tiết các Use Case:**

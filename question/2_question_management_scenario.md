@@ -6,7 +6,7 @@
 |-----------|----------|
 | **Use Case** | Xem danh sách Question |
 | **Actor** | User |
-| **Tiền điều kiện** | - UC "Xem chi tiết Session" đã hoàn thành |
+| **Tiền điều kiện** | - User đang xem chi tiết Session |
 | **Hậu điều kiện** | - Danh sách các Question trong Session được hiển thị |
 | **Kịch bản chính** | 1. User click tab "Chỉnh sửa"<br>2. User click tab con "Câu hỏi"<br>3. Hệ thống gửi yêu cầu lấy danh sách Question đến backend<br>4. Backend trả về danh sách Question<br>5. Hệ thống hiển thị danh sách Question |
 | **Ngoại lệ** | - Không có Question: hiển thị thông báo "Chưa có câu hỏi"<br>- Lỗi load: hiển thị thông báo "Không thể tải câu hỏi" |

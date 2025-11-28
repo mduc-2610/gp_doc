@@ -1,48 +1,12 @@
 # Scenario - Generation với Batch
 
-## Use Case: Đăng nhập
-
-| Thành phần | Chi tiết |
-|-----------|----------|
-| **Use Case** | Đăng nhập |
-| **Actor** | User |
-| **Tiền điều kiện** | - User chưa đăng nhập |
-| **Hậu điều kiện** | - User đăng nhập thành công và có quyền truy cập hệ thống |
-| **Kịch bản chính** | 1. User truy cập trang đăng nhập<br>2. Hệ thống hiển thị form đăng nhập<br>3. User nhập thông tin đăng nhập<br>4. Hệ thống xác thực và chuyển đến trang chính |
-
----
-
-## Use Case: Xem danh sách Session
-
-| Thành phần | Chi tiết |
-|-----------|----------|
-| **Use Case** | Xem danh sách Session |
-| **Actor** | User |
-| **Tiền điều kiện** | - UC "Đăng nhập" đã hoàn thành |
-| **Hậu điều kiện** | - Danh sách Session được hiển thị |
-| **Kịch bản chính** | 1. User truy cập trang danh sách Session<br>2. Hệ thống hiển thị danh sách các Session của User |
-
----
-
-## Use Case: Xem chi tiết Session
-
-| Thành phần | Chi tiết |
-|-----------|----------|
-| **Use Case** | Xem chi tiết Session |
-| **Actor** | User |
-| **Tiền điều kiện** | - UC "Xem danh sách Session" đã hoàn thành |
-| **Hậu điều kiện** | - Chi tiết Session được hiển thị |
-| **Kịch bản chính** | 1. User chọn một Session từ danh sách<br>2. Hệ thống hiển thị chi tiết Session |
-
----
-
 ## Use Case: Tạo yêu cầu Generation
 
 | Thành phần | Chi tiết |
 |-----------|----------|
 | **Use Case** | Tạo yêu cầu Generation |
 | **Actor** | User |
-| **Tiền điều kiện** | - UC "Xem chi tiết Session" đã hoàn thành<br>- Session có ít nhất một Document |
+| **Tiền điều kiện** | - User đang xem chi tiết Session<br>- Session có ít nhất một Document |
 | **Hậu điều kiện** | - Yêu cầu generation được tạo<br>- Tiến trình generation bắt đầu |
 | **Kịch bản chính** | 1. User click icon sparkles tại sidebar<br>2. Hệ thống hiển thị dialog tạo generation<br>3. User chọn tham số generation và click "Tạo"<br>4. Hệ thống gửi yêu cầu và hiển thị progress bar |
 
